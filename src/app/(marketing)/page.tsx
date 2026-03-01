@@ -38,6 +38,22 @@ import {
   Cpu,
   X,
   FileText,
+  Shield,
+  Clock,
+  Calendar,
+  Download,
+  CheckCircle,
+  Award,
+  Users,
+  TrendingUp,
+  Star,
+  BadgeCheck,
+  Timer,
+  Rocket,
+  Target,
+  Headphones,
+  Lock,
+  RefreshCw,
 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1906,6 +1922,497 @@ export default function HomePage() {
                 
                 <p className="text-xs text-[#6b6b80] mt-4">
                   +500 devs já inscritos • Cancele quando quiser
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          PROCESS — How I Work Timeline
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="processo" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-6">
+                <span className="text-sm font-mono text-[#00f0ff]">
+                  {"<Process />"}
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                Como{" "}
+                <span className="gradient-text-cyber">trabalho</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Processo estruturado para garantir entregas de qualidade
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Timeline */}
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#00f0ff]/50 via-[#ff00ff]/50 to-[#00ff41]/50 hidden lg:block" />
+            
+            <div className="space-y-12 lg:space-y-24">
+              {[
+                {
+                  step: "01",
+                  title: "Discovery Call",
+                  desc: "Reunião gratuita de 30min para entender seu projeto, objetivos e desafios. Sem compromisso.",
+                  icon: <Headphones className="w-6 h-6" />,
+                  color: "#00f0ff",
+                  duration: "30 min",
+                  items: ["Análise de requisitos", "Definição de escopo", "Alinhamento de expectativas"],
+                },
+                {
+                  step: "02",
+                  title: "Proposta & Contrato",
+                  desc: "Proposta detalhada com cronograma, entregas e investimento. Contrato digital seguro.",
+                  icon: <FileText className="w-6 h-6" />,
+                  color: "#ff00ff",
+                  duration: "24-48h",
+                  items: ["Orçamento transparente", "Cronograma realista", "Contrato digital"],
+                },
+                {
+                  step: "03",
+                  title: "Design & Aprovação",
+                  desc: "Wireframes e protótipos navegáveis para aprovação antes de uma linha de código.",
+                  icon: <Target className="w-6 h-6" />,
+                  color: "#00ff41",
+                  duration: "3-5 dias",
+                  items: ["Wireframes interativos", "Design responsivo", "Revisões inclusas"],
+                },
+                {
+                  step: "04",
+                  title: "Desenvolvimento",
+                  desc: "Código limpo, testes automatizados e updates semanais. Acompanhe em tempo real.",
+                  icon: <Code2 className="w-6 h-6" />,
+                  color: "#00f0ff",
+                  duration: "2-8 semanas",
+                  items: ["Sprints semanais", "Deploys de preview", "Comunicação constante"],
+                },
+                {
+                  step: "05",
+                  title: "QA & Lançamento",
+                  desc: "Testes rigorosos, otimização SEO, configuração de analytics e go-live assistido.",
+                  icon: <Rocket className="w-6 h-6" />,
+                  color: "#ff00ff",
+                  duration: "2-3 dias",
+                  items: ["Testes cross-browser", "Otimização SEO", "Deploy production"],
+                },
+                {
+                  step: "06",
+                  title: "Suporte Contínuo",
+                  desc: "30 dias de suporte gratuito pós-entrega. Planos mensais de manutenção disponíveis.",
+                  icon: <RefreshCw className="w-6 h-6" />,
+                  color: "#00ff41",
+                  duration: "Ongoing",
+                  items: ["30 dias grátis", "Correção de bugs", "Atualizações de segurança"],
+                },
+              ].map((phase, i) => (
+                <Reveal key={i} delay={i * 0.1} direction={i % 2 === 0 ? "left" : "right"}>
+                  <div className={`flex flex-col lg:flex-row items-center gap-8 ${i % 2 === 1 ? "lg:flex-row-reverse" : ""}`}>
+                    {/* Content */}
+                    <div className={`flex-1 ${i % 2 === 1 ? "lg:text-right" : ""}`}>
+                      <div className={`flex items-center gap-3 mb-4 ${i % 2 === 1 ? "lg:justify-end" : ""}`}>
+                        <span 
+                          className="text-4xl font-black font-mono"
+                          style={{ color: phase.color, textShadow: `0 0 20px ${phase.color}40` }}
+                        >
+                          {phase.step}
+                        </span>
+                        <span 
+                          className="px-3 py-1 text-xs font-mono rounded-full"
+                          style={{ background: `${phase.color}15`, color: phase.color, border: `1px solid ${phase.color}30` }}
+                        >
+                          {phase.duration}
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-white mb-3">{phase.title}</h3>
+                      <p className="text-[#9999ab] mb-4">{phase.desc}</p>
+                      <ul className={`space-y-2 ${i % 2 === 1 ? "lg:text-right" : ""}`}>
+                        {phase.items.map((item, ii) => (
+                          <li key={ii} className={`flex items-center gap-2 text-sm text-[#6b6b80] ${i % 2 === 1 ? "lg:flex-row-reverse" : ""}`}>
+                            <CheckCircle className="w-4 h-4" style={{ color: phase.color }} />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Icon node */}
+                    <div className="relative z-10">
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                        style={{
+                          background: `${phase.color}15`,
+                          border: `2px solid ${phase.color}40`,
+                          boxShadow: `0 0 30px ${phase.color}30`,
+                          color: phase.color,
+                        }}
+                      >
+                        {phase.icon}
+                      </motion.div>
+                    </div>
+
+                    {/* Spacer for layout */}
+                    <div className="flex-1 hidden lg:block" />
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          PACKAGES — Pricing Plans
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="pacotes" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
+                <span className="text-sm font-mono text-[#ff00ff]">
+                  {"<Packages />"}
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                Pacotes &{" "}
+                <span className="gradient-text-cyber">Investimento</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Soluções para cada fase do seu negócio — do MVP à escala
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Starter",
+                subtitle: "Landing Page",
+                price: "2.500",
+                description: "Ideal para validar ideias e captar leads",
+                color: "#00f0ff",
+                popular: false,
+                features: [
+                  { text: "1 página responsiva", included: true },
+                  { text: "Design personalizado", included: true },
+                  { text: "Animações modernas", included: true },
+                  { text: "Formulário de contato", included: true },
+                  { text: "SEO básico", included: true },
+                  { text: "Entrega em 7 dias", included: true },
+                  { text: "Painel administrativo", included: false },
+                  { text: "Integrações avançadas", included: false },
+                ],
+                cta: "Começar Projeto",
+              },
+              {
+                name: "Pro",
+                subtitle: "Site Institucional",
+                price: "5.500",
+                description: "Para empresas que querem presença profissional",
+                color: "#ff00ff",
+                popular: true,
+                features: [
+                  { text: "Até 5 páginas", included: true },
+                  { text: "Design premium", included: true },
+                  { text: "Blog integrado", included: true },
+                  { text: "Painel admin básico", included: true },
+                  { text: "SEO completo", included: true },
+                  { text: "Analytics configurado", included: true },
+                  { text: "Integrações (WhatsApp, Maps)", included: true },
+                  { text: "Entrega em 14 dias", included: true },
+                ],
+                cta: "Mais Popular",
+              },
+              {
+                name: "Enterprise",
+                subtitle: "Plataforma/SaaS",
+                price: "15.000",
+                description: "Soluções complexas sob medida",
+                color: "#00ff41",
+                popular: false,
+                features: [
+                  { text: "Páginas ilimitadas", included: true },
+                  { text: "Sistema de usuários", included: true },
+                  { text: "Dashboard completo", included: true },
+                  { text: "APIs & Integrações", included: true },
+                  { text: "Pagamentos online", included: true },
+                  { text: "App mobile (PWA)", included: true },
+                  { text: "CI/CD & DevOps", included: true },
+                  { text: "Suporte prioritário", included: true },
+                ],
+                cta: "Falar Comigo",
+              },
+            ].map((plan, i) => (
+              <Reveal key={i} delay={i * 0.15}>
+                <motion.div
+                  whileHover={{ y: -10, scale: 1.02 }}
+                  className={`relative glass-card rounded-3xl p-8 border transition-all duration-500 h-full flex flex-col ${
+                    plan.popular 
+                      ? "border-[#ff00ff]/50 shadow-[0_0_60px_rgba(255,0,255,0.15)]" 
+                      : "border-[#1e1e2e] hover:border-[color:var(--plan-color)]/30"
+                  }`}
+                  style={{ "--plan-color": plan.color } as React.CSSProperties}
+                >
+                  {/* Popular badge */}
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <span className="px-4 py-1.5 text-xs font-bold rounded-full bg-[#ff00ff] text-black">
+                        MAIS VENDIDO
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Header */}
+                  <div className="text-center mb-8">
+                    <span 
+                      className="text-sm font-mono uppercase tracking-wider"
+                      style={{ color: plan.color }}
+                    >
+                      {plan.name}
+                    </span>
+                    <h3 className="text-xl font-bold text-white mt-1">{plan.subtitle}</h3>
+                    <div className="mt-4">
+                      <span className="text-sm text-[#6b6b80]">A partir de</span>
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-sm text-[#6b6b80]">R$</span>
+                        <span 
+                          className="text-5xl font-black"
+                          style={{ color: plan.color, textShadow: `0 0 30px ${plan.color}40` }}
+                        >
+                          {plan.price}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-[#6b6b80] mt-2">{plan.description}</p>
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-3 flex-1 mb-8">
+                    {plan.features.map((feature, fi) => (
+                      <li key={fi} className="flex items-center gap-3">
+                        {feature.included ? (
+                          <CheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: plan.color }} />
+                        ) : (
+                          <X className="w-5 h-5 flex-shrink-0 text-[#3a3a4a]" />
+                        )}
+                        <span className={feature.included ? "text-[#9999ab]" : "text-[#4a4a5a]"}>
+                          {feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA */}
+                  <Link
+                    href="/orcamento"
+                    className={`w-full py-4 rounded-xl font-bold text-center transition-all duration-300 ${
+                      plan.popular
+                        ? "bg-[#ff00ff] text-black hover:shadow-[0_0_40px_rgba(255,0,255,0.5)]"
+                        : "border-2 text-white hover:bg-white/5"
+                    }`}
+                    style={!plan.popular ? { borderColor: `${plan.color}50`, color: plan.color } : {}}
+                  >
+                    {plan.cta}
+                  </Link>
+                </motion.div>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Custom note */}
+          <Reveal delay={0.4}>
+            <div className="text-center mt-12">
+              <p className="text-[#6b6b80]">
+                Precisa de algo diferente?{" "}
+                <a href="#contato" className="text-[#00f0ff] hover:underline">
+                  Vamos conversar sobre seu projeto específico
+                </a>
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          GUARANTEES — Trust Badges
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="garantias" className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                Garantias que dou aos meus{" "}
+                <span className="neon-text-green">clientes</span>
+              </h2>
+            </div>
+          </Reveal>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: <Shield className="w-8 h-8" />,
+                title: "Código Proprietário",
+                desc: "100% seu. Entrego todo código fonte e documentação.",
+                color: "#00f0ff",
+              },
+              {
+                icon: <Clock className="w-8 h-8" />,
+                title: "Prazo Garantido",
+                desc: "Entrega no prazo ou desconto de 10% por dia de atraso.",
+                color: "#ff00ff",
+              },
+              {
+                icon: <RefreshCw className="w-8 h-8" />,
+                title: "Revisões Inclusas",
+                desc: "Até 3 rodadas de revisão sem custo adicional.",
+                color: "#00ff41",
+              },
+              {
+                icon: <Headphones className="w-8 h-8" />,
+                title: "Suporte 30 Dias",
+                desc: "Pós-entrega gratuito para correções e dúvidas.",
+                color: "#00f0ff",
+              },
+              {
+                icon: <Lock className="w-8 h-8" />,
+                title: "NDA Disponível",
+                desc: "Confidencialidade total se seu projeto exigir.",
+                color: "#ff00ff",
+              },
+              {
+                icon: <BadgeCheck className="w-8 h-8" />,
+                title: "Qualidade Testada",
+                desc: "Testes automatizados e QA em todos os projetos.",
+                color: "#00ff41",
+              },
+              {
+                icon: <TrendingUp className="w-8 h-8" />,
+                title: "Performance A+",
+                desc: "Otimização para 90+ no PageSpeed Insights.",
+                color: "#00f0ff",
+              },
+              {
+                icon: <Users className="w-8 h-8" />,
+                title: "Comunicação Clara",
+                desc: "Updates semanais e resposta em até 24h.",
+                color: "#ff00ff",
+              },
+            ].map((guarantee, i) => (
+              <Reveal key={i} delay={i * 0.05}>
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="glass-card p-6 rounded-xl border border-[#1e1e2e] hover:border-[color:var(--g-color)]/30 transition-all text-center"
+                  style={{ "--g-color": guarantee.color } as React.CSSProperties}
+                >
+                  <div 
+                    className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4"
+                    style={{ 
+                      background: `${guarantee.color}15`, 
+                      border: `1px solid ${guarantee.color}30`,
+                      color: guarantee.color 
+                    }}
+                  >
+                    {guarantee.icon}
+                  </div>
+                  <h3 className="font-bold text-white mb-2">{guarantee.title}</h3>
+                  <p className="text-sm text-[#6b6b80]">{guarantee.desc}</p>
+                </motion.div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          AVAILABILITY — Limited Slots CTA
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#00f0ff]/10 via-[#ff00ff]/10 to-[#00ff41]/10" />
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="glass-card rounded-3xl p-10 lg:p-16 border border-[#00f0ff]/20 relative overflow-hidden">
+              {/* Background effects */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#00f0ff] rounded-full blur-[150px] opacity-10" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#ff00ff] rounded-full blur-[120px] opacity-10" />
+              
+              <div className="relative z-10 text-center">
+                {/* Live indicator */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/30 bg-[#00ff41]/10 mb-6">
+                  <motion.span
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="w-2 h-2 rounded-full bg-[#00ff41]"
+                  />
+                  <span className="text-sm font-mono text-[#00ff41]">
+                    Disponível para novos projetos
+                  </span>
+                </div>
+
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
+                  Apenas{" "}
+                  <span className="neon-text-cyan">2 vagas</span>
+                  {" "}disponíveis
+                </h2>
+                <p className="text-lg text-[#9999ab] mb-4 max-w-xl mx-auto">
+                  Para garantir qualidade máxima, trabalho com no máximo 3 projetos simultaneamente.
+                </p>
+                
+                {/* Stats */}
+                <div className="flex flex-wrap items-center justify-center gap-8 mb-8">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-[#00f0ff]">&lt;2h</div>
+                    <div className="text-xs text-[#6b6b80]">Tempo de resposta</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-[#ff00ff]">100%</div>
+                    <div className="text-xs text-[#6b6b80]">Taxa de satisfação</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-[#00ff41]">15+</div>
+                    <div className="text-xs text-[#6b6b80]">Projetos entregues</div>
+                  </div>
+                </div>
+
+                {/* CTAs */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Link
+                    href="/orcamento"
+                    className="group px-8 py-4 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-300 flex items-center gap-2"
+                  >
+                    <Rocket className="w-5 h-5" />
+                    Iniciar Projeto
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <a
+                    href="https://cal.com/emmanuelbezerra/discovery"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 rounded-xl font-bold border-2 border-[#ff00ff]/50 text-[#ff00ff] hover:bg-[#ff00ff]/10 transition-all duration-300 flex items-center gap-2"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    Agendar Call Gratuita
+                  </a>
+                </div>
+
+                <p className="text-xs text-[#6b6b80] mt-6">
+                  📞 Discovery call de 30min • Sem compromisso • 100% gratuita
                 </p>
               </div>
             </div>

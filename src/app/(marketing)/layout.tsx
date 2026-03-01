@@ -26,11 +26,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const navLinks = [
     { label: "Início", href: "#hero" },
     { label: "Sobre", href: "#sobre" },
-    { label: "Tech Stack", href: "#stack" },
     { label: "Projetos", href: "#projetos" },
+    { label: "Pacotes", href: "#pacotes" },
+    { label: "Processo", href: "#processo" },
     { label: "Depoimentos", href: "#depoimentos" },
-    { label: "FAQ", href: "#faq" },
-    { label: "Contato", href: "#contato" },
     { label: "Orçamento", href: "/orcamento", isRoute: true },
   ];
 

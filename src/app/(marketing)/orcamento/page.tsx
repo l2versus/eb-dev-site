@@ -42,9 +42,9 @@ const projectTypes = [
     icon: Globe,
     title: "Landing Page",
     desc: "Página única focada em conversão",
-    price: "A partir de R$ 1.500",
+    price: "A partir de R$ 2.500",
     features: ["Design responsivo", "SEO otimizado", "Formulário de contato", "Analytics integrado"],
-    timeline: "7-14 dias",
+    timeline: "5-7 dias",
     color: "#00f0ff",
   },
   {
@@ -52,9 +52,9 @@ const projectTypes = [
     icon: Layers,
     title: "Site Institucional",
     desc: "Múltiplas páginas com CMS",
-    price: "A partir de R$ 3.000",
+    price: "A partir de R$ 5.500",
     features: ["Até 10 páginas", "Painel admin", "Blog integrado", "Otimização de performance"],
-    timeline: "15-30 dias",
+    timeline: "10-14 dias",
     color: "#ff00ff",
   },
   {
@@ -62,9 +62,9 @@ const projectTypes = [
     icon: ShoppingCart,
     title: "E-commerce",
     desc: "Loja virtual completa",
-    price: "A partir de R$ 6.000",
+    price: "A partir de R$ 12.000",
     features: ["Catálogo de produtos", "Carrinho + checkout", "Gateway de pagamento", "Gestão de pedidos"],
-    timeline: "30-60 dias",
+    timeline: "20-30 dias",
     color: "#00ff41",
   },
   {
@@ -72,9 +72,9 @@ const projectTypes = [
     icon: Rocket,
     title: "Web App / SaaS",
     desc: "Sistema web personalizado",
-    price: "Sob consulta",
+    price: "A partir de R$ 15.000",
     features: ["Autenticação segura", "Dashboard interativo", "APIs customizadas", "Integrações"],
-    timeline: "45-90 dias",
+    timeline: "30-60 dias",
     color: "#ffaa00",
   },
   {
@@ -82,18 +82,18 @@ const projectTypes = [
     icon: Smartphone,
     title: "App Mobile",
     desc: "React Native / PWA",
-    price: "Sob consulta",
+    price: "A partir de R$ 20.000",
     features: ["iOS + Android", "Notificações push", "Modo offline", "Publicação nas lojas"],
-    timeline: "60-120 dias",
+    timeline: "45-90 dias",
     color: "#aa00ff",
   },
 ];
 
 const addons = [
-  { id: "chatbot", icon: MessageSquare, title: "Chatbot com IA", price: "+ R$ 800" },
-  { id: "analytics", icon: BarChart3, title: "Dashboard Analytics", price: "+ R$ 1.200" },
-  { id: "schedule", icon: Calendar, title: "Sistema de Agendamento", price: "+ R$ 1.500" },
-  { id: "payments", icon: ShoppingCart, title: "Integração Pagamentos", price: "+ R$ 1.000" },
+  { id: "chatbot", icon: MessageSquare, title: "Chatbot com IA", price: "+ R$ 1.500" },
+  { id: "analytics", icon: BarChart3, title: "Dashboard Analytics", price: "+ R$ 2.500" },
+  { id: "schedule", icon: Calendar, title: "Sistema de Agendamento", price: "+ R$ 3.000" },
+  { id: "payments", icon: ShoppingCart, title: "Integração Pagamentos", price: "+ R$ 2.000" },
 ];
 
 const techShowcase = [
@@ -668,6 +668,95 @@ export default function OrcamentoPage() {
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">{tech.name}</h3>
                   <p className="text-sm text-[#6b6b80] leading-relaxed">{tech.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Me */}
+      <section className="relative z-10 py-20 border-t border-[#1e1e2e]">
+        <div className="mx-auto max-w-6xl px-6">
+          <Reveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Por que escolher{" "}
+                <span className="neon-text-cyan">meus serviços</span>?
+              </h2>
+              <p className="text-[#6b6b80] max-w-2xl mx-auto">
+                Diferenciais que fazem a diferença no resultado final
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Comunicação Transparente",
+                desc: "Updates semanais, acesso direto via WhatsApp, sem intermediários. Você fala direto comigo.",
+                stat: "< 2h",
+                statLabel: "tempo de resposta",
+                color: "#00f0ff",
+              },
+              {
+                title: "Código de Qualidade",
+                desc: "TypeScript, testes automatizados, documentação completa. Código que outros devs entendem.",
+                stat: "A+",
+                statLabel: "PageSpeed score",
+                color: "#ff00ff",
+              },
+              {
+                title: "Entrega Garantida",
+                desc: "Prazo definido em contrato. Se atrasar, você ganha desconto. Simples assim.",
+                stat: "100%",
+                statLabel: "projetos no prazo",
+                color: "#00ff41",
+              },
+            ].map((item, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <div className="glass-card rounded-2xl p-8 h-full border border-[#1e1e2e] hover:border-[color:var(--item-color)]/30 transition-all"
+                  style={{ "--item-color": item.color } as React.CSSProperties}
+                >
+                  <div 
+                    className="text-4xl font-black mb-2"
+                    style={{ color: item.color, textShadow: `0 0 20px ${item.color}40` }}
+                  >
+                    {item.stat}
+                  </div>
+                  <div className="text-xs text-[#6b6b80] font-mono uppercase tracking-wider mb-6">
+                    {item.statLabel}
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                  <p className="text-[#9999ab]">{item.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof - Logos */}
+      <section className="relative z-10 py-16 border-t border-[#1e1e2e] bg-[#08080d]">
+        <div className="mx-auto max-w-6xl px-6">
+          <Reveal>
+            <p className="text-center text-sm text-[#6b6b80] mb-8 font-mono">
+              EMPRESAS QUE CONFIAM NO MEU TRABALHO
+            </p>
+          </Reveal>
+          
+          <div className="flex flex-wrap items-center justify-center gap-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+            {[
+              { name: "L2 Versus", icon: "⚔️" },
+              { name: "Myka Clínica", icon: "💆" },
+              { name: "TechStartup", icon: "🚀" },
+              { name: "E-commerce Plus", icon: "🛒" },
+              { name: "Consultoria Pro", icon: "📊" },
+            ].map((company, i) => (
+              <Reveal key={i} delay={i * 0.05}>
+                <div className="flex items-center gap-2 text-xl font-bold text-white">
+                  <span>{company.icon}</span>
+                  <span>{company.name}</span>
                 </div>
               </Reveal>
             ))}
