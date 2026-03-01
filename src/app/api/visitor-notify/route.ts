@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 const EVOLUTION_API_URL = process.env.WHATSAPP_API_URL || "";
 const EVOLUTION_API_KEY = process.env.WHATSAPP_API_KEY || "";
 const INSTANCE_NAME = process.env.WHATSAPP_INSTANCE || "emmanuel-clinica";
-const OWNER_PHONE = process.env.OWNER_WHATSAPP || "5585999999999"; // Seu número
+const OWNER_PHONE = process.env.OWNER_WHATSAPP || "5585998500344"; // Seu número
 
 // Rate limiting - evita spam de notificações
 const recentVisitors = new Map<string, number>();

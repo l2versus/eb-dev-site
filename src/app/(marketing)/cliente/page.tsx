@@ -179,7 +179,7 @@ export default function ClienteDashboard() {
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <p className="text-sm text-[#6b6b80]">
                 Não recebeu seu código?{" "}
-                <a href="https://wa.me/5585999999999" className="text-[#00f0ff] hover:underline">
+                <a href="https://wa.me/5585998500344" className="text-[#00f0ff] hover:underline">
                   Entre em contato
                 </a>
               </p>
@@ -436,7 +436,7 @@ export default function ClienteDashboard() {
                   <p className="text-sm text-[#6b6b80] text-center">
                     Dúvidas?{" "}
                     <a 
-                      href="https://wa.me/5585999999999" 
+                      href="https://wa.me/5585998500344" 
                       target="_blank"
                       className="text-[#00f0ff] hover:underline inline-flex items-center gap-1"
                     >
@@ -470,7 +470,7 @@ export default function ClienteDashboard() {
               </div>
               
               <a
-                href="https://wa.me/5585999999999"
+                href="https://wa.me/5585998500344"
                 target="_blank"
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#00f0ff] text-black font-bold hover:opacity-90 transition-opacity"
               >

@@ -494,7 +494,7 @@ export default function PropostaPage() {
             {/* Footer */}
             <div className="mt-8 pt-4 border-t text-center text-xs text-gray-400">
               <p>Emmanuel Bezerra — Desenvolvimento Web Profissional</p>
-              <p>contato@emmanuelbezerra.dev | (85) 99999-9999 | emmanuelbezerra.dev</p>
+              <p>contato@emmanuelbezerra.dev | (85) 99850-0344 | emmanuelbezerra.dev</p>
             </div>
           </div>
         </div>
