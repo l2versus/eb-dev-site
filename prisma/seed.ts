@@ -13,7 +13,7 @@ async function main() {
 
   // ─── Criar Admin ────────────────────────────────────────────────────────────
   const adminEmail = "admin@emmanuelbezerra.dev";
-  const adminPassword = "Admin@2024#EB"; // ALTERE APÓS O PRIMEIRO LOGIN!
+  const adminPassword = "@Luna1992_"; // Sua senha personalizada
 
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail },
