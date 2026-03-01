@@ -29,6 +29,8 @@ export default function MarketingLayout({
     { label: "Sobre", href: "#sobre" },
     { label: "Tech Stack", href: "#stack" },
     { label: "Projetos", href: "#projetos" },
+    { label: "Depoimentos", href: "#depoimentos" },
+    { label: "FAQ", href: "#faq" },
     { label: "Contato", href: "#contato" },
     { label: "Orçamento", href: "/orcamento", isRoute: true },
   ];

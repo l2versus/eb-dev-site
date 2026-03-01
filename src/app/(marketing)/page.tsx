@@ -400,6 +400,60 @@ function MagneticButton({
   );
 }
 
+// ─── FAQ Accordion Item ───────────────────────────────────────────────────────
+function FAQItem({
+  faq,
+  index,
+}: {
+  faq: { q: string; a: string; color: string };
+  index: number;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Reveal delay={index * 0.1}>
+      <motion.div
+        className="glass-card rounded-2xl border border-[#1e1e2e] overflow-hidden"
+        style={{
+          borderColor: isOpen ? `${faq.color}30` : undefined,
+        }}
+      >
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors"
+        >
+          <span className="font-bold text-white pr-4">{faq.q}</span>
+          <motion.span
+            animate={{ rotate: isOpen ? 45 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-2xl flex-shrink-0"
+            style={{ color: faq.color }}
+          >
+            +
+          </motion.span>
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <div
+                className="px-6 pb-6 text-[#9999ab] leading-relaxed border-t"
+                style={{ borderColor: `${faq.color}15` }}
+              >
+                <p className="pt-4">{faq.a}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </Reveal>
+  );
+}
+
 // ─── 3D Tilt Card ─────────────────────────────────────────────────────────────
 function TiltCard({
   children,
@@ -630,7 +684,7 @@ export default function HomePage() {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen flex items-center overflow-hidden"
+        className="relative min-h-screen flex items-center overflow-hidden pt-24 lg:pt-20"
       >
         {/* Layered backgrounds */}
         <div className="absolute inset-0 cyber-grid" />
@@ -1348,6 +1402,214 @@ export default function HomePage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          TESTIMONIALS — Client Reviews
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="depoimentos" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          {/* Section Header */}
+          <Reveal>
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
+                <span className="text-sm font-mono text-[#ff00ff]">
+                  {"<Testimonials />"}
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                O que dizem meus{" "}
+                <span className="gradient-text-cyber">clientes</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Feedback de pessoas incríveis com quem tive o prazer de colaborar
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Testimonials Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Mykaele Procópio",
+                role: "Proprietária — Myka Procópio Clínica",
+                text: "Emmanuel desenvolveu um site incrível para minha clínica! O sistema de agendamento online transformou nosso atendimento. Profissional, pontual e criativo.",
+                avatar: "MP",
+                color: "#00f0ff",
+                stars: 5,
+              },
+              {
+                name: "Lucas Oliveira",
+                role: "CEO — StartupTech",
+                text: "Trabalho excepcional! Entregou a plataforma antes do prazo com qualidade impecável. A dashboard administrativa superou todas as expectativas.",
+                avatar: "LO",
+                color: "#ff00ff",
+                stars: 5,
+              },
+              {
+                name: "Amanda Silva",
+                role: "Marketing — E-commerce Fashion",
+                text: "O e-commerce que Emmanuel criou aumentou nossas vendas em 150%. Interface linda, rápida e com ótima experiência mobile. Recomendo!",
+                avatar: "AS",
+                color: "#00ff41",
+                stars: 5,
+              },
+              {
+                name: "Ricardo Santos",
+                role: "Gerente — Consultoria Financeira",
+                text: "Sistema de gestão robusto e intuitivo. A integração com APIs bancárias foi perfeita. Comunicação clara durante todo o projeto.",
+                avatar: "RS",
+                color: "#00f0ff",
+                stars: 5,
+              },
+              {
+                name: "Beatriz Costa",
+                role: "Proprietária — Studio de Design",
+                text: "Meu portfólio ficou simplesmente maravilhoso! As animações e efeitos dão uma identidade única. Recebi muitos elogios dos clientes.",
+                avatar: "BC",
+                color: "#ff00ff",
+                stars: 5,
+              },
+              {
+                name: "Fernando Mendes",
+                role: "CTO — Logística Express",
+                text: "O app de rastreamento que desenvolveu revolucionou nossa operação. Performance incrível mesmo com milhares de usuários simultâneos.",
+                avatar: "FM",
+                color: "#00ff41",
+                stars: 5,
+              },
+            ].map((testimonial, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="glass-card p-8 rounded-2xl border border-[#1e1e2e] hover:border-[color:var(--hover-color)]/30 transition-all duration-500 h-full flex flex-col"
+                  style={{ "--hover-color": testimonial.color } as React.CSSProperties}
+                >
+                  {/* Stars */}
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: testimonial.stars }).map((_, si) => (
+                      <motion.span
+                        key={si}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 + si * 0.1 }}
+                        className="text-yellow-400"
+                      >
+                        ★
+                      </motion.span>
+                    ))}
+                  </div>
+
+                  {/* Quote */}
+                  <p className="text-[#9999ab] leading-relaxed flex-1 mb-6">
+                    "{testimonial.text}"
+                  </p>
+
+                  {/* Author */}
+                  <div className="flex items-center gap-4 pt-4 border-t border-[#1e1e2e]">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm"
+                      style={{
+                        background: `${testimonial.color}20`,
+                        color: testimonial.color,
+                        border: `2px solid ${testimonial.color}30`,
+                      }}
+                    >
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white">{testimonial.name}</p>
+                      <p className="text-sm text-[#6b6b80]">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          FAQ — Frequently Asked Questions
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="faq" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-12">
+          {/* Section Header */}
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/20 bg-[#00ff41]/5 mb-6">
+                <span className="text-sm font-mono text-[#00ff41]">
+                  {"<FAQ />"}
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                Perguntas{" "}
+                <span className="gradient-text-cyber">frequentes</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg">
+                Dúvidas comuns sobre meus serviços e processo de trabalho
+              </p>
+            </div>
+          </Reveal>
+
+          {/* FAQ Accordion */}
+          <div className="space-y-4">
+            {[
+              {
+                q: "Qual é o prazo médio de entrega de um projeto?",
+                a: "Depende da complexidade: Landing pages de 1-2 semanas, sites institucionais de 2-4 semanas, e-commerces ou apps de 4-8 semanas. Sempre defino prazos realistas após entender seu projeto.",
+                color: "#00f0ff",
+              },
+              {
+                q: "Como funciona o processo de desenvolvimento?",
+                a: "1) Briefing e análise de requisitos, 2) Proposta e orçamento, 3) Wireframes e aprovação do design, 4) Desenvolvimento com atualizações semanais, 5) Testes e ajustes, 6) Deploy e entrega com documentação.",
+                color: "#ff00ff",
+              },
+              {
+                q: "Você oferece suporte após a entrega?",
+                a: "Sim! Ofereço 30 dias de suporte gratuito para correção de bugs. Também tenho planos de manutenção mensal para atualizações, novas features e suporte técnico contínuo.",
+                color: "#00ff41",
+              },
+              {
+                q: "Quais formas de pagamento você aceita?",
+                a: "Aceito PIX, transferência bancária e cartão de crédito (via Mercado Pago). Para projetos maiores, trabalho com pagamento em etapas: entrada + parcelas no desenvolvimento + saldo na entrega.",
+                color: "#00f0ff",
+              },
+              {
+                q: "Você desenvolve para mobile também?",
+                a: "Sim! Desenvolvo apps mobile com React Native (iOS e Android) e também PWAs (Progressive Web Apps) que funcionam como apps instaláveis diretamente do navegador.",
+                color: "#ff00ff",
+              },
+              {
+                q: "O site fica responsivo em todos os dispositivos?",
+                a: "Com certeza! Todos os meus projetos são desenvolvidos com mobile-first, garantindo perfeito funcionamento em celulares, tablets, laptops e desktops de qualquer tamanho.",
+                color: "#00ff41",
+              },
+            ].map((faq, i) => (
+              <FAQItem key={i} faq={faq} index={i} />
+            ))}
+          </div>
+
+          {/* CTA */}
+          <Reveal delay={0.4}>
+            <div className="text-center mt-12">
+              <p className="text-[#6b6b80] mb-4">Não encontrou sua dúvida?</p>
+              <a
+                href="#contato"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-500"
+              >
+                <Mail className="h-4 w-4" />
+                Entre em contato
+              </a>
+            </div>
+          </Reveal>
         </div>
       </section>
 
