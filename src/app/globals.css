@@ -254,3 +254,66 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   🌓 LIGHT MODE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.light-mode {
+  --dark-bg: #f8f9fa;
+  --dark-surface: #ffffff;
+  --dark-card: #ffffff;
+  --dark-border: #e2e8f0;
+  --dark-text: #1a1a2e;
+  --dark-muted: #64748b;
+}
+
+.light-mode body {
+  background-color: #f8f9fa;
+  color: #1a1a2e;
+}
+
+.light-mode .glass {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.light-mode .glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .cyber-grid {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+}
+
+.light-mode .neon-text-cyan {
+  text-shadow: none;
+}
+
+.light-mode .neon-text-magenta {
+  text-shadow: none;
+}
+
+.light-mode .neon-text-green {
+  text-shadow: none;
+}
+
+/* Light mode scrollbar */
+.light-mode ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.light-mode ::-webkit-scrollbar-thumb {
+  background: #00a0aa55;
+}
+.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: #00a0aa99;
+}
+
+/* Light mode selection */
+.light-mode ::selection {
+  background: rgba(0, 160, 170, 0.2);
+  color: #1a1a2e;
+}

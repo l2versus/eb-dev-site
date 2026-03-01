@@ -7,16 +7,15 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Instagram, Mail, Terminal, MapPin, Phone, Heart, ArrowUp, Code2, ExternalLink } from "lucide-react";
+import { Menu, X, Github, Instagram, Mail, Terminal, MapPin, Phone, Heart, ArrowUp, Code2, ExternalLink, Sun, Moon } from "lucide-react";
 import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
+import { ThemeProvider, useTheme } from "@/lib/theme-provider";
 
-export default function MarketingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Componente interno do Layout
+function LayoutContent({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -98,6 +97,20 @@ export default function MarketingLayout({
             >
               <Instagram className="h-5 w-5" />
             </a>
+            
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-[#6b6b80] hover:text-[#00f0ff] hover:bg-[#00f0ff]/10 transition-all"
+              title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
+            
             <a
               href="#contato"
               className="ml-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] hover:bg-[#00f0ff]/20 hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all"
@@ -345,5 +358,17 @@ export default function MarketingLayout({
       {/* ═══ CHATBOT IA ══════════════════════════════════════════════════ */}
       <ChatbotWidget />
     </div>
+  );
+}
+// Componente principal com ThemeProvider
+export default function MarketingLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </ThemeProvider>
   );
 }

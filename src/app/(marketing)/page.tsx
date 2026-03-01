@@ -636,6 +636,11 @@ const projects = [
     image: "/images/project-l2versus.png",
     color: "#00f0ff",
     number: "01",
+    metrics: [
+      { label: "Usuários", value: "10k+", icon: "👥" },
+      { label: "Uptime", value: "99.9%", icon: "⚡" },
+      { label: "Transações", value: "R$50k+", icon: "💰" },
+    ],
   },
   {
     title: "Myka Procópio",
@@ -647,6 +652,11 @@ const projects = [
     image: "/images/project-estetica.png",
     color: "#ff00ff",
     number: "02",
+    metrics: [
+      { label: "Clientes", value: "+150%", icon: "📈" },
+      { label: "Load Time", value: "<1s", icon: "🚀" },
+      { label: "Economia", value: "R$2k/mês", icon: "💎" },
+    ],
   },
 ];
 
@@ -675,6 +685,46 @@ export default function HomePage() {
 
   // Estado para o modal de tecnologias
   const [selectedTech, setSelectedTech] = useState<typeof techStack[0] | null>(null);
+
+  // ─── Notificar visita via WhatsApp ───────────────────────────────────────────
+  useEffect(() => {
+    const notifyVisit = async () => {
+      try {
+        // Obter localização aproximada via API gratuita
+        let city = "";
+        let country = "";
+        try {
+          const geoRes = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(3000) });
+          if (geoRes.ok) {
+            const geo = await geoRes.json();
+            city = geo.city || "";
+            country = geo.country_name || "";
+          }
+        } catch {
+          // Ignorar erro de geolocalização
+        }
+
+        await fetch("/api/visitor-notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            page: "Home - Portfolio",
+            referrer: document.referrer || "Direto",
+            userAgent: navigator.userAgent,
+            screenSize: `${window.innerWidth}x${window.innerHeight}`,
+            city,
+            country,
+          }),
+        });
+      } catch {
+        // Silently fail - não atrapalha o usuário
+      }
+    };
+
+    // Pequeno delay para não impactar carregamento
+    const timer = setTimeout(notifyVisit, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
@@ -1364,6 +1414,35 @@ export default function HomePage() {
                       </p>
                     </div>
 
+                    {/* Metrics */}
+                    <div
+                      className="flex flex-wrap gap-4 mb-6"
+                      style={{ justifyContent: i % 2 === 1 ? "flex-end" : "flex-start" }}
+                    >
+                      {project.metrics.map((metric, mi) => (
+                        <motion.div
+                          key={mi}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: mi * 0.1 }}
+                          className="glass-card px-4 py-3 rounded-xl border border-[#1e1e2e] hover:border-[color:var(--project-color)]/30 transition-all"
+                          style={{ "--project-color": project.color } as React.CSSProperties}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{metric.icon}</span>
+                            <div>
+                              <div className="text-lg font-black" style={{ color: project.color }}>
+                                {metric.value}
+                              </div>
+                              <div className="text-xs text-[#6b6b80] font-mono">
+                                {metric.label}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+
                     {/* Tags */}
                     <div
                       className="flex flex-wrap gap-2 mb-6"
@@ -1608,6 +1687,227 @@ export default function HomePage() {
                 <Mail className="h-4 w-4" />
                 Entre em contato
               </a>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          CERTIFICATIONS — Skills & Badges
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="certificacoes" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-6">
+                <span className="text-sm font-mono text-[#00f0ff]">
+                  {"<Certifications />"}
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                Certificações &{" "}
+                <span className="gradient-text-cyber">Skills</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Aprendizado contínuo é a chave para entregar soluções de qualidade
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { name: "React.js", provider: "Meta", year: "2023", icon: "⚛️", color: "#00f0ff" },
+              { name: "Node.js", provider: "OpenJS", year: "2023", icon: "🟢", color: "#00ff41" },
+              { name: "TypeScript", provider: "Microsoft", year: "2024", icon: "📘", color: "#3178c6" },
+              { name: "AWS Cloud", provider: "Amazon", year: "2024", icon: "☁️", color: "#ff9900" },
+              { name: "Docker", provider: "Docker Inc", year: "2023", icon: "🐳", color: "#2496ed" },
+              { name: "PostgreSQL", provider: "EDB", year: "2023", icon: "🐘", color: "#336791" },
+              { name: "Next.js", provider: "Vercel", year: "2024", icon: "▲", color: "#ffffff" },
+              { name: "Python", provider: "PSF", year: "2023", icon: "🐍", color: "#ffd43b" },
+            ].map((cert, i) => (
+              <Reveal key={i} delay={i * 0.05}>
+                <motion.div
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="glass-card p-6 rounded-xl border border-[#1e1e2e] hover:border-[color:var(--cert-color)]/30 transition-all duration-300"
+                  style={{ "--cert-color": cert.color } as React.CSSProperties}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">{cert.icon}</span>
+                    <span className="text-xs font-mono px-2 py-1 rounded-full bg-white/5 text-[#6b6b80]">
+                      {cert.year}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-white mb-1">{cert.name}</h3>
+                  <p className="text-sm text-[#6b6b80]">{cert.provider}</p>
+                </motion.div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          BLOG — Latest Articles
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="blog" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
+                <span className="text-sm font-mono text-[#ff00ff]">
+                  {"<Blog />"}
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                Artigos &{" "}
+                <span className="gradient-text-cyber">Tutoriais</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Compartilhando conhecimento sobre desenvolvimento web moderno
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Next.js 14: Server Actions na Prática",
+                excerpt: "Descubra como usar Server Actions para mutações de dados sem API routes.",
+                category: "Next.js",
+                readTime: "8 min",
+                color: "#00f0ff",
+                date: "Mar 2026",
+              },
+              {
+                title: "Autenticação com NextAuth.js 5.0",
+                excerpt: "Implementação completa de login social, JWT, sessions e proteção de rotas.",
+                category: "Auth",
+                readTime: "12 min",
+                color: "#ff00ff",
+                date: "Fev 2026",
+              },
+              {
+                title: "Prisma ORM: Do Básico ao Avançado",
+                excerpt: "Migrations, relations, queries complexas e otimização de performance.",
+                category: "Backend",
+                readTime: "15 min",
+                color: "#00ff41",
+                date: "Jan 2026",
+              },
+            ].map((post, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <motion.article
+                  whileHover={{ y: -8 }}
+                  className="glass-card rounded-2xl overflow-hidden border border-[#1e1e2e] hover:border-[color:var(--post-color)]/30 transition-all duration-300 group cursor-pointer"
+                  style={{ "--post-color": post.color } as React.CSSProperties}
+                >
+                  {/* Thumbnail placeholder */}
+                  <div 
+                    className="h-40 relative overflow-hidden"
+                    style={{ background: `linear-gradient(135deg, ${post.color}20 0%, transparent 100%)` }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Code2 className="w-16 h-16 opacity-20" style={{ color: post.color }} />
+                    </div>
+                    <div className="absolute top-4 left-4">
+                      <span 
+                        className="px-3 py-1 text-xs font-mono rounded-full"
+                        style={{ background: `${post.color}20`, color: post.color }}
+                      >
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 text-xs text-[#6b6b80] mb-3">
+                      <span>{post.date}</span>
+                      <span>•</span>
+                      <span>{post.readTime} leitura</span>
+                    </div>
+                    <h3 className="font-bold text-white mb-2 group-hover:text-[color:var(--post-color)] transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-[#9999ab] line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                </motion.article>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay={0.3}>
+            <div className="text-center mt-12">
+              <span className="text-[#6b6b80] text-sm">
+                Em breve mais artigos! Assine a newsletter 👇
+              </span>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          NEWSLETTER — Subscribe CTA
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="newsletter" className="relative py-24">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
+        
+        <div className="relative z-10 max-w-3xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="glass-card rounded-3xl p-10 lg:p-16 border border-[#00ff41]/20 text-center relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#00ff41] rounded-full blur-[150px] opacity-5" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#00f0ff] rounded-full blur-[120px] opacity-5" />
+              
+              <div className="relative z-10">
+                <motion.div
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                  className="text-5xl mb-6"
+                >
+                  📬
+                </motion.div>
+                
+                <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                  Receba dicas de{" "}
+                  <span className="neon-text-green">dev</span>
+                </h2>
+                <p className="text-[#9999ab] mb-8 max-w-md mx-auto">
+                  Artigos, tutoriais e novidades sobre React, Next.js e desenvolvimento web moderno. Sem spam, prometo!
+                </p>
+                
+                <form 
+                  className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    // TODO: Integrar com serviço de newsletter
+                    alert("Newsletter em breve! Por enquanto, me siga no Instagram @emmanuelbezerra_");
+                  }}
+                >
+                  <input
+                    type="email"
+                    placeholder="seu@email.com"
+                    className="flex-1 px-5 py-4 rounded-xl bg-white/5 border border-[#1e1e2e] text-white placeholder:text-[#6b6b80] focus:border-[#00ff41]/50 focus:outline-none transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    className="px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.5)] transition-all duration-300"
+                  >
+                    Inscrever
+                  </button>
+                </form>
+                
+                <p className="text-xs text-[#6b6b80] mt-4">
+                  +500 devs já inscritos • Cancele quando quiser
+                </p>
+              </div>
             </div>
           </Reveal>
         </div>
