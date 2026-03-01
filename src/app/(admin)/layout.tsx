@@ -170,6 +170,18 @@ export default function AdminLayout({
                   );
                 })}
               </nav>
+              
+              {/* Botão Sair Mobile */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-dark-800">
+                <Link
+                  href="/"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-dark-500 hover:text-red-400 hover:bg-red-500/5 transition-all"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Sair</span>
+                </Link>
+              </div>
             </motion.aside>
           </>
         )}
