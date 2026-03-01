@@ -28,7 +28,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     { label: "Sobre", href: "#sobre" },
     { label: "Projetos", href: "#projetos" },
     { label: "Pacotes", href: "#pacotes" },
-    { label: "Processo", href: "#processo" },
     { label: "Depoimentos", href: "#depoimentos" },
     { label: "Orçamento", href: "/orcamento", isRoute: true },
   ];
@@ -110,12 +109,19 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               )}
             </button>
             
-            <a
-              href="#contato"
-              className="ml-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] hover:bg-[#00f0ff]/20 hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all"
+            {/* Access Buttons */}
+            <Link
+              href="/cliente"
+              className="ml-2 px-4 py-2 text-sm font-semibold rounded-lg bg-[#ff00ff]/10 border border-[#ff00ff]/30 text-[#ff00ff] hover:bg-[#ff00ff]/20 hover:shadow-[0_0_20px_rgba(255,0,255,0.2)] transition-all"
             >
-              Contato
-            </a>
+              Área Cliente
+            </Link>
+            <Link
+              href="/admin"
+              className="px-4 py-2 text-sm font-semibold rounded-lg bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] hover:bg-[#00f0ff]/20 hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all"
+            >
+              Admin
+            </Link>
           </div>
 
           {/* Hamburger Mobile */}
@@ -138,15 +144,45 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             >
               <div className="px-6 py-6 space-y-4">
                 {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="block text-base text-[#6b6b80] hover:text-[#00f0ff] py-2 transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  link.isRoute ? (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block text-base text-[#00ff41] hover:text-[#00ff41] py-2 transition-colors font-semibold"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block text-base text-[#6b6b80] hover:text-[#00f0ff] py-2 transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )
                 ))}
+                
+                {/* Access Buttons Mobile */}
+                <div className="pt-4 border-t border-[#1e1e2e] space-y-3">
+                  <Link
+                    href="/cliente"
+                    onClick={() => setMenuOpen(false)}
+                    className="block w-full text-center px-4 py-3 text-sm font-semibold rounded-lg bg-[#ff00ff]/10 border border-[#ff00ff]/30 text-[#ff00ff]"
+                  >
+                    Área Cliente
+                  </Link>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="block w-full text-center px-4 py-3 text-sm font-semibold rounded-lg bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff]"
+                  >
+                    Admin
+                  </Link>
+                </div>
+                
                 <div className="pt-4 border-t border-[#1e1e2e] flex gap-4">
                   <a href="https://github.com/emmanuelbezerradev" target="_blank" rel="noopener noreferrer" className="text-[#6b6b80] hover:text-white">
                     <Github className="h-5 w-5" />

@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Star,
   BadgeCheck,
+  FileText,
 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -596,6 +597,21 @@ export default function OrcamentoPage() {
                           * Selecione um tipo de projeto para continuar
                         </p>
                       )}
+
+                      {/* PDF Proposal Link */}
+                      <div className="mt-6 pt-6 border-t border-white/10">
+                        <p className="text-sm text-[#6b6b80] mb-3">
+                          Ou gere uma proposta comercial completa em PDF:
+                        </p>
+                        <Link
+                          href="/proposta"
+                          className="inline-flex items-center gap-2 text-[#ff00ff] hover:text-[#ff00ff]/80 transition-colors"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Gerar Proposta Comercial em PDF
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                     </div>
                   </Reveal>
                 </div>

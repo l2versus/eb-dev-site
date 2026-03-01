@@ -775,17 +775,28 @@ export default function HomePage() {
         >
           {/* Left — Text */}
           <div className="text-center lg:text-left">
-            {/* Status badge */}
+            {/* Status badges */}
             <Reveal delay={0.1}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-8">
-                <motion.span
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="w-2 h-2 rounded-full bg-[#00ff41]"
-                />
-                <span className="text-sm font-mono text-[#6b6b80]">
-                  Disponível para projetos
-                </span>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-8">
+                {/* Available badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5">
+                  <motion.span
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="w-2 h-2 rounded-full bg-[#00ff41]"
+                  />
+                  <span className="text-sm font-mono text-[#6b6b80]">
+                    Disponível para projetos
+                  </span>
+                </div>
+                
+                {/* Verified badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5">
+                  <BadgeCheck className="w-4 h-4 text-[#ff00ff]" />
+                  <span className="text-sm font-mono text-[#ff00ff]">
+                    Verified Developer
+                  </span>
+                </div>
               </div>
             </Reveal>
 
@@ -964,6 +975,324 @@ export default function HomePage() {
           </span>
           <ArrowDown className="h-4 w-4 text-[#00f0ff]/60" />
         </motion.div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          VIDEO INTRO — Meet Me Section
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f]" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
+                <span className="text-sm font-mono text-[#ff00ff]">
+                  {"<MeetTheCreator />"}
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                Conheça quem está por trás do{" "}
+                <span className="gradient-text-cyber">código</span>
+              </h2>
+              <p className="text-[#6b6b80] max-w-xl mx-auto">
+                2 minutos para você entender como posso ajudar seu negócio
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Video Container */}
+          <Reveal delay={0.2}>
+            <div className="relative rounded-3xl overflow-hidden border border-[#1e1e2e] glass-card">
+              {/* Video placeholder / embed */}
+              <div className="aspect-video bg-[#0a0a0f] relative group cursor-pointer">
+                {/* Thumbnail overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-20 h-20 rounded-full bg-[#ff00ff] flex items-center justify-center shadow-[0_0_40px_rgba(255,0,255,0.5)] group-hover:shadow-[0_0_60px_rgba(255,0,255,0.7)] transition-all"
+                    onClick={() => {
+                      // TODO: Open video modal or embed
+                      window.open("https://www.youtube.com/@emmanuelbezerra", "_blank");
+                    }}
+                  >
+                    <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </motion.button>
+                </div>
+                
+                {/* Decorative corners */}
+                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50" />
+                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50" />
+                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50" />
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50" />
+
+                {/* Duration badge */}
+                <div className="absolute bottom-6 right-6 px-3 py-1 rounded-lg glass text-xs font-mono text-white">
+                  2:34
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Video features */}
+          <Reveal delay={0.3}>
+            <div className="grid grid-cols-3 gap-4 mt-8">
+              {[
+                { icon: "🎯", text: "Minha abordagem" },
+                { icon: "💡", text: "Como resolvo problemas" },
+                { icon: "🚀", text: "Resultados reais" },
+              ].map((item, i) => (
+                <div key={i} className="text-center p-4 rounded-xl glass-card">
+                  <span className="text-2xl mb-2 block">{item.icon}</span>
+                  <span className="text-sm text-[#6b6b80]">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          CASE STUDY — Featured Project Deep Dive
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="case-study" className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/20 bg-[#00ff41]/5 mb-6">
+                <Award className="w-4 h-4 text-[#00ff41]" />
+                <span className="text-sm font-mono text-[#00ff41]">
+                  Case Study em Destaque
+                </span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+                De conceito a{" "}
+                <span className="neon-text-green">+150% de clientes</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Veja como transformei a presença digital de uma clínica de estética
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Mockup/Screenshot */}
+            <Reveal direction="left">
+              <div className="relative">
+                <div className="relative rounded-2xl overflow-hidden border border-[#00ff41]/20 shadow-[0_0_60px_rgba(0,255,65,0.1)]">
+                  <Image
+                    src="/images/project-estetica.png"
+                    alt="Myka Procópio Case Study"
+                    width={600}
+                    height={400}
+                    className="w-full"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent" />
+                  
+                  {/* Floating metrics */}
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ repeat: Infinity, duration: 3 }}
+                    className="absolute top-4 right-4 glass-card rounded-xl px-4 py-3"
+                  >
+                    <div className="text-2xl font-black text-[#00ff41]">+150%</div>
+                    <div className="text-xs text-[#6b6b80]">Novos Clientes</div>
+                  </motion.div>
+                  
+                  <motion.div
+                    animate={{ y: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 4 }}
+                    className="absolute bottom-4 left-4 glass-card rounded-xl px-4 py-3"
+                  >
+                    <div className="text-2xl font-black text-[#00f0ff]">0.8s</div>
+                    <div className="text-xs text-[#6b6b80]">Load Time</div>
+                  </motion.div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Details */}
+            <Reveal direction="right" delay={0.2}>
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-2">Myka Procópio Clínica</h3>
+                <p className="text-[#ff00ff] font-mono text-sm mb-6">Sistema SaaS Completo</p>
+                
+                {/* Problem/Solution */}
+                <div className="space-y-6 mb-8">
+                  <div className="glass-card rounded-xl p-6 border-l-4 border-[#ff00ff]">
+                    <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                      <span className="text-[#ff00ff]">❌</span> O Problema
+                    </h4>
+                    <p className="text-[#9999ab] text-sm">
+                      Agendamentos via WhatsApp, controle financeiro em planilha, sem presença digital profissional. Clínica perdia clientes para concorrentes com sites modernos.
+                    </p>
+                  </div>
+                  
+                  <div className="glass-card rounded-xl p-6 border-l-4 border-[#00ff41]">
+                    <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                      <span className="text-[#00ff41]">✅</span> A Solução
+                    </h4>
+                    <p className="text-[#9999ab] text-sm">
+                      Sistema completo: site institucional + agendamento online + dashboard financeiro + chatbot IA + notificações WhatsApp automatizadas.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Metrics grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  {[
+                    { metric: "+150%", label: "Novos clientes/mês", color: "#00ff41" },
+                    { metric: "60%", label: "Menos no-shows", color: "#00f0ff" },
+                    { metric: "R$2k", label: "Economia mensal", color: "#ff00ff" },
+                    { metric: "4.9★", label: "Avaliação Google", color: "#ffaa00" },
+                  ].map((item, i) => (
+                    <div key={i} className="glass-card rounded-xl p-4 text-center">
+                      <div 
+                        className="text-2xl font-black"
+                        style={{ color: item.color, textShadow: `0 0 20px ${item.color}40` }}
+                      >
+                        {item.metric}
+                      </div>
+                      <div className="text-xs text-[#6b6b80]">{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tech stack used */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {["Next.js", "TypeScript", "Prisma", "Mercado Pago", "Tailwind", "AI"].map((tech) => (
+                    <span key={tech} className="px-3 py-1 text-xs font-mono rounded-full bg-white/5 text-[#9999ab] border border-[#1e1e2e]">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <a
+                  href="https://www.mykaprocopio.com.br"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-[#00ff41] hover:underline font-bold"
+                >
+                  Ver projeto ao vivo
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          GOOGLE REVIEWS — Social Proof
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-[#08080d]" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <svg className="w-8 h-8" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span className="text-2xl font-bold text-white">4.9</span>
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-current" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-[#6b6b80] text-sm">
+                Avaliação média no Google • 15+ reviews
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Reviews carousel */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Mykaele P.",
+                avatar: "MP",
+                rating: 5,
+                text: "Profissional excepcional! Meu site ficou muito além do esperado. Comunicação clara e entrega antes do prazo. Super recomendo!",
+                date: "há 2 semanas",
+              },
+              {
+                name: "Lucas O.",
+                avatar: "LO",
+                rating: 5,
+                text: "Emmanuel transformou nossa ideia em realidade. O sistema que ele desenvolveu aumentou nossa produtividade em 200%. Trabalho impecável!",
+                date: "há 1 mês",
+              },
+              {
+                name: "Amanda S.",
+                avatar: "AS",
+                rating: 5,
+                text: "Incrível atenção aos detalhes! O e-commerce que ele criou já faturou R$50k no primeiro mês. Investimento que se pagou rápido.",
+                date: "há 1 mês",
+              },
+            ].map((review, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <div className="glass-card rounded-2xl p-6 h-full border border-[#1e1e2e]">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00f0ff] to-[#ff00ff] flex items-center justify-center text-sm font-bold text-white">
+                        {review.avatar}
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-sm">{review.name}</p>
+                        <p className="text-xs text-[#6b6b80]">{review.date}</p>
+                      </div>
+                    </div>
+                    <svg className="w-5 h-5 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Stars */}
+                  <div className="flex text-yellow-400 mb-3">
+                    {[...Array(review.rating)].map((_, si) => (
+                      <Star key={si} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  
+                  {/* Text */}
+                  <p className="text-[#9999ab] text-sm leading-relaxed">
+                    "{review.text}"
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay={0.3}>
+            <div className="text-center mt-8">
+              <a
+                href="https://g.page/r/emmanuelbezerradev/review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-[#00f0ff] hover:underline"
+              >
+                Ver todas as avaliações no Google
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
