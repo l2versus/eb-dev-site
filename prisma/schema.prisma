@@ -28,13 +28,13 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relacionamentos
-  accounts      Account[]
-  sessions      Session[]
-  agendamentos  Agendamento[]
-  anamneses     Anamnese[]
-  evolucoes     Evolucao[]
-  pagamentos    Pagamento[]
-  notificacoes  Notificacao[]
+  accounts     Account[]
+  sessions     Session[]
+  agendamentos Agendamento[]
+  anamneses    Anamnese[]
+  evolucoes    Evolucao[]
+  pagamentos   Pagamento[]
+  notificacoes Notificacao[]
 
   @@map("users")
 }
@@ -91,20 +91,20 @@ model VerificationToken {
 
 // ─── 5. SERVIÇO / PROCEDIMENTO ───────────────────────────────────────────────
 model Servico {
-  id              String   @id @default(cuid())
-  nome            String
-  descricao       String   @db.Text
-  descricaoCurta  String?
-  categoria       CategoriaServico
-  preco           Decimal  @db.Decimal(10, 2)
-  precoPromocional Decimal? @db.Decimal(10, 2)
-  duracaoMinutos  Int
-  imagemUrl       String?
-  ativo           Boolean  @default(true)
-  destaque        Boolean  @default(false)
-  ordemExibicao   Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String           @id @default(cuid())
+  nome             String
+  descricao        String           @db.Text
+  descricaoCurta   String?
+  categoria        CategoriaServico
+  preco            Decimal          @db.Decimal(10, 2)
+  precoPromocional Decimal?         @db.Decimal(10, 2)
+  duracaoMinutos   Int
+  imagemUrl        String?
+  ativo            Boolean          @default(true)
+  destaque         Boolean          @default(false)
+  ordemExibicao    Int              @default(0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   // Relacionamentos
   agendamentos Agendamento[]
@@ -123,23 +123,23 @@ enum CategoriaServico {
 
 // ─── 6. AGENDAMENTO ──────────────────────────────────────────────────────────
 model Agendamento {
-  id              String            @id @default(cuid())
-  clienteId       String
-  servicoId       String
-  profissionalId  String?
-  dataHora        DateTime
-  dataFim         DateTime
-  status          StatusAgendamento @default(PENDENTE)
-  observacoes     String?           @db.Text
-  valorTotal      Decimal           @db.Decimal(10, 2)
+  id                String            @id @default(cuid())
+  clienteId         String
+  servicoId         String
+  profissionalId    String?
+  dataHora          DateTime
+  dataFim           DateTime
+  status            StatusAgendamento @default(PENDENTE)
+  observacoes       String?           @db.Text
+  valorTotal        Decimal           @db.Decimal(10, 2)
   origemAgendamento OrigemAgendamento @default(SITE)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   // Relacionamentos
-  cliente    User       @relation(fields: [clienteId], references: [id])
-  servico    Servico    @relation(fields: [servicoId], references: [id])
-  pagamento  Pagamento?
+  cliente   User       @relation(fields: [clienteId], references: [id])
+  servico   Servico    @relation(fields: [servicoId], references: [id])
+  pagamento Pagamento?
 
   @@index([clienteId])
   @@index([dataHora])
@@ -148,14 +148,14 @@ model Agendamento {
 }
 
 enum StatusAgendamento {
-  PENDENTE        // Aguardando confirmação
-  CONFIRMADO      // Pago ou confirmado manualmente
-  EM_ATENDIMENTO  // Em andamento
-  CONCLUIDO       // Finalizado com sucesso
-  CANCELADO       // Cancelado pelo cliente
-  NO_SHOW         // Paciente não compareceu
-  REAGENDADO      // Movido para outra data
-  LISTA_ESPERA    // Aguardando vaga
+  PENDENTE // Aguardando confirmação
+  CONFIRMADO // Pago ou confirmado manualmente
+  EM_ATENDIMENTO // Em andamento
+  CONCLUIDO // Finalizado com sucesso
+  CANCELADO // Cancelado pelo cliente
+  NO_SHOW // Paciente não compareceu
+  REAGENDADO // Movido para outra data
+  LISTA_ESPERA // Aguardando vaga
 }
 
 enum OrigemAgendamento {
@@ -168,24 +168,24 @@ enum OrigemAgendamento {
 
 // ─── 7. PAGAMENTO ────────────────────────────────────────────────────────────
 model Pagamento {
-  id                    String          @id @default(cuid())
-  agendamentoId         String          @unique
-  clienteId             String
-  valorOriginal         Decimal         @db.Decimal(10, 2)
-  valorPago             Decimal?        @db.Decimal(10, 2)
-  desconto              Decimal?        @db.Decimal(10, 2)
-  metodo                MetodoPagamento
-  status                StatusPagamento @default(PENDENTE)
-  mercadoPagoId         String?         @unique
-  mercadoPagoStatus     String?
-  mercadoPagoDetail     String?         @db.Text
-  pixQrCode             String?         @db.Text
-  pixQrCodeBase64       String?         @db.Text
-  pixExpiresAt          DateTime?
-  fraudeDetected        Boolean         @default(false)
-  fraudeMotivo          String?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  id                String          @id @default(cuid())
+  agendamentoId     String          @unique
+  clienteId         String
+  valorOriginal     Decimal         @db.Decimal(10, 2)
+  valorPago         Decimal?        @db.Decimal(10, 2)
+  desconto          Decimal?        @db.Decimal(10, 2)
+  metodo            MetodoPagamento
+  status            StatusPagamento @default(PENDENTE)
+  mercadoPagoId     String?         @unique
+  mercadoPagoStatus String?
+  mercadoPagoDetail String?         @db.Text
+  pixQrCode         String?         @db.Text
+  pixQrCodeBase64   String?         @db.Text
+  pixExpiresAt      DateTime?
+  fraudeDetected    Boolean         @default(false)
+  fraudeMotivo      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   // Relacionamentos
   agendamento Agendamento @relation(fields: [agendamentoId], references: [id])
@@ -217,28 +217,28 @@ enum StatusPagamento {
 
 // ─── 8. ANAMNESE (Ficha Médica Criptografada) ───────────────────────────────
 model Anamnese {
-  id                    String   @id @default(cuid())
-  clienteId             String
+  id                  String    @id @default(cuid())
+  clienteId           String
   // Dados criptografados AES-256 (LGPD)
-  dadosCriptografados   String   @db.Text
+  dadosCriptografados String    @db.Text
   // Flags médicas (booleanos para consulta rápida sem descriptografar)
-  alergia               Boolean  @default(false)
-  diabetes              Boolean  @default(false)
-  hipertensao           Boolean  @default(false)
-  cardiopatia           Boolean  @default(false)
-  gravidez              Boolean  @default(false)
-  lactante              Boolean  @default(false)
-  marcapasso            Boolean  @default(false)
-  epilepsia             Boolean  @default(false)
-  cancer                Boolean  @default(false)
-  cirurgiaRecente       Boolean  @default(false)
-  problemaPele          Boolean  @default(false)
-  usoMedicamento        Boolean  @default(false)
-  assinaturaDigital     String?
-  consentimentoLGPD     Boolean  @default(false)
-  dataAssinatura        DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  alergia             Boolean   @default(false)
+  diabetes            Boolean   @default(false)
+  hipertensao         Boolean   @default(false)
+  cardiopatia         Boolean   @default(false)
+  gravidez            Boolean   @default(false)
+  lactante            Boolean   @default(false)
+  marcapasso          Boolean   @default(false)
+  epilepsia           Boolean   @default(false)
+  cancer              Boolean   @default(false)
+  cirurgiaRecente     Boolean   @default(false)
+  problemaPele        Boolean   @default(false)
+  usoMedicamento      Boolean   @default(false)
+  assinaturaDigital   String?
+  consentimentoLGPD   Boolean   @default(false)
+  dataAssinatura      DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   // Relacionamentos
   cliente User @relation(fields: [clienteId], references: [id])
@@ -249,32 +249,32 @@ model Anamnese {
 
 // ─── 9. EVOLUÇÃO CLÍNICA ────────────────────────────────────────────────────
 model Evolucao {
-  id              String   @id @default(cuid())
-  clienteId       String
-  dataAvaliacao   DateTime @default(now())
-  observacoes     String?  @db.Text
-  
+  id            String   @id @default(cuid())
+  clienteId     String
+  dataAvaliacao DateTime @default(now())
+  observacoes   String?  @db.Text
+
   // 13 Zonas de Medição Corporal (em cm)
-  abdomen         Decimal? @db.Decimal(6, 2)
-  cintura         Decimal? @db.Decimal(6, 2)
-  quadril         Decimal? @db.Decimal(6, 2)
-  coxaDireita     Decimal? @db.Decimal(6, 2)
-  coxaEsquerda    Decimal? @db.Decimal(6, 2)
-  bracoDireito    Decimal? @db.Decimal(6, 2)
-  bracoEsquerdo   Decimal? @db.Decimal(6, 2)
-  torax           Decimal? @db.Decimal(6, 2)
-  panturrilhaDir  Decimal? @db.Decimal(6, 2)
-  panturrilhaEsq  Decimal? @db.Decimal(6, 2)
-  peso            Decimal? @db.Decimal(6, 2)
-  altura          Decimal? @db.Decimal(5, 2)
-  imc             Decimal? @db.Decimal(5, 2)
+  abdomen        Decimal? @db.Decimal(6, 2)
+  cintura        Decimal? @db.Decimal(6, 2)
+  quadril        Decimal? @db.Decimal(6, 2)
+  coxaDireita    Decimal? @db.Decimal(6, 2)
+  coxaEsquerda   Decimal? @db.Decimal(6, 2)
+  bracoDireito   Decimal? @db.Decimal(6, 2)
+  bracoEsquerdo  Decimal? @db.Decimal(6, 2)
+  torax          Decimal? @db.Decimal(6, 2)
+  panturrilhaDir Decimal? @db.Decimal(6, 2)
+  panturrilhaEsq Decimal? @db.Decimal(6, 2)
+  peso           Decimal? @db.Decimal(6, 2)
+  altura         Decimal? @db.Decimal(5, 2)
+  imc            Decimal? @db.Decimal(5, 2)
 
   // Fotos antes/depois (URLs criptografadas)
-  fotosAntes      String[] @default([])
-  fotosDepois     String[] @default([])
+  fotosAntes  String[] @default([])
+  fotosDepois String[] @default([])
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relacionamentos
   cliente User @relation(fields: [clienteId], references: [id])
@@ -286,40 +286,40 @@ model Evolucao {
 
 // ─── 10. CONFIGURAÇÃO DO SISTEMA ─────────────────────────────────────────────
 model ConfiguracaoSistema {
-  id                    String   @id @default(cuid())
-  nomeClinica           String   @default("Emmanuel Estética Premium")
-  logoUrl               String?
-  telefone              String?
-  email                 String?
-  endereco              String?
-  cnpj                  String?
+  id                String   @id @default(cuid())
+  nomeClinica       String   @default("Emmanuel Estética Premium")
+  logoUrl           String?
+  telefone          String?
+  email             String?
+  endereco          String?
+  cnpj              String?
   // Horários de funcionamento
-  horarioAbertura       String   @default("08:00")
-  horarioFechamento     String   @default("20:00")
-  intervaloMinutos      Int      @default(30)
-  diasFuncionamento     Int[]    @default([1, 2, 3, 4, 5, 6]) // 0=Dom ... 6=Sab
+  horarioAbertura   String   @default("08:00")
+  horarioFechamento String   @default("20:00")
+  intervaloMinutos  Int      @default(30)
+  diasFuncionamento Int[]    @default([1, 2, 3, 4, 5, 6]) // 0=Dom ... 6=Sab
   // Estética do sistema
-  corPrimaria           String   @default("#e14a72")
-  corSecundaria         String   @default("#d99c22")
+  corPrimaria       String   @default("#e14a72")
+  corSecundaria     String   @default("#d99c22")
   // Redes sociais
-  instagramUrl          String?
-  facebookUrl           String?
-  whatsappNumero        String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  instagramUrl      String?
+  facebookUrl       String?
+  whatsappNumero    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@map("configuracoes_sistema")
 }
 
 // ─── 11. BLOQUEIO DE AGENDA ──────────────────────────────────────────────────
 model BloqueioAgenda {
-  id              String   @id @default(cuid())
-  titulo          String
-  dataInicio      DateTime
-  dataFim         DateTime
-  motivo          String?
-  diaTodo         Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  id         String   @id @default(cuid())
+  titulo     String
+  dataInicio DateTime
+  dataFim    DateTime
+  motivo     String?
+  diaTodo    Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   @@index([dataInicio, dataFim])
   @@map("bloqueios_agenda")
@@ -327,15 +327,15 @@ model BloqueioAgenda {
 
 // ─── 12. NOTIFICAÇÃO ─────────────────────────────────────────────────────────
 model Notificacao {
-  id          String          @id @default(cuid())
-  userId      String
-  titulo      String
-  mensagem    String          @db.Text
-  tipo        TipoNotificacao
-  canal       CanalNotificacao
-  lida        Boolean         @default(false)
-  enviadaEm   DateTime        @default(now())
-  metadata    Json?
+  id        String           @id @default(cuid())
+  userId    String
+  titulo    String
+  mensagem  String           @db.Text
+  tipo      TipoNotificacao
+  canal     CanalNotificacao
+  lida      Boolean          @default(false)
+  enviadaEm DateTime         @default(now())
+  metadata  Json?
 
   // Relacionamentos
   user User @relation(fields: [userId], references: [id])
@@ -381,4 +381,334 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 🚀 MODELOS ADICIONAIS — DEV FREELANCER
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ─── 14. CLIENTE / LEAD DO FREELANCER ────────────────────────────────────────
+model Cliente {
+  id               String        @id @default(cuid())
+  nome             String
+  email            String        @unique
+  telefone         String?
+  empresa          String?
+  site             String?
+  tipo             TipoCliente   @default(PF)
+  status           StatusCliente @default(LEAD)
+  faturamentoTotal Decimal       @default(0) @db.Decimal(12, 2)
+  rating           Int           @default(0)
+  tags             String[]      @default([])
+  notas            String?       @db.Text
+  origemLead       String?
+  ultimoContato    DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  // Relacionamentos
+  projetos      Projeto[]
+  propostas     Proposta[]
+  compromissos  Compromisso[]
+  pedidos       Pedido[]
+  acessoCliente AcessoCliente?
+
+  @@map("clientes")
+}
+
+enum TipoCliente {
+  PF
+  PJ
+}
+
+enum StatusCliente {
+  LEAD
+  PROSPECT
+  NEGOCIANDO
+  ATIVO
+  INATIVO
+  PERDIDO
+}
+
+// ─── 15. PROJETO DO FREELANCER ───────────────────────────────────────────────
+model Projeto {
+  id           String        @id @default(cuid())
+  clienteId    String
+  nome         String
+  descricao    String?       @db.Text
+  tipo         TipoProjeto
+  valor        Decimal       @db.Decimal(12, 2)
+  valorPago    Decimal       @default(0) @db.Decimal(12, 2)
+  progresso    Int           @default(0) // 0-100
+  status       StatusProjeto @default(BRIEFING)
+  prazoEntrega DateTime?
+  dataInicio   DateTime?
+  dataEntrega  DateTime?
+  urlPreview   String?
+  urlProducao  String?
+  repositorio  String?
+  tecnologias  String[]      @default([])
+  notas        String?       @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relacionamentos
+  cliente    Cliente          @relation(fields: [clienteId], references: [id])
+  milestones Milestone[]
+  arquivos   ArquivoProjeto[]
+
+  @@index([clienteId])
+  @@index([status])
+  @@map("projetos")
+}
+
+enum TipoProjeto {
+  LANDING_PAGE
+  SITE_INSTITUCIONAL
+  ECOMMERCE
+  WEBAPP
+  DASHBOARD
+  API
+  CONSULTORIA
+  MANUTENCAO
+  OUTRO
+}
+
+enum StatusProjeto {
+  BRIEFING
+  PROPOSTA_ENVIADA
+  AGUARDANDO_PAGAMENTO
+  EM_DESENVOLVIMENTO
+  REVISAO
+  AJUSTES
+  ENTREGUE
+  CANCELADO
+  PAUSADO
+}
+
+// ─── 16. MILESTONE DO PROJETO ────────────────────────────────────────────────
+model Milestone {
+  id        String    @id @default(cuid())
+  projetoId String
+  titulo    String
+  descricao String?
+  prazo     DateTime?
+  concluido Boolean   @default(false)
+  ordem     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  projeto Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+
+  @@map("milestones")
+}
+
+// ─── 17. ARQUIVOS DO PROJETO ─────────────────────────────────────────────────
+model ArquivoProjeto {
+  id        String   @id @default(cuid())
+  projetoId String
+  nome      String
+  url       String
+  tipo      String
+  tamanho   Int?
+  createdAt DateTime @default(now())
+
+  projeto Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+
+  @@map("arquivos_projeto")
+}
+
+// ─── 18. PROPOSTA COMERCIAL ──────────────────────────────────────────────────
+model Proposta {
+  id             String         @id @default(cuid())
+  clienteId      String
+  titulo         String
+  descricao      String?        @db.Text
+  valor          Decimal        @db.Decimal(12, 2)
+  desconto       Decimal?       @db.Decimal(12, 2)
+  valorFinal     Decimal        @db.Decimal(12, 2)
+  validade       DateTime
+  status         StatusProposta @default(PENDENTE)
+  tipoProjeto    TipoProjeto
+  prazoEstimado  String?
+  itensInclusos  String[]       @default([])
+  termosContrato String?        @db.Text
+  observacoes    String?        @db.Text
+  enviadaEm      DateTime?
+  respondidaEm   DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  cliente Cliente @relation(fields: [clienteId], references: [id])
+
+  @@index([clienteId])
+  @@index([status])
+  @@map("propostas")
+}
+
+enum StatusProposta {
+  RASCUNHO
+  PENDENTE
+  ENVIADA
+  VISUALIZADA
+  NEGOCIANDO
+  APROVADA
+  RECUSADA
+  EXPIRADA
+}
+
+// ─── 19. COMPROMISSO / AGENDA DO FREELANCER ──────────────────────────────────
+model Compromisso {
+  id          String            @id @default(cuid())
+  clienteId   String?
+  titulo      String
+  descricao   String?           @db.Text
+  tipo        TipoCompromisso
+  dataHora    DateTime
+  duracao     Int               @default(30) // minutos
+  status      StatusCompromisso @default(PENDENTE)
+  plataforma  String? // Zoom, Meet, WhatsApp
+  linkReuniao String?
+  notas       String?           @db.Text
+  lembrete    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  cliente Cliente? @relation(fields: [clienteId], references: [id])
+
+  @@index([dataHora])
+  @@index([status])
+  @@map("compromissos")
+}
+
+enum TipoCompromisso {
+  CALL
+  BRIEFING
+  APRESENTACAO
+  ENTREGA
+  REVIEW
+  FOLLOW_UP
+  REUNIAO
+  OUTRO
+}
+
+enum StatusCompromisso {
+  PENDENTE
+  CONFIRMADO
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+  REAGENDADO
+  NAO_COMPARECEU
+}
+
+// ─── 20. PEDIDO / PAGAMENTO ──────────────────────────────────────────────────
+model Pedido {
+  id         String  @id @default(cuid())
+  codigo     String  @unique @default(cuid())
+  clienteId  String?
+  propostaId String? @unique
+
+  // Dados do cliente (cópia para histórico)
+  nomeCliente     String
+  emailCliente    String
+  telefoneCliente String?
+  cpfCliente      String?
+
+  // Detalhes do pedido
+  descricao       String          @db.Text
+  valorOriginal   Decimal         @db.Decimal(12, 2)
+  desconto        Decimal         @default(0) @db.Decimal(12, 2)
+  valorFinal      Decimal         @db.Decimal(12, 2)
+  metodoPagamento MetodoPagamento @default(PIX)
+  parcelas        Int             @default(1)
+
+  // Status do pagamento
+  status StatusPedido @default(PENDENTE)
+
+  // Dados Mercado Pago
+  mercadoPagoId   String?
+  preferenceId    String?
+  pixQrCode       String?   @db.Text
+  pixQrCodeBase64 String?   @db.Text
+  pixExpiresAt    DateTime?
+  checkoutUrl     String?
+
+  // Timestamps
+  pagoEm      DateTime?
+  expiradoEm  DateTime?
+  canceladoEm DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relacionamentos
+  cliente Cliente? @relation(fields: [clienteId], references: [id])
+
+  @@index([clienteId])
+  @@index([status])
+  @@index([mercadoPagoId])
+  @@map("pedidos")
+}
+
+enum StatusPedido {
+  PENDENTE
+  AGUARDANDO_PAGAMENTO
+  PROCESSANDO
+  APROVADO
+  PAGO
+  CANCELADO
+  EXPIRADO
+  REEMBOLSADO
+}
+
+// ─── 21. ACESSO DO CLIENTE AO PORTAL ─────────────────────────────────────────
+model AcessoCliente {
+  id           String    @id @default(cuid())
+  clienteId    String    @unique
+  codigoAcesso String    @unique
+  emailEnviado Boolean   @default(false)
+  whatsEnviado Boolean   @default(false)
+  ultimoAcesso DateTime?
+  ativo        Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relacionamento
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@map("acessos_cliente")
+}
+
+// ─── 22. CONFIGURAÇÕES DO FREELANCER ─────────────────────────────────────────
+model ConfiguracaoFreelancer {
+  id           String  @id @default(cuid())
+  nomeCompleto String  @default("Emmanuel Bezerra")
+  titulo       String  @default("Desenvolvedor Full-Stack")
+  email        String  @default("contato@emmanuelbezerra.dev")
+  telefone     String  @default("+5585998500344")
+  whatsapp     String  @default("+5585998500344")
+  linkedin     String?
+  github       String?
+  instagram    String?
+  site         String?
+
+  // Horários de disponibilidade
+  horaInicio      String @default("08:00")
+  horaFim         String @default("18:00")
+  diasDisponiveis Int[]  @default([1, 2, 3, 4, 5]) // Seg a Sex
+  fusoHorario     String @default("America/Fortaleza")
+
+  // Notificações
+  notificarNovoLead      Boolean @default(true)
+  notificarNovaProsposta Boolean @default(true)
+  notificarPagamento     Boolean @default(true)
+
+  // Evolution API / WhatsApp
+  evolutionApiUrl   String?
+  evolutionApiKey   String?
+  evolutionInstance String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("configuracao_freelancer")
 }

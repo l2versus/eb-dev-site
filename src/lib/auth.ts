@@ -38,7 +38,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 dias
+    maxAge: 60 * 60, // 1 hora - expira rápido
+  },
+
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        // Sem maxAge = cookie de sessão (expira ao fechar navegador)
+      },
+    },
   },
 
   pages: {

@@ -1,10 +1,11 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // 🛡️ MIDDLEWARE DE SEGURANÇA — Portfolio EB
-// Headers de Segurança + Rate Limiting básico
+// Headers de Segurança + Rate Limiting + Proteção Admin
 // ══════════════════════════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 // ─── Rate Limiting em memória (per-IP) ────────────────────────────────────────
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -24,7 +25,7 @@ function isRateLimited(ip: string): boolean {
   return entry.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -42,7 +43,27 @@ export default function middleware(request: NextRequest) {
     });
   }
 
-  // ─── 2. Response com Headers de Segurança ────────────────────────────
+  // ─── 2. Proteção de Rotas Admin ──────────────────────────────────────
+  if (pathname.startsWith("/admin")) {
+    const token = await getToken({ 
+      req: request, 
+      secret: process.env.AUTH_SECRET 
+    });
+
+    // Não autenticado → redireciona para login
+    if (!token) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Verifica se é ADMIN
+    if (token.role !== "ADMIN") {
+      return new NextResponse("Acesso negado", { status: 403 });
+    }
+  }
+
+  // ─── 3. Response com Headers de Segurança ────────────────────────────
   const response = NextResponse.next();
 
   response.headers.set("X-Frame-Options", "DENY");

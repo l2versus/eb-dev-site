@@ -7,8 +7,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/utils/validations";
@@ -20,6 +22,7 @@ import {
   ArrowRight,
   Sparkles,
   Shield,
+  AlertCircle,
 } from "lucide-react";
 import type { z } from "zod";
 
@@ -28,6 +31,9 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
   const {
     register,
@@ -39,18 +45,28 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
+    setError(null);
     try {
-      // signIn("credentials", { ...data, redirect: true, callbackUrl: "/dashboard" })
-      console.log("Login:", data);
-      await new Promise((r) => setTimeout(r, 1500));
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Email ou senha inválidos");
+      } else if (result?.ok) {
+        window.location.href = callbackUrl;
+      }
+    } catch (e) {
+      setError("Erro ao fazer login. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    // signIn("google", { callbackUrl: "/dashboard" })
-    console.log("Google login");
+    signIn("google", { callbackUrl });
   };
 
   return (
@@ -71,11 +87,11 @@ export default function LoginPage() {
             />
           </div>
           <h2 className="font-display text-3xl text-white mb-4">
-            Sua beleza merece o <span className="gradient-text-brand">melhor</span>
+            Acesso <span className="gradient-text-brand">Administrativo</span>
           </h2>
           <p className="text-dark-300 leading-relaxed">
-            Acesse seu painel para agendar tratamentos, acompanhar sua evolução
-            e gerenciar seus pagamentos de forma segura.
+            Painel exclusivo para gestão de clientes, projetos, propostas
+            e acompanhamento financeiro do seu negócio.
           </p>
 
           {/* Trust badges */}
@@ -119,10 +135,10 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-white mb-2">
-              Entrar na sua conta
+              Login Administrativo
             </h1>
             <p className="text-dark-400 text-sm">
-              Acesse seu painel de tratamentos e agendamentos
+              Acesse o painel de controle do sistema
             </p>
           </div>
 
@@ -163,6 +179,14 @@ export default function LoginPage() {
 
           {/* Formulário */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Mensagem de erro */}
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {error}
+              </div>
+            )}
+            
             <Input
               label="Email"
               type="email"
