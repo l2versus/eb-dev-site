@@ -1,21 +1,24 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📊 Admin Dashboard — Painel Dinâmico (dados reais de shared-financeiro)
+// 📊 Admin Dashboard — Painel 100% localStorage (sem API)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DonutChart, BarChartCustom, LineChartCustom } from "@/components/charts/charts";
 import { loadTransacoes, calcFaturamentoMensal } from "@/lib/shared-financeiro";
+import { loadProjetos, getProjetoStats, type Projeto } from "@/lib/shared-projetos";
+import { loadConversas, getChatStats, type Conversa } from "@/lib/shared-chat";
+import { loadClientes } from "@/lib/shared-clientes";
+import { loadCompromissos } from "@/lib/shared-agenda";
+import { toast } from "sonner";
 import {
   DollarSign,
   FolderKanban,
   TrendingUp,
-  ArrowUp,
-  ArrowDown,
   Star,
   Zap,
   FileText,
@@ -27,36 +30,11 @@ import {
   MessageCircle,
   Users,
   RefreshCw,
-  Loader2,
   Calendar,
   Activity,
+  CalendarDays,
+  User,
 } from "lucide-react";
-
-// ─── Tipos ────────────────────────────────────────────────────────────────────
-interface Projeto {
-  id: string;
-  titulo: string;
-  descricao: string;
-  clienteNome: string;
-  clienteEmail: string;
-  status: string;
-  prioridade: string;
-  valor: number;
-  progresso: number;
-  prazo: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Conversa {
-  id: string;
-  clienteNome: string;
-  ultimaMensagem: string;
-  ultimaHora: string;
-  naoLidas: number;
-  status: string;
-}
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const statusConfig: Record<string, { label: string; css: string }> = {
@@ -67,58 +45,35 @@ const statusConfig: Record<string, { label: string; css: string }> = {
   entregue: { label: "Entregue", css: "text-emerald-400 bg-emerald-500/10" },
 };
 
-const prioridadeConfig: Record<string, { label: string; css: string }> = {
-  baixa: { label: "Baixa", css: "text-dark-400" },
-  media: { label: "Média", css: "text-amber-400" },
-  alta: { label: "Alta", css: "text-orange-400" },
-  urgente: { label: "Urgente", css: "text-red-400" },
-};
-
-// ─── Faturamento real de shared-financeiro ──────────────────────────────────────
-// Calculado dinamicamente a partir das transações salvas no localStorage
-
 export default function AdminDashboardPage() {
+  const [loaded, setLoaded] = useState(false);
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [conversas, setConversas] = useState<Conversa[]>([]);
-  const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  // Faturamento real calculado do localStorage
-  const transacoesFinanceiro = loadTransacoes();
-  const faturamentoMensal = calcFaturamentoMensal(transacoesFinanceiro).map((m) => ({
+  const refresh = () => {
+    setProjetos(loadProjetos());
+    setConversas(loadConversas());
+    setLastUpdate(new Date());
+    setLoaded(true);
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  // ─── Dados derivados ────────────────────────────────────────────────────────
+  const stats = getProjetoStats(projetos);
+  const chatStats = getChatStats(conversas);
+  const clientes = loaded ? loadClientes() : [];
+  const compromissos = loaded ? loadCompromissos() : [];
+
+  // Faturamento real do localStorage financeiro
+  const transacoes = loaded ? loadTransacoes() : [];
+  const faturamentoMensal = calcFaturamentoMensal(transacoes).map((m) => ({
     label: m.label,
     valor: m.receita,
   }));
-
-  const fetchDados = useCallback(async () => {
-    try {
-      const [projRes, chatRes] = await Promise.all([
-        fetch("/api/projetos").then((r) => (r.ok ? r.json() : [])),
-        fetch("/api/chat").then((r) => (r.ok ? r.json() : [])),
-      ]);
-      setProjetos(Array.isArray(projRes) ? projRes : []);
-      setConversas(Array.isArray(chatRes) ? chatRes : []);
-      setLastUpdate(new Date());
-    } catch {
-      // Manter dados anteriores em caso de erro
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDados();
-    const interval = setInterval(fetchDados, 30000); // Refresh a cada 30s
-    return () => clearInterval(interval);
-  }, [fetchDados]);
-
-  // ─── Métricas calculadas ──────────────────────────────────────────────────
-  const projetosAtivos = projetos.filter((p) => p.status !== "entregue");
-  const projetosEntregues = projetos.filter((p) => p.status === "entregue");
-  const faturamentoTotal = projetos.reduce((acc, p) => acc + (p.valor || 0), 0);
-  const faturamentoAtivos = projetosAtivos.reduce((acc, p) => acc + (p.valor || 0), 0);
-  const mensagensNaoLidas = conversas.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
-  const ticketMedio = projetos.length > 0 ? faturamentoTotal / projetos.length : 0;
 
   // Status dos projetos para donut
   const statusCount = projetos.reduce((acc, p) => {
@@ -134,7 +89,7 @@ export default function AdminDashboardPage() {
     { name: "Entregue", value: statusCount.entregue || 0, color: "#10b981" },
   ].filter((s) => s.value > 0);
 
-  // Projetos por prioridade para bar chart
+  // Prioridades para bar chart
   const prioridadeCount = projetos.reduce((acc, p) => {
     acc[p.prioridade] = (acc[p.prioridade] || 0) + 1;
     return acc;
@@ -146,8 +101,8 @@ export default function AdminDashboardPage() {
     { name: "Urgente", valor: prioridadeCount.urgente || 0 },
   ];
 
-  // Próximos prazos (projetos ativos ordenados por prazo)
-  const proximosEntregas = [...projetosAtivos].sort(
+  // Próximas entregas
+  const proximosEntregas = [...stats.ativos].sort(
     (a, b) => new Date(a.prazo).getTime() - new Date(b.prazo).getTime()
   );
 
@@ -158,43 +113,49 @@ export default function AdminDashboardPage() {
     year: "numeric",
   });
 
+  // Próximos compromissos
+  const proximosCompromissos = compromissos
+    .filter((c) => new Date(c.dataHora) >= new Date())
+    .sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
+    .slice(0, 3);
+
   // ─── KPIs ─────────────────────────────────────────────────────────────────
   const kpis = [
     {
       titulo: "Faturamento Total",
-      valor: `R$ ${faturamentoTotal.toLocaleString("pt-BR")}`,
-      extra: `${projetosAtivos.length} ativos: R$ ${faturamentoAtivos.toLocaleString("pt-BR")}`,
+      valor: `R$ ${stats.faturamentoTotal.toLocaleString("pt-BR")}`,
+      extra: `${stats.ativos.length} ativos: R$ ${stats.faturamentoAtivos.toLocaleString("pt-BR")}`,
       icon: DollarSign,
       cor: "emerald" as const,
     },
     {
       titulo: "Projetos",
       valor: `${projetos.length}`,
-      extra: `${projetosAtivos.length} ativos · ${projetosEntregues.length} entregues`,
+      extra: `${stats.ativos.length} ativos · ${stats.entregues.length} entregues`,
       icon: FolderKanban,
       cor: "brand" as const,
     },
     {
-      titulo: "Mensagens não lidas",
-      valor: `${mensagensNaoLidas}`,
-      extra: `${conversas.length} conversas`,
-      icon: MessageCircle,
+      titulo: "Clientes",
+      valor: `${clientes.length}`,
+      extra: `${clientes.filter((c) => c.status === "ATIVO").length} ativos`,
+      icon: Users,
       cor: "purple" as const,
     },
     {
       titulo: "Ticket Médio",
-      valor: `R$ ${ticketMedio.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`,
+      valor: `R$ ${stats.ticketMedio.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`,
       extra: `${projetos.length} projetos no total`,
       icon: TrendingUp,
       cor: "gold" as const,
     },
   ];
 
-  if (loading) {
+  if (!loaded) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-brand-400 mx-auto" />
+          <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-dark-400 text-sm">Carregando dashboard...</p>
         </div>
       </div>
@@ -211,7 +172,7 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={fetchDados}
+            onClick={() => { refresh(); toast.success("Dashboard atualizado!"); }}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-dark-400 hover:text-white bg-dark-800/50 hover:bg-dark-700/50 border border-dark-700/50 rounded-lg transition-all"
           >
             <RefreshCw className="h-3 w-3" />
@@ -307,10 +268,10 @@ export default function AdminDashboardPage() {
         <Card variant="glass" className="lg:col-span-2">
           <CardHeader
             title="Projetos em Andamento"
-            subtitle={`${projetosAtivos.length} projetos ativos`}
+            subtitle={`${stats.ativos.length} projetos ativos`}
             icon={<Rocket className="h-5 w-5" />}
           />
-          {projetosAtivos.length > 0 ? (
+          {stats.ativos.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -323,11 +284,11 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {projetosAtivos.map((proj) => (
+                  {stats.ativos.map((proj) => (
                     <tr
                       key={proj.id}
                       className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors cursor-pointer"
-                      onClick={() => window.location.href = "/admin/clientes"}
+                      onClick={() => (window.location.href = "/admin/projetos")}
                     >
                       <td className="py-3 px-3">
                         <div>
@@ -391,13 +352,13 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* Chat + Métricas */}
+      {/* Chat + Compromissos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Conversas recentes */}
         <Card variant="glass" className="lg:col-span-2">
           <CardHeader
             title="Conversas Recentes"
-            subtitle={`${mensagensNaoLidas} não lidas`}
+            subtitle={`${chatStats.totalNaoLidas} não lidas`}
             icon={<MessageCircle className="h-5 w-5" />}
           />
           {conversas.length > 0 ? (
@@ -443,31 +404,31 @@ export default function AdminDashboardPage() {
           )}
         </Card>
 
-        {/* Métricas rápidas */}
+        {/* Métricas rápidas + próximos compromissos */}
         <div className="space-y-4">
           <Card variant="glass">
             <div className="text-center">
               <p className="text-3xl font-bold gradient-text-brand">
-                R$ {ticketMedio.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+                R$ {stats.ticketMedio.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
               </p>
               <p className="text-xs text-dark-400 mt-1">Ticket Médio</p>
             </div>
           </Card>
           <Card variant="glass">
             <div className="text-center">
-              <p className="text-3xl font-bold gradient-text-gold">{projetosEntregues.length}</p>
+              <p className="text-3xl font-bold gradient-text-gold">{stats.entregues.length}</p>
               <p className="text-xs text-dark-400 mt-1">Projetos Entregues</p>
             </div>
           </Card>
           <Card variant="glass">
             <div className="text-center">
-              <p className="text-3xl font-bold text-emerald-400">{conversas.length}</p>
+              <p className="text-3xl font-bold text-emerald-400">{chatStats.totalConversas}</p>
               <p className="text-xs text-dark-400 mt-1">Conversas</p>
             </div>
           </Card>
           <Card variant="glass">
             <div className="text-center">
-              <p className="text-3xl font-bold text-purple-400">{projetosAtivos.length}</p>
+              <p className="text-3xl font-bold text-purple-400">{stats.ativos.length}</p>
               <p className="text-xs text-dark-400 mt-1">Em Andamento</p>
             </div>
           </Card>
@@ -483,7 +444,7 @@ export default function AdminDashboardPage() {
             icon={<Timer className="h-5 w-5" />}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-            {proximosEntregas.slice(0, 4).map((proj, i) => {
+            {proximosEntregas.slice(0, 4).map((proj) => {
               const diasRestantes = Math.ceil(
                 (new Date(proj.prazo).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
               );
@@ -535,6 +496,48 @@ export default function AdminDashboardPage() {
                 </div>
               );
             })}
+          </div>
+        </Card>
+      )}
+
+      {/* Próximos Compromissos da Agenda */}
+      {proximosCompromissos.length > 0 && (
+        <Card variant="glass">
+          <CardHeader
+            title="Próximos Compromissos"
+            subtitle="Da sua agenda"
+            icon={<CalendarDays className="h-5 w-5" />}
+          />
+          <div className="divide-y divide-dark-700/50 mt-2">
+            {proximosCompromissos.map((comp) => (
+              <Link
+                key={comp.id}
+                href="/admin/agenda"
+                className="flex items-center gap-4 py-3 px-2 hover:bg-dark-800/30 rounded-lg transition-colors"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
+                  <CalendarDays className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm">{comp.titulo}</p>
+                  <p className="text-xs text-dark-400">
+                    {new Date(comp.dataHora).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}{" "}
+                    às{" "}
+                    {new Date(comp.dataHora).toLocaleTimeString("pt-BR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {comp.clienteNome && ` · ${comp.clienteNome}`}
+                  </p>
+                </div>
+                <Badge variant={comp.tipo === "REUNIAO" ? "info" : comp.tipo === "ENTREGA" ? "success" : "default"}>
+                  {comp.tipo}
+                </Badge>
+              </Link>
+            ))}
           </div>
         </Card>
       )}

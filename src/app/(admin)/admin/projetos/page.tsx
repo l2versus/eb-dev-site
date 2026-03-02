@@ -1,60 +1,49 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📋 Projetos Kanban — Gestão Visual de Projetos
+// 📋 Projetos Kanban — 100% localStorage (sem API)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import {
+  loadProjetos,
+  saveProjetos,
+  addProjeto,
+  updateProjeto,
+  deleteProjeto,
+  type Projeto,
+  type ProjetoStatus,
+  type ProjetoPrioridade,
+} from "@/lib/shared-projetos";
+import { toast } from "sonner";
 import {
   FolderKanban,
   Plus,
-  GripVertical,
   Clock,
   DollarSign,
   User,
-  Tag,
-  MoreHorizontal,
+  BarChart3,
   ArrowRight,
   ArrowLeft,
-  ChevronDown,
-  ChevronUp,
   Calendar,
   Edit3,
   Trash2,
   X,
   Eye,
-  BarChart3,
 } from "lucide-react";
 
-interface Projeto {
-  id: string;
-  titulo: string;
-  descricao: string;
-  clienteNome: string;
-  clienteEmail: string;
-  status: "briefing" | "design" | "desenvolvimento" | "revisao" | "entregue";
-  prioridade: "baixa" | "media" | "alta" | "urgente";
-  valor: number;
-  progresso: number;
-  prazo: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
 const COLUNAS = [
-  { key: "briefing", label: "📋 Briefing", color: "from-blue-500/20 to-blue-600/5", border: "border-blue-500/30", badge: "bg-blue-500/20 text-blue-300" },
-  { key: "design", label: "🎨 Design", color: "from-purple-500/20 to-purple-600/5", border: "border-purple-500/30", badge: "bg-purple-500/20 text-purple-300" },
-  { key: "desenvolvimento", label: "⚡ Desenvolvimento", color: "from-amber-500/20 to-amber-600/5", border: "border-amber-500/30", badge: "bg-amber-500/20 text-amber-300" },
-  { key: "revisao", label: "🔍 Revisão", color: "from-cyan-500/20 to-cyan-600/5", border: "border-cyan-500/30", badge: "bg-cyan-500/20 text-cyan-300" },
-  { key: "entregue", label: "✅ Entregue", color: "from-green-500/20 to-green-600/5", border: "border-green-500/30", badge: "bg-green-500/20 text-green-300" },
-] as const;
+  { key: "briefing" as const, label: "📋 Briefing", color: "from-blue-500/20 to-blue-600/5", border: "border-blue-500/30", badge: "bg-blue-500/20 text-blue-300" },
+  { key: "design" as const, label: "🎨 Design", color: "from-purple-500/20 to-purple-600/5", border: "border-purple-500/30", badge: "bg-purple-500/20 text-purple-300" },
+  { key: "desenvolvimento" as const, label: "⚡ Desenvolvimento", color: "from-amber-500/20 to-amber-600/5", border: "border-amber-500/30", badge: "bg-amber-500/20 text-amber-300" },
+  { key: "revisao" as const, label: "🔍 Revisão", color: "from-cyan-500/20 to-cyan-600/5", border: "border-cyan-500/30", badge: "bg-cyan-500/20 text-cyan-300" },
+  { key: "entregue" as const, label: "✅ Entregue", color: "from-green-500/20 to-green-600/5", border: "border-green-500/30", badge: "bg-green-500/20 text-green-300" },
+];
 
-const PRIORIDADES = {
+const PRIORIDADES: Record<ProjetoPrioridade, { label: string; color: string }> = {
   baixa: { label: "Baixa", color: "bg-dark-700 text-dark-300" },
   media: { label: "Média", color: "bg-blue-500/20 text-blue-300" },
   alta: { label: "Alta", color: "bg-amber-500/20 text-amber-300" },
@@ -63,7 +52,7 @@ const PRIORIDADES = {
 
 export default function ProjetosPage() {
   const [projetos, setProjetos] = useState<Projeto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [detalheProjeto, setDetalheProjeto] = useState<Projeto | null>(null);
   const [editando, setEditando] = useState<Projeto | null>(null);
@@ -74,107 +63,67 @@ export default function ProjetosPage() {
     descricao: "",
     clienteNome: "",
     clienteEmail: "",
-    status: "briefing" as Projeto["status"],
-    prioridade: "media" as Projeto["prioridade"],
+    status: "briefing" as ProjetoStatus,
+    prioridade: "media" as ProjetoPrioridade,
     valor: 0,
     prazo: "",
     tags: "",
   });
 
-  // Carregar projetos
-  const carregarProjetos = useCallback(async () => {
-    try {
-      const res = await fetch("/api/projetos");
-      if (res.ok) {
-        const data = await res.json();
-        setProjetos(data);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar projetos:", error);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    setProjetos(loadProjetos());
+    setLoaded(true);
   }, []);
 
-  useEffect(() => {
-    carregarProjetos();
-  }, [carregarProjetos]);
-
   // Mover projeto para coluna
-  const moverProjeto = async (projeto: Projeto, novoStatus: Projeto["status"]) => {
-    // Ajustar progresso automaticamente
-    const progressoMap: Record<string, number> = {
+  const moverProjeto = (projeto: Projeto, novoStatus: ProjetoStatus) => {
+    const progressoMap: Record<ProjetoStatus, number> = {
       briefing: 10, design: 30, desenvolvimento: 60, revisao: 85, entregue: 100,
     };
-
-    setProjetos((prev) =>
-      prev.map((p) =>
-        p.id === projeto.id
-          ? { ...p, status: novoStatus, progresso: progressoMap[novoStatus], updatedAt: new Date().toISOString() }
-          : p
-      )
-    );
-
-    try {
-      await fetch("/api/projetos", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: projeto.id, status: novoStatus, progresso: progressoMap[novoStatus] }),
-      });
-    } catch {}
+    const updated = updateProjeto(projeto.id, {
+      status: novoStatus,
+      progresso: progressoMap[novoStatus],
+    });
+    if (updated) {
+      setProjetos(loadProjetos());
+      toast.success(`Movido para ${novoStatus}`);
+    }
   };
 
   // Salvar projeto (criar ou editar)
-  const salvarProjeto = async () => {
+  const salvarProjeto = () => {
     const payload = {
-      ...form,
+      titulo: form.titulo,
+      descricao: form.descricao,
+      clienteNome: form.clienteNome,
+      clienteEmail: form.clienteEmail,
+      status: form.status,
+      prioridade: form.prioridade,
+      valor: form.valor,
+      prazo: form.prazo || new Date(Date.now() + 30 * 86400000).toISOString(),
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
     };
 
     if (editando) {
-      setProjetos((prev) =>
-        prev.map((p) =>
-          p.id === editando.id ? { ...p, ...payload, updatedAt: new Date().toISOString() } : p
-        )
-      );
-      try {
-        await fetch("/api/projetos", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: editando.id, ...payload }),
-        });
-      } catch {}
+      updateProjeto(editando.id, payload);
+      toast.success("Projeto atualizado!");
     } else {
-      const novoProjeto: Projeto = {
-        id: `proj-${Date.now()}`,
-        ...payload,
-        progresso: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setProjetos((prev) => [novoProjeto, ...prev]);
-      try {
-        await fetch("/api/projetos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } catch {}
+      addProjeto(payload);
+      toast.success("Projeto criado!");
     }
-
+    setProjetos(loadProjetos());
     fecharModal();
   };
 
-  // Excluir projeto
-  const excluirProjeto = async (id: string) => {
-    setProjetos((prev) => prev.filter((p) => p.id !== id));
-    try {
-      await fetch(`/api/projetos?id=${id}`, { method: "DELETE" });
-    } catch {}
+  // Excluir
+  const excluirProjeto = (id: string) => {
+    deleteProjeto(id);
+    setProjetos(loadProjetos());
     setDetalheProjeto(null);
+    toast.success("Projeto excluído!");
   };
 
-  // Abrir modal
+  // Modal
   const abrirModal = (projeto?: Projeto) => {
     if (projeto) {
       setEditando(projeto);
@@ -211,7 +160,6 @@ export default function ProjetosPage() {
     ? Math.round(projetos.reduce((acc, p) => acc + p.progresso, 0) / projetos.length)
     : 0;
 
-  // Dias restantes
   const diasRestantes = (prazo: string) => {
     const diff = Math.ceil((new Date(prazo).getTime() - Date.now()) / 86400000);
     if (diff < 0) return { text: `${Math.abs(diff)}d atrasado`, color: "text-red-400" };
@@ -220,7 +168,7 @@ export default function ProjetosPage() {
     return { text: `${diff}d`, color: "text-dark-400" };
   };
 
-  if (loading) {
+  if (!loaded) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -230,7 +178,7 @@ export default function ProjetosPage() {
 
   return (
     <div className="space-y-6">
-      {/* ─── Header ──────────────────────────────────────────────────── */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -242,7 +190,6 @@ export default function ProjetosPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Toggle view */}
           <div className="flex bg-dark-800 rounded-lg p-0.5">
             <button
               onClick={() => setViewMode("kanban")}
@@ -263,7 +210,7 @@ export default function ProjetosPage() {
         </div>
       </div>
 
-      {/* ─── Stats Cards ─────────────────────────────────────────────── */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4 bg-dark-900 border-dark-800">
           <div className="flex items-center gap-3">
@@ -302,7 +249,7 @@ export default function ProjetosPage() {
         </Card>
       </div>
 
-      {/* ─── KANBAN VIEW ─────────────────────────────────────────────── */}
+      {/* KANBAN VIEW */}
       {viewMode === "kanban" ? (
         <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
           {COLUNAS.map((coluna) => {
@@ -310,11 +257,7 @@ export default function ProjetosPage() {
             const colunaIdx = COLUNAS.findIndex((c) => c.key === coluna.key);
 
             return (
-              <div
-                key={coluna.key}
-                className="flex-shrink-0 w-72"
-              >
-                {/* Header da coluna */}
+              <div key={coluna.key} className="flex-shrink-0 w-72">
                 <div className={`rounded-t-xl p-3 bg-gradient-to-b ${coluna.color} border ${coluna.border} border-b-0`}>
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-white">{coluna.label}</h3>
@@ -324,7 +267,6 @@ export default function ProjetosPage() {
                   </div>
                 </div>
 
-                {/* Cards */}
                 <div className={`space-y-2 p-2 bg-dark-900/50 border ${coluna.border} border-t-0 rounded-b-xl min-h-[200px]`}>
                   {projetosColuna.map((projeto) => {
                     const prazoInfo = diasRestantes(projeto.prazo);
@@ -334,7 +276,6 @@ export default function ProjetosPage() {
                         className="bg-dark-900 border border-dark-800 rounded-xl p-3 hover:border-dark-700 transition-all group cursor-pointer"
                         onClick={() => setDetalheProjeto(projeto)}
                       >
-                        {/* Prioridade + Ações */}
                         <div className="flex items-center justify-between mb-2">
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${PRIORIDADES[projeto.prioridade].color}`}>
                             {PRIORIDADES[projeto.prioridade].label}
@@ -342,10 +283,7 @@ export default function ProjetosPage() {
                           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             {colunaIdx > 0 && (
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  moverProjeto(projeto, COLUNAS[colunaIdx - 1].key);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); moverProjeto(projeto, COLUNAS[colunaIdx - 1].key); }}
                                 className="p-1 text-dark-500 hover:text-white rounded"
                                 title={`Mover para ${COLUNAS[colunaIdx - 1].label}`}
                               >
@@ -354,10 +292,7 @@ export default function ProjetosPage() {
                             )}
                             {colunaIdx < COLUNAS.length - 1 && (
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  moverProjeto(projeto, COLUNAS[colunaIdx + 1].key);
-                                }}
+                                onClick={(e) => { e.stopPropagation(); moverProjeto(projeto, COLUNAS[colunaIdx + 1].key); }}
                                 className="p-1 text-dark-500 hover:text-white rounded"
                                 title={`Mover para ${COLUNAS[colunaIdx + 1].label}`}
                               >
@@ -367,18 +302,12 @@ export default function ProjetosPage() {
                           </div>
                         </div>
 
-                        {/* Título */}
-                        <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">
-                          {projeto.titulo}
-                        </h4>
-
-                        {/* Cliente */}
+                        <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">{projeto.titulo}</h4>
                         <p className="text-[11px] text-dark-400 flex items-center gap-1 mb-2">
                           <User className="h-3 w-3" />
                           {projeto.clienteNome}
                         </p>
 
-                        {/* Barra de progresso */}
                         <div className="mb-2">
                           <div className="h-1.5 bg-dark-800 rounded-full overflow-hidden">
                             <div
@@ -389,26 +318,20 @@ export default function ProjetosPage() {
                           <p className="text-[10px] text-dark-500 mt-0.5">{projeto.progresso}%</p>
                         </div>
 
-                        {/* Footer */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-dark-500" />
-                            <span className={`text-[10px] font-medium ${prazoInfo.color}`}>
-                              {prazoInfo.text}
-                            </span>
+                            <span className={`text-[10px] font-medium ${prazoInfo.color}`}>{prazoInfo.text}</span>
                           </div>
                           <span className="text-[10px] text-dark-500 font-medium">
                             R$ {projeto.valor.toLocaleString("pt-BR")}
                           </span>
                         </div>
 
-                        {/* Tags */}
                         {projeto.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {projeto.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-dark-800 text-dark-400">
-                                {tag}
-                              </span>
+                              <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded bg-dark-800 text-dark-400">{tag}</span>
                             ))}
                           </div>
                         )}
@@ -427,7 +350,7 @@ export default function ProjetosPage() {
           })}
         </div>
       ) : (
-        /* ─── LISTA VIEW ────────────────────────────────────────────── */
+        /* LISTA VIEW */
         <Card className="bg-dark-900 border-dark-800 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -502,7 +425,7 @@ export default function ProjetosPage() {
         </Card>
       )}
 
-      {/* ═══ MODAL DETALHE ═══ */}
+      {/* MODAL DETALHE */}
       {detalheProjeto && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDetalheProjeto(null)}>
           <div className="bg-dark-900 border border-dark-800 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -571,7 +494,7 @@ export default function ProjetosPage() {
         </div>
       )}
 
-      {/* ═══ MODAL CRIAR/EDITAR ═══ */}
+      {/* MODAL CRIAR/EDITAR */}
       {modalAberto && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={fecharModal}>
           <div className="bg-dark-900 border border-dark-800 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -630,7 +553,7 @@ export default function ProjetosPage() {
                     <label className="text-xs text-dark-400 mb-1 block">Status</label>
                     <select
                       value={form.status}
-                      onChange={(e) => setForm({ ...form, status: e.target.value as Projeto["status"] })}
+                      onChange={(e) => setForm({ ...form, status: e.target.value as ProjetoStatus })}
                       className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                     >
                       {COLUNAS.map((c) => (
@@ -642,7 +565,7 @@ export default function ProjetosPage() {
                     <label className="text-xs text-dark-400 mb-1 block">Prioridade</label>
                     <select
                       value={form.prioridade}
-                      onChange={(e) => setForm({ ...form, prioridade: e.target.value as Projeto["prioridade"] })}
+                      onChange={(e) => setForm({ ...form, prioridade: e.target.value as ProjetoPrioridade })}
                       className="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                     >
                       <option value="baixa">Baixa</option>

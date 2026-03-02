@@ -1,12 +1,11 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 🔔 Componente — Centro de Notificações em Tempo Real
+// 🔔 Componente — Centro de Notificações (localStorage)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRealtime } from "@/hooks/use-realtime";
 import {
   Bell,
   X,
@@ -30,6 +29,8 @@ interface Notification {
   link?: string;
 }
 
+const NOTIF_KEY = "eb-admin-notifications";
+
 const iconMap: Record<string, any> = {
   novo_cliente: UserPlus,
   novo_pedido: DollarSign,
@@ -48,105 +49,42 @@ const colorMap: Record<string, string> = {
   mensagem_chat: "text-pink-400 bg-pink-500/10",
 };
 
+const h = (hoursAgo: number) =>
+  new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString();
+
+const defaultNotifications: Notification[] = [
+  { id: "n1", type: "pagamento_aprovado", title: "Pagamento Aprovado!", message: "PIX R$ 3.500 de Tech Solutions confirmado", timestamp: h(1), read: false, link: "/admin/financeiro" },
+  { id: "n2", type: "mensagem_chat", title: "Nova Mensagem", message: "Myka Procópio enviou uma mensagem", timestamp: h(2), read: false, link: "/admin/chat" },
+  { id: "n3", type: "novo_compromisso", title: "Novo Compromisso", message: "Reunião com Café Aroma amanhã às 14h", timestamp: h(5), read: true, link: "/admin/agenda" },
+  { id: "n4", type: "novo_cliente", title: "Novo Cliente", message: "Marina Costa foi cadastrada via site", timestamp: h(8), read: true, link: "/admin/clientes" },
+  { id: "n5", type: "proposta_visualizada", title: "Proposta Visualizada", message: "João Silva visualizou a proposta", timestamp: h(12), read: true, link: "/admin/propostas" },
+];
+
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Carregar notificações do localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("notifications");
-    if (stored) {
-      try {
+    try {
+      const stored = localStorage.getItem(NOTIF_KEY);
+      if (stored) {
         setNotifications(JSON.parse(stored));
-      } catch {}
+      } else {
+        setNotifications(defaultNotifications);
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(defaultNotifications));
+      }
+    } catch {
+      setNotifications(defaultNotifications);
     }
   }, []);
 
   // Salvar notificações no localStorage
   useEffect(() => {
-    localStorage.setItem("notifications", JSON.stringify(notifications));
+    if (notifications.length > 0 || localStorage.getItem(NOTIF_KEY)) {
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications));
+    }
   }, [notifications]);
-
-  // Ouvir eventos em tempo real
-  useRealtime({
-    onEvent: (event) => {
-      if (event.type === "ping") return;
-
-      const newNotification: Notification = {
-        id: crypto.randomUUID(),
-        type: event.type,
-        title: getTitleForEvent(event.type, event.data),
-        message: getMessageForEvent(event.type, event.data),
-        timestamp: event.timestamp,
-        read: false,
-        link: getLinkForEvent(event.type, event.data),
-      };
-
-      setNotifications((prev) => [newNotification, ...prev].slice(0, 50));
-
-      // Tocar som de notificação (opcional)
-      try {
-        const audio = new Audio("/sounds/notification.mp3");
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-      } catch {}
-    },
-  });
-
-  // Helpers para formatar notificações
-  function getTitleForEvent(type: string, data: any): string {
-    switch (type) {
-      case "novo_cliente":
-        return "Novo Cliente";
-      case "novo_pedido":
-        return "Novo Pedido";
-      case "pagamento_aprovado":
-        return "Pagamento Aprovado!";
-      case "novo_compromisso":
-        return "Novo Compromisso";
-      case "proposta_visualizada":
-        return "Proposta Visualizada";
-      case "mensagem_chat":
-        return "Nova Mensagem";
-      default:
-        return "Notificação";
-    }
-  }
-
-  function getMessageForEvent(type: string, data: any): string {
-    switch (type) {
-      case "novo_cliente":
-        return `${data?.nome || "Cliente"} foi cadastrado`;
-      case "novo_pedido":
-        return `Pedido ${data?.codigo || ""} criado`;
-      case "pagamento_aprovado":
-        return `Pagamento de ${data?.valor || "R$ 0"} confirmado`;
-      case "novo_compromisso":
-        return `${data?.titulo || "Reunião"} agendada`;
-      case "proposta_visualizada":
-        return `${data?.clienteNome || "Cliente"} visualizou a proposta`;
-      case "mensagem_chat":
-        return data?.preview || "Nova mensagem recebida";
-      default:
-        return "Você tem uma nova notificação";
-    }
-  }
-
-  function getLinkForEvent(type: string, data: any): string | undefined {
-    switch (type) {
-      case "novo_cliente":
-        return "/admin/clientes";
-      case "novo_pedido":
-      case "pagamento_aprovado":
-        return "/admin/financeiro";
-      case "novo_compromisso":
-        return "/admin/agenda";
-      case "proposta_visualizada":
-        return "/admin/financeiro";
-      default:
-        return undefined;
-    }
-  }
 
   // Marcar como lida
   const markAsRead = (id: string) => {

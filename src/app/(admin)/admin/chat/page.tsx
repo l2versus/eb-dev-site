@@ -1,14 +1,21 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 💬 Chat Admin — Mensagens com Clientes em Tempo Real
+// 💬 Chat Admin — 100% localStorage (sem API)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  loadConversas,
+  loadMensagens,
+  enviarMensagem,
+  marcarComoLida,
+  type Conversa,
+  type Mensagem,
+} from "@/lib/shared-chat";
+import { toast } from "sonner";
 import {
   MessageCircle,
   Send,
@@ -18,35 +25,10 @@ import {
   MoreVertical,
   Phone,
   Video,
-  Archive,
   Check,
   CheckCheck,
-  Circle,
   ArrowLeft,
-  User,
 } from "lucide-react";
-
-interface Conversa {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  clienteEmail: string;
-  ultimaMensagem: string;
-  ultimaHora: string;
-  naoLidas: number;
-  status: string;
-}
-
-interface Mensagem {
-  id: string;
-  conversaId: string;
-  remetente: "admin" | "cliente";
-  remetenteNome: string;
-  conteudo: string;
-  tipo: string;
-  lida: boolean;
-  createdAt: string;
-}
 
 export default function ChatPage() {
   const [conversas, setConversas] = useState<Conversa[]>([]);
@@ -54,125 +36,44 @@ export default function ChatPage() {
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [novaMensagem, setNovaMensagem] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [enviando, setEnviando] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [showMobile, setShowMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Carregar conversas
-  const carregarConversas = useCallback(async () => {
-    try {
-      const res = await fetch("/api/chat");
-      if (res.ok) {
-        const data = await res.json();
-        setConversas(data);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar conversas:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Carregar mensagens de uma conversa
-  const carregarMensagens = useCallback(async (conversaId: string) => {
-    try {
-      const res = await fetch(`/api/chat?conversaId=${conversaId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMensagens(data);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar mensagens:", error);
-    }
-  }, []);
-
-  // Polling para novas mensagens
   useEffect(() => {
-    carregarConversas();
+    setConversas(loadConversas());
+    setLoaded(true);
+  }, []);
 
-    pollRef.current = setInterval(() => {
-      carregarConversas();
-      if (conversaSelecionada) {
-        carregarMensagens(conversaSelecionada.id);
-      }
-    }, 5000);
-
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, [carregarConversas, carregarMensagens, conversaSelecionada]);
-
-  // Scroll pro final ao receber mensagens
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens]);
 
   // Selecionar conversa
-  const selecionarConversa = async (conversa: Conversa) => {
+  const selecionarConversa = (conversa: Conversa) => {
     setConversaSelecionada(conversa);
     setShowMobile(true);
-    await carregarMensagens(conversa.id);
+    const msgs = loadMensagens(conversa.id);
+    setMensagens(msgs);
 
-    // Marcar como lidas
     if (conversa.naoLidas > 0) {
-      try {
-        await fetch("/api/chat", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ conversaId: conversa.id }),
-        });
-        carregarConversas();
-      } catch {}
+      marcarComoLida(conversa.id);
+      setConversas(loadConversas());
     }
 
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   // Enviar mensagem
-  const enviarMensagem = async () => {
+  const handleEnviar = () => {
     if (!novaMensagem.trim() || !conversaSelecionada) return;
 
-    setEnviando(true);
-    const conteudo = novaMensagem.trim();
+    enviarMensagem(conversaSelecionada.id, novaMensagem.trim(), "admin", "Emmanuel");
     setNovaMensagem("");
-
-    // Optimistic update
-    const msgTemp: Mensagem = {
-      id: `temp-${Date.now()}`,
-      conversaId: conversaSelecionada.id,
-      remetente: "admin",
-      remetenteNome: "Emmanuel",
-      conteudo,
-      tipo: "texto",
-      lida: true,
-      createdAt: new Date().toISOString(),
-    };
-    setMensagens((prev) => [...prev, msgTemp]);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversaId: conversaSelecionada.id,
-          conteudo,
-          remetente: "admin",
-          remetenteNome: "Emmanuel",
-        }),
-      });
-
-      if (res.ok) {
-        carregarConversas();
-        carregarMensagens(conversaSelecionada.id);
-      }
-    } catch (error) {
-      console.error("Erro ao enviar:", error);
-    } finally {
-      setEnviando(false);
-    }
+    setMensagens(loadMensagens(conversaSelecionada.id));
+    setConversas(loadConversas());
+    toast.success("Mensagem enviada!");
   };
 
   // Formatar hora
@@ -194,12 +95,19 @@ export default function ChatPage() {
     c.clienteNome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Total não lidas
   const totalNaoLidas = conversas.reduce((acc, c) => acc + c.naoLidas, 0);
+
+  if (!loaded) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-8rem)] flex rounded-2xl overflow-hidden border border-dark-800 bg-dark-900">
-      {/* ═══ LISTA DE CONVERSAS ═══════════════════════════════════════ */}
+      {/* LISTA DE CONVERSAS */}
       <div
         className={`${
           showMobile ? "hidden lg:flex" : "flex"
@@ -231,11 +139,7 @@ export default function ChatPage() {
 
         {/* Lista */}
         <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : conversasFiltradas.length === 0 ? (
+          {conversasFiltradas.length === 0 ? (
             <div className="py-12 text-center text-dark-500 text-sm">
               Nenhuma conversa
             </div>
@@ -280,7 +184,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* ═══ ÁREA DE CHAT ════════════════════════════════════════════ */}
+      {/* ÁREA DE CHAT */}
       <div
         className={`${
           !showMobile ? "hidden lg:flex" : "flex"
@@ -338,18 +242,7 @@ export default function ChatPage() {
                           : "bg-dark-800 text-dark-200 rounded-bl-md"
                       }`}
                     >
-                      {msg.tipo === "link" ? (
-                        <a
-                          href={msg.conteudo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`text-sm underline ${isAdmin ? "text-white/90" : "text-brand-400"}`}
-                        >
-                          🔗 {msg.conteudo}
-                        </a>
-                      ) : (
-                        <p className="text-sm whitespace-pre-wrap">{msg.conteudo}</p>
-                      )}
+                      <p className="text-sm whitespace-pre-wrap">{msg.conteudo}</p>
                       <div className={`flex items-center gap-1 mt-1 ${isAdmin ? "justify-end" : ""}`}>
                         <span className={`text-[10px] ${isAdmin ? "text-white/50" : "text-dark-500"}`}>
                           {formatarHora(msg.createdAt)}
@@ -374,7 +267,7 @@ export default function ChatPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  enviarMensagem();
+                  handleEnviar();
                 }}
                 className="flex items-center gap-2"
               >
@@ -399,7 +292,7 @@ export default function ChatPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={!novaMensagem.trim() || enviando}
+                  disabled={!novaMensagem.trim()}
                   className="p-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
                 >
                   <Send className="h-4 w-4" />
@@ -418,7 +311,7 @@ export default function ChatPage() {
                 Selecione uma conversa
               </h3>
               <p className="text-sm text-dark-500">
-                Escolha um cliente para iniciar a conversa
+                Escolha um cliente para ver as mensagens
               </p>
             </div>
           </div>
