@@ -1,13 +1,15 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📊 Admin Dashboard — Painel Dinâmico do Desenvolvedor Freelancer
+// 📊 Admin Dashboard — Painel Dinâmico (dados reais de shared-financeiro)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DonutChart, BarChartCustom, LineChartCustom } from "@/components/charts/charts";
+import { loadTransacoes, calcFaturamentoMensal } from "@/lib/shared-financeiro";
 import {
   DollarSign,
   FolderKanban,
@@ -72,21 +74,21 @@ const prioridadeConfig: Record<string, { label: string; css: string }> = {
   urgente: { label: "Urgente", css: "text-red-400" },
 };
 
-// ─── Faturamento Mock (6 meses) ──────────────────────────────────────────────
-const faturamentoMensal = [
-  { label: "Set", valor: 8500 },
-  { label: "Out", valor: 12000 },
-  { label: "Nov", valor: 15500 },
-  { label: "Dez", valor: 22000 },
-  { label: "Jan", valor: 14000 },
-  { label: "Fev", valor: 18500 },
-];
+// ─── Faturamento real de shared-financeiro ──────────────────────────────────────
+// Calculado dinamicamente a partir das transações salvas no localStorage
 
 export default function AdminDashboardPage() {
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [conversas, setConversas] = useState<Conversa[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  // Faturamento real calculado do localStorage
+  const transacoesFinanceiro = loadTransacoes();
+  const faturamentoMensal = calcFaturamentoMensal(transacoesFinanceiro).map((m) => ({
+    label: m.label,
+    valor: m.receita,
+  }));
 
   const fetchDados = useCallback(async () => {
     try {
@@ -324,7 +326,8 @@ export default function AdminDashboardPage() {
                   {projetosAtivos.map((proj) => (
                     <tr
                       key={proj.id}
-                      className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors"
+                      className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors cursor-pointer"
+                      onClick={() => window.location.href = "/admin/clientes"}
                     >
                       <td className="py-3 px-3">
                         <div>
@@ -400,8 +403,9 @@ export default function AdminDashboardPage() {
           {conversas.length > 0 ? (
             <div className="divide-y divide-dark-700/50">
               {conversas.slice(0, 5).map((conversa) => (
-                <div
+                <Link
                   key={conversa.id}
+                  href="/admin/chat"
                   className="flex items-center gap-4 py-3 px-2 hover:bg-dark-800/30 rounded-lg transition-colors"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/20 to-purple-500/20 text-sm font-bold text-brand-400 shrink-0">
@@ -429,7 +433,7 @@ export default function AdminDashboardPage() {
                       {conversa.naoLidas}
                     </span>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

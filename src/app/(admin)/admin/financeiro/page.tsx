@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 💰 Financeiro — Gestão Financeira Freelancer Dev
+// 💰 Financeiro — Persistência localStorage via shared-financeiro.ts
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
@@ -8,7 +8,18 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { LineChartCustom, DonutChart, BarChartCustom } from "@/components/charts/charts";
+import { toast } from "sonner";
+import {
+  loadTransacoes,
+  addTransacao,
+  updateTransacao,
+  deleteTransacao as removeTransacao,
+  calcFaturamentoMensal,
+  type Transacao,
+} from "@/lib/shared-financeiro";
 import {
   DollarSign,
   TrendingUp,
@@ -28,6 +39,9 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  Edit,
+  Trash2,
+  Save,
 } from "lucide-react";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -42,47 +56,6 @@ interface Projeto {
   tags: string[];
 }
 
-interface Transacao {
-  id: string;
-  tipo: "receita" | "despesa";
-  descricao: string;
-  valor: number;
-  categoria: string;
-  data: string;
-  status: "pago" | "pendente" | "atrasado" | "cancelado";
-  metodo?: string;
-  cliente?: string;
-}
-
-// ─── Dados de transações (in-memory mock) ─────────────────────────────────────
-const transacoesMock: Transacao[] = [
-  { id: "1", tipo: "receita", descricao: "Site Institucional - Myka Procópio", valor: 5500, categoria: "Projeto", data: "2026-02-28", status: "pago", metodo: "PIX", cliente: "Myka Procópio" },
-  { id: "2", tipo: "receita", descricao: "Landing Page Advocacia - João Silva", valor: 2500, categoria: "Projeto", data: "2026-02-20", status: "pago", metodo: "Transferência", cliente: "João Silva" },
-  { id: "3", tipo: "receita", descricao: "Dashboard Analytics - Tech Solutions (1ª parcela)", valor: 7500, categoria: "Projeto", data: "2026-02-15", status: "pago", metodo: "PIX", cliente: "Tech Solutions" },
-  { id: "4", tipo: "receita", descricao: "Manutenção mensal - L2Versus", valor: 800, categoria: "Manutenção", data: "2026-02-05", status: "pago", metodo: "PIX", cliente: "L2Versus" },
-  { id: "5", tipo: "receita", descricao: "E-commerce Café - Café Aroma (sinal)", valor: 3200, categoria: "Projeto", data: "2026-01-28", status: "pago", metodo: "Boleto", cliente: "Café Aroma" },
-  { id: "6", tipo: "receita", descricao: "Dashboard Analytics - Tech Solutions (2ª parcela)", valor: 7500, categoria: "Projeto", data: "2026-03-15", status: "pendente", metodo: "PIX", cliente: "Tech Solutions" },
-  { id: "7", tipo: "receita", descricao: "E-commerce Café - Café Aroma (final)", valor: 4800, categoria: "Projeto", data: "2026-04-15", status: "pendente", metodo: "PIX", cliente: "Café Aroma" },
-  { id: "8", tipo: "despesa", descricao: "Vercel Pro", valor: 100, categoria: "Infraestrutura", data: "2026-02-01", status: "pago", metodo: "Cartão" },
-  { id: "9", tipo: "despesa", descricao: "Domínios + DNS", valor: 85, categoria: "Infraestrutura", data: "2026-02-01", status: "pago", metodo: "Cartão" },
-  { id: "10", tipo: "despesa", descricao: "Figma Pro", valor: 60, categoria: "Ferramentas", data: "2026-02-01", status: "pago", metodo: "Cartão" },
-  { id: "11", tipo: "despesa", descricao: "ChatGPT Plus", valor: 100, categoria: "Ferramentas", data: "2026-02-01", status: "pago", metodo: "Cartão" },
-  { id: "12", tipo: "despesa", descricao: "Neon (DB) + AWS", valor: 45, categoria: "Infraestrutura", data: "2026-02-01", status: "pago", metodo: "Cartão" },
-  { id: "13", tipo: "despesa", descricao: "GitHub Copilot", valor: 50, categoria: "Ferramentas", data: "2026-02-01", status: "pago", metodo: "Cartão" },
-  { id: "14", tipo: "despesa", descricao: "Contador MEI", valor: 200, categoria: "Fiscal", data: "2026-02-10", status: "pago", metodo: "PIX" },
-  { id: "15", tipo: "despesa", descricao: "DAS MEI", valor: 75, categoria: "Fiscal", data: "2026-02-20", status: "pago", metodo: "Boleto" },
-];
-
-// Faturamento últimos 6 meses
-const faturamentoMensal = [
-  { label: "Set", receita: 8500, despesa: 680 },
-  { label: "Out", receita: 12000, despesa: 720 },
-  { label: "Nov", receita: 15500, despesa: 750 },
-  { label: "Dez", receita: 22000, despesa: 810 },
-  { label: "Jan", receita: 14000, despesa: 700 },
-  { label: "Fev", receita: 19500, despesa: 715 },
-];
-
 const statusConfig: Record<string, { label: string; css: string; icon: typeof CheckCircle }> = {
   pago: { label: "Pago", css: "text-emerald-400 bg-emerald-500/10", icon: CheckCircle },
   pendente: { label: "Pendente", css: "text-amber-400 bg-amber-500/10", icon: Clock },
@@ -90,11 +63,31 @@ const statusConfig: Record<string, { label: string; css: string; icon: typeof Ch
   cancelado: { label: "Cancelado", css: "text-dark-500 bg-dark-700/50", icon: XCircle },
 };
 
+const defaultForm = {
+  tipo: "receita" as "receita" | "despesa",
+  descricao: "",
+  valor: "",
+  categoria: "Projeto",
+  data: new Date().toISOString().split("T")[0],
+  status: "pago" as "pago" | "pendente" | "atrasado" | "cancelado",
+  metodo: "PIX",
+  cliente: "",
+};
+
 export default function FinanceiroPage() {
   const [projetos, setProjetos] = useState<Projeto[]>([]);
-  const [transacoes] = useState<Transacao[]>(transacoesMock);
+  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroTipo, setFiltroTipo] = useState<"todos" | "receita" | "despesa">("todos");
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(defaultForm);
+  const [saving, setSaving] = useState(false);
+
+  // Carregar transações do localStorage ao montar
+  useEffect(() => {
+    setTransacoes(loadTransacoes());
+  }, []);
 
   const fetchProjetos = useCallback(async () => {
     try {
@@ -109,6 +102,86 @@ export default function FinanceiroPage() {
   }, []);
 
   useEffect(() => { fetchProjetos(); }, [fetchProjetos]);
+
+  // ═══ CRUD ═══
+  const abrirNova = () => {
+    setEditingId(null);
+    setForm(defaultForm);
+    setShowModal(true);
+  };
+
+  const abrirEdicao = (t: Transacao) => {
+    setEditingId(t.id);
+    setForm({
+      tipo: t.tipo,
+      descricao: t.descricao,
+      valor: String(t.valor),
+      categoria: t.categoria,
+      data: t.data,
+      status: t.status,
+      metodo: t.metodo || "PIX",
+      cliente: t.cliente || "",
+    });
+    setShowModal(true);
+  };
+
+  const salvarTransacao = () => {
+    if (!form.descricao.trim() || !form.valor) return;
+    setSaving(true);
+    try {
+      const payload: Transacao = {
+        id: editingId || `txn-${Date.now()}`,
+        tipo: form.tipo,
+        descricao: form.descricao,
+        valor: parseFloat(form.valor) || 0,
+        categoria: form.categoria,
+        data: form.data,
+        status: form.status,
+        metodo: form.metodo,
+        cliente: form.cliente || undefined,
+      };
+      if (editingId) {
+        const updated = updateTransacao(editingId, payload);
+        setTransacoes(updated);
+        toast.success("Transação atualizada!");
+      } else {
+        const updated = addTransacao(payload);
+        setTransacoes(updated);
+        toast.success("Transação criada!");
+      }
+      setShowModal(false);
+      setEditingId(null);
+      setForm(defaultForm);
+    } catch {
+      toast.error("Erro ao salvar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const excluirTransacao = (id: string) => {
+    if (!confirm("Excluir esta transação?")) return;
+    const updated = removeTransacao(id);
+    setTransacoes(updated);
+    toast.success("Transação excluída.");
+  };
+
+  // ═══ Exportar CSV ═══
+  const exportarCSV = () => {
+    const header = "Tipo,Descrição,Valor,Categoria,Data,Status,Método,Cliente";
+    const rows = transacoes.map((t) =>
+      [t.tipo, `"${t.descricao}"`, t.valor, t.categoria, t.data, t.status, t.metodo || "", t.cliente || ""].join(",")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `financeiro-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado!");
+  };
 
   // ─── Cálculos financeiros ─────────────────────────────────────────────────
   const mesAtual = new Date().getMonth() + 1;
@@ -140,6 +213,12 @@ export default function FinanceiroPage() {
 
   // Valor total dos projetos (pipeline)
   const pipelineTotal = projetos.reduce((s, p) => s + (p.valor || 0), 0);
+
+  // Faturamento mensal calculado dos dados reais
+  const faturamentoMensal = calcFaturamentoMensal(transacoes);
+
+  // Label dinâmico do mês atual
+  const mesLabel = new Date().toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
 
   // Métodos de pagamento
   const metodoCount = transacoes
@@ -202,8 +281,11 @@ export default function FinanceiroPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" icon={<Download className="h-4 w-4" />}>
-            Exportar
+          <Button variant="outline" size="sm" icon={<Download className="h-4 w-4" />} onClick={exportarCSV}>
+            Exportar CSV
+          </Button>
+          <Button variant="gold" size="sm" icon={<Plus className="h-4 w-4" />} onClick={abrirNova}>
+            Nova Transação
           </Button>
         </div>
       </div>
@@ -215,7 +297,7 @@ export default function FinanceiroPage() {
             <div>
               <p className="text-xs text-dark-400 mb-1">Receita do Mês</p>
               <p className="text-2xl font-bold text-white">{fmt(receitaMes)}</p>
-              <p className="text-xs text-dark-500 mt-1">Fev/2026</p>
+              <p className="text-xs text-dark-500 mt-1 capitalize">{mesLabel}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
               <TrendingUp className="h-5 w-5" />
@@ -348,6 +430,7 @@ export default function FinanceiroPage() {
                   <th className="text-left py-2 px-3 font-medium">Categoria</th>
                   <th className="text-left py-2 px-3 font-medium">Data</th>
                   <th className="text-left py-2 px-3 font-medium">Status</th>
+                  <th className="text-left py-2 px-3 font-medium">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -395,6 +478,12 @@ export default function FinanceiroPage() {
                             {cfg.label}
                           </span>
                         </td>
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => abrirEdicao(t)} className="p-1.5 text-dark-400 hover:text-brand-400 transition-colors"><Edit className="h-3.5 w-3.5" /></button>
+                            <button onClick={() => excluirTransacao(t.id)} className="p-1.5 text-dark-400 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
@@ -425,6 +514,82 @@ export default function FinanceiroPage() {
           </div>
         </Card>
       </div>
+
+      {/* ═══ Modal Nova/Editar Transação ═══ */}
+      <Modal
+        open={showModal}
+        onOpenChange={(v) => { if (!v) { setShowModal(false); setEditingId(null); } }}
+        title={editingId ? "Editar Transação" : "Nova Transação"}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-1">Tipo</label>
+              <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value as "receita" | "despesa" })} className="w-full h-10 bg-dark-800 border border-dark-700 rounded-xl px-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                <option value="receita">Receita</option>
+                <option value="despesa">Despesa</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-1">Status</label>
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as "pago" | "pendente" | "atrasado" | "cancelado" })} className="w-full h-10 bg-dark-800 border border-dark-700 rounded-xl px-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                <option value="pago">Pago</option>
+                <option value="pendente">Pendente</option>
+                <option value="atrasado">Atrasado</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-1">Descrição *</label>
+            <Input value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} placeholder="Ex: Projeto Site Institucional" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-1">Valor (R$) *</label>
+              <Input type="number" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} placeholder="5000" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-1">Data</label>
+              <Input type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-1">Categoria</label>
+              <select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} className="w-full h-10 bg-dark-800 border border-dark-700 rounded-xl px-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                <option value="Projeto">Projeto</option>
+                <option value="Manutenção">Manutenção</option>
+                <option value="Infraestrutura">Infraestrutura</option>
+                <option value="Ferramentas">Ferramentas</option>
+                <option value="Fiscal">Fiscal</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-1">Método</label>
+              <select value={form.metodo} onChange={(e) => setForm({ ...form, metodo: e.target.value })} className="w-full h-10 bg-dark-800 border border-dark-700 rounded-xl px-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50">
+                <option value="PIX">PIX</option>
+                <option value="Transferência">Transferência</option>
+                <option value="Boleto">Boleto</option>
+                <option value="Cartão">Cartão</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-1">Cliente</label>
+            <Input value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} placeholder="Nome do cliente (opcional)" />
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-dark-800">
+            <Button variant="secondary" onClick={() => { setShowModal(false); setEditingId(null); }}>Cancelar</Button>
+            <Button variant="primary" onClick={salvarTransacao} loading={saving} disabled={!form.descricao || !form.valor} icon={<Save className="h-4 w-4" />}>
+              {editingId ? "Salvar Alterações" : "Criar Transação"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

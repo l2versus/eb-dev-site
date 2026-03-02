@@ -1,15 +1,23 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📅 Agenda Admin — Gerenciamento de Compromissos (Funcional com Mock)
+// 📅 Agenda Admin — Persistência localStorage via shared-agenda.ts
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { toast } from "sonner";
+import {
+  loadCompromissos,
+  addCompromisso,
+  updateCompromisso,
+  deleteCompromisso as removeCompromisso,
+  type Compromisso,
+} from "@/lib/shared-agenda";
 import {
   CalendarDays,
   ChevronLeft,
@@ -67,97 +75,24 @@ const tipoConfig: Record<TipoCompromisso, { label: string; icon: typeof Video; c
   REUNIAO: { label: "Reunião", icon: Video, color: "text-cyan-400" },
 };
 
-interface Compromisso {
-  id: string;
-  titulo: string;
-  descricao?: string;
-  tipo: TipoCompromisso;
-  dataHora: string;
-  duracao: number;
-  status: StatusCompromisso;
-  plataforma?: string;
-  linkReuniao?: string;
-  notas?: string;
-  clienteNome?: string;
-}
-
-// Dados mock iniciais
-const compromissosMock: Compromisso[] = [
-  {
-    id: "1",
-    titulo: "Validação do design da home",
-    tipo: "REVIEW",
-    dataHora: new Date().toISOString().split("T")[0] + "T09:00:00",
-    duracao: 30,
-    status: "CONCLUIDO",
-    plataforma: "Google Meet",
-    notas: "Validação do design da home",
-    clienteNome: "Myka Procópio",
-  },
-  {
-    id: "2",
-    titulo: "Alinhamento de funcionalidades",
-    tipo: "CALL",
-    dataHora: new Date().toISOString().split("T")[0] + "T10:00:00",
-    duracao: 45,
-    status: "EM_ANDAMENTO",
-    plataforma: "Zoom",
-    notas: "Alinhamento de funcionalidades",
-    clienteNome: "Tech Solutions",
-  },
-  {
-    id: "3",
-    titulo: "Entrega final + ajustes",
-    tipo: "ENTREGA",
-    dataHora: new Date().toISOString().split("T")[0] + "T11:30:00",
-    duracao: 15,
-    status: "CONFIRMADO",
-    clienteNome: "João Silva",
-  },
-  {
-    id: "4",
-    titulo: "Apresentar proposta comercial",
-    tipo: "PROPOSTA",
-    dataHora: new Date().toISOString().split("T")[0] + "T14:00:00",
-    duracao: 30,
-    status: "PENDENTE",
-    plataforma: "Google Meet",
-    notas: "Apresentar proposta comercial",
-    clienteNome: "Clínica Vida",
-  },
-  {
-    id: "5",
-    titulo: "Levantar requisitos do e-commerce",
-    tipo: "BRIEFING",
-    dataHora: new Date().toISOString().split("T")[0] + "T15:00:00",
-    duracao: 45,
-    status: "CONFIRMADO",
-    plataforma: "WhatsApp",
-    notas: "Levantar requisitos do e-commerce",
-    clienteNome: "Café Aroma",
-  },
-  {
-    id: "6",
-    titulo: "Retornar sobre proposta enviada",
-    tipo: "FOLLOWUP",
-    dataHora: new Date().toISOString().split("T")[0] + "T16:00:00",
-    duracao: 15,
-    status: "PENDENTE",
-    plataforma: "WhatsApp",
-    clienteNome: "Marina Costa",
-  },
-];
+// Compromisso type é importado de shared-agenda.ts
 
 export default function AgendaPage() {
-  // Estados
-  const [compromissos, setCompromissos] = useState<Compromisso[]>(compromissosMock);
-  const [loading, setLoading] = useState(false);
+  // Estados — carrega do localStorage
+  const [compromissos, setCompromissos] = useState<Compromisso[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [dataSelecionada, setDataSelecionada] = useState(new Date());
   const [filtroStatus, setFiltroStatus] = useState<StatusCompromisso | "TODOS">("TODOS");
   const [filtroTipo, setFiltroTipo] = useState<TipoCompromisso | "TODOS">("TODOS");
   const [showModal, setShowModal] = useState(false);
   const [editingCompromisso, setEditingCompromisso] = useState<Compromisso | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Carregar compromissos do localStorage ao montar
+  useEffect(() => {
+    setCompromissos(loadCompromissos());
+    setLoaded(true);
+  }, []);
 
   // Form state
   const [form, setForm] = useState({
@@ -281,48 +216,53 @@ export default function AgendaPage() {
     setShowModal(true);
   };
 
-  // Salvar compromisso
+  // ═══ Salvar compromisso → persiste em localStorage ═══
   const salvarCompromisso = () => {
+    if (!form.titulo.trim() || !form.dataHora) return;
     setSaving(true);
-
-    setTimeout(() => {
+    try {
       if (editingCompromisso) {
-        // Editar existente
-        setCompromissos((prev) =>
-          prev.map((c) =>
-            c.id === editingCompromisso.id
-              ? { ...c, ...form }
-              : c
-          )
-        );
+        const updated = updateCompromisso(editingCompromisso.id, { ...form });
+        setCompromissos(updated);
+        toast.success("Compromisso atualizado!");
       } else {
-        // Criar novo
-        const novo: Compromisso = {
-          id: `comp-${Date.now()}`,
-          ...form,
-        };
-        setCompromissos((prev) => [...prev, novo]);
+        const novo: Compromisso = { id: `comp-${Date.now()}`, ...form };
+        const updated = addCompromisso(novo);
+        setCompromissos(updated);
+        toast.success("Compromisso criado!");
       }
-
       setShowModal(false);
       setEditingCompromisso(null);
       resetForm();
+    } catch {
+      toast.error("Erro ao salvar compromisso.");
+    } finally {
       setSaving(false);
-    }, 300);
+    }
   };
 
-  // Excluir compromisso
+  // ═══ Excluir compromisso → persiste em localStorage ═══
   const excluirCompromisso = (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este compromisso?")) return;
-    setCompromissos((prev) => prev.filter((c) => c.id !== id));
+    const updated = removeCompromisso(id);
+    setCompromissos(updated);
+    toast.success("Compromisso excluído.");
   };
 
-  // Alterar status rápido
+  // ═══ Alterar status rápido → persiste em localStorage ═══
   const alterarStatus = (id: string, novoStatus: StatusCompromisso) => {
-    setCompromissos((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: novoStatus } : c))
-    );
+    const updated = updateCompromisso(id, { status: novoStatus });
+    setCompromissos(updated);
+    toast.success(`Status: ${statusConfig[novoStatus].label}`);
   };
+
+  if (!loaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

@@ -428,10 +428,10 @@ export default function ConfiguracoesPage() {
           />
           <div className="space-y-3">
             {[
-              { nome: "WhatsApp API", icon: MessageSquare, status: "Conectado", ativo: true },
-              { nome: "Mercado Pago", icon: CreditCard, status: "Configurar", ativo: false },
-              { nome: "GitHub", icon: Github, status: "Conectado", ativo: true },
-              { nome: "Google Analytics", icon: Globe, status: "Não configurado", ativo: false },
+              { nome: "WhatsApp API", icon: MessageSquare, status: "Em breve", ativo: false },
+              { nome: "Mercado Pago", icon: CreditCard, status: "Em breve", ativo: false },
+              { nome: "GitHub", icon: Github, status: "Em breve", ativo: false },
+              { nome: "Google Analytics", icon: Globe, status: "Em breve", ativo: false },
             ].map((integracao, i) => (
               <div
                 key={i}
