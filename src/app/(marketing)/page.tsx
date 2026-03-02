@@ -1004,36 +1004,21 @@ export default function HomePage() {
           {/* Video Container */}
           <Reveal delay={0.2}>
             <div className="relative rounded-3xl overflow-hidden border border-[#1e1e2e] glass-card">
-              {/* Video placeholder / embed */}
-              <div className="aspect-video bg-[#0a0a0f] relative group cursor-pointer">
-                {/* Thumbnail overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-20 h-20 rounded-full bg-[#ff00ff] flex items-center justify-center shadow-[0_0_40px_rgba(255,0,255,0.5)] group-hover:shadow-[0_0_60px_rgba(255,0,255,0.7)] transition-all"
-                    onClick={() => {
-                      // TODO: Open video modal or embed
-                      window.open("https://www.youtube.com/@emmanuelbezerra", "_blank");
-                    }}
-                  >
-                    <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </motion.button>
-                </div>
+              <div className="aspect-video bg-[#0a0a0f] relative group">
+                <video
+                  className="w-full h-full object-cover"
+                  src="/videos/video-app.mp4"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  poster=""
+                />
                 
                 {/* Decorative corners */}
-                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50" />
-                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50" />
-                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50" />
-                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50" />
-
-                {/* Duration badge */}
-                <div className="absolute bottom-6 right-6 px-3 py-1 rounded-lg glass text-xs font-mono text-white">
-                  2:34
-                </div>
+                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50 pointer-events-none" />
+                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50 pointer-events-none" />
+                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50 pointer-events-none" />
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50 pointer-events-none" />
               </div>
             </div>
           </Reveal>
