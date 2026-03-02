@@ -40,14 +40,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   // Se for rota de cliente portal, renderizar só o children sem header/footer
   if (isClientePortal) {
     return (
-      <div className="flex min-h-screen flex-col bg-[#0a0a0f]">
+      <div className="flex min-h-screen flex-col bg-[#0a0a0f] overflow-x-hidden">
         <main className="flex-1">{children}</main>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-hidden">
       {/* ═══ HEADER ═══════════════════════════════════════════════════════ */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${

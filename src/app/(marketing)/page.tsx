@@ -1466,7 +1466,7 @@ export default function HomePage() {
                 <motion.div
                   animate={{ rotate: [0, 3, -3, 0], y: [0, -8, 0] }}
                   transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-                  className="absolute -top-6 -right-6 glass-card rounded-xl px-3 py-2 border border-[#00f0ff]/20 backdrop-blur-md"
+                  className="absolute -top-6 right-0 lg:-right-6 glass-card rounded-xl px-3 py-2 border border-[#00f0ff]/20 backdrop-blur-md hidden sm:block"
                 >
                   <pre className="text-[10px] font-mono text-[#00f0ff]/70 leading-relaxed">
                     <span className="text-[#ff00ff]/60">const</span> dev = {'{'}<br/>
@@ -1483,7 +1483,7 @@ export default function HomePage() {
                     opacity: [0.4, 0.8, 0.4],
                   }}
                   transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                  className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full"
+                  className="absolute bottom-0 left-0 w-16 h-16 rounded-full hidden sm:block"
                   style={{
                     background: "radial-gradient(circle, rgba(255,0,255,0.3) 0%, transparent 70%)",
                     boxShadow: "0 0 40px rgba(255,0,255,0.15)",
@@ -1494,7 +1494,7 @@ export default function HomePage() {
                 <motion.div
                   animate={{ y: [0, -6, 0] }}
                   transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                  className="absolute -right-4 top-1/4 glass-card rounded-xl px-4 py-3 text-center"
+                  className="absolute right-0 sm:-right-4 top-1/4 glass-card rounded-xl px-4 py-3 text-center"
                 >
                   <div className="text-2xl font-black neon-text-cyan">3+</div>
                   <div className="text-[10px] text-[#6b6b80] uppercase tracking-wider font-mono">
@@ -1506,7 +1506,7 @@ export default function HomePage() {
                 <motion.div
                   animate={{ y: [0, 8, 0] }}
                   transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                  className="absolute -left-4 bottom-1/4 glass-card rounded-xl px-4 py-3 text-center"
+                  className="absolute left-0 sm:-left-4 bottom-1/4 glass-card rounded-xl px-4 py-3 text-center"
                 >
                   <div className="text-2xl font-black neon-text-magenta">15+</div>
                   <div className="text-[10px] text-[#6b6b80] uppercase tracking-wider font-mono">

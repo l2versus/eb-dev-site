@@ -77,7 +77,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR" className="dark overflow-x-hidden">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
@@ -86,7 +86,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#0a0a0f" />
       </head>
-      <body className="min-h-screen bg-[#0a0a0f] text-[#e2e2ef] antialiased">
+      <body className="min-h-screen bg-[#0a0a0f] text-[#e2e2ef] antialiased overflow-x-hidden">
         {children}
 
         <Toaster
