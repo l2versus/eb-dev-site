@@ -1334,16 +1334,32 @@ export default function HomePage() {
                   </div>
                 </motion.div>
 
-                {/* Decorative geometry */}
+                {/* Decorative floating code snippet */}
                 <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
-                  className="absolute -top-8 -right-8 w-24 h-24 border border-[#00f0ff]/10 rounded-xl"
-                />
+                  animate={{ rotate: [0, 3, -3, 0], y: [0, -8, 0] }}
+                  transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+                  className="absolute -top-6 -right-6 glass-card rounded-xl px-3 py-2 border border-[#00f0ff]/20 backdrop-blur-md"
+                >
+                  <pre className="text-[10px] font-mono text-[#00f0ff]/70 leading-relaxed">
+                    <span className="text-[#ff00ff]/60">const</span> dev = {'{'}<br/>
+                    &nbsp;&nbsp;stack: <span className="text-[#00ff41]/70">&apos;fullstack&apos;</span>,<br/>
+                    &nbsp;&nbsp;passion: <span className="text-[#00f0ff]">∞</span><br/>
+                    {'}'};
+                  </pre>
+                </motion.div>
+
+                {/* Decorative glowing orb */}
                 <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-                  className="absolute -bottom-6 -left-6 w-20 h-20 border border-[#ff00ff]/10 rounded-full"
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0.4, 0.8, 0.4],
+                  }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full"
+                  style={{
+                    background: "radial-gradient(circle, rgba(255,0,255,0.3) 0%, transparent 70%)",
+                    boxShadow: "0 0 40px rgba(255,0,255,0.15)",
+                  }}
                 />
 
                 {/* Experience badge */}
@@ -1384,38 +1400,82 @@ export default function HomePage() {
                 </div>
 
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-8 leading-tight">
-                  Código limpo.
-                  <br />
-                  <span className="gradient-text-cyber">Alta performance.</span>
-                  <br />
-                  <span className="text-[#6b6b80]">Resultados reais.</span>
+                  <motion.span
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                    className="block"
+                  >
+                    Código limpo.
+                  </motion.span>
+                  <motion.span
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    className="block gradient-text-cyber"
+                  >
+                    Alta performance.
+                  </motion.span>
+                  <motion.span
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    className="block text-[#6b6b80]"
+                  >
+                    Resultados reais.
+                  </motion.span>
                 </h2>
 
                 <div className="space-y-5 text-[#9999ab] leading-relaxed text-lg">
-                  <p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
                     Sou desenvolvedor Full-Stack focado em{" "}
                     <span className="text-white font-medium">aplicações web modernas</span>{" "}
                     e escaláveis. Cada projeto é uma oportunidade de entregar
                     excelência técnica e impacto real.
-                  </p>
-                  <p>
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.35 }}
+                  >
                     Do{" "}
                     <span className="text-[#00f0ff]">frontend</span>{" "}
                     com React/Next.js ao{" "}
                     <span className="text-[#ff00ff]">backend</span>{" "}
                     com Node.js e Python — domino toda a stack.
                     Bancos SQL, APIs robustas, Docker, CI/CD e deploy em cloud.
-                  </p>
-                  <p>
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.5 }}
+                  >
                     Baseado em{" "}
                     <span className="text-white font-medium">Fortaleza - CE</span>,
                     atendo clientes de todo o Brasil com projetos que
                     vão de landing pages a plataformas SaaS completas.
-                  </p>
+                  </motion.p>
                 </div>
 
                 {/* Stats row with animated counters */}
-                <div className="grid grid-cols-3 gap-6 mt-10 pt-10 border-t border-[#1e1e2e]">
+                <motion.div
+                  initial={{ opacity: 0, scaleX: 0 }}
+                  whileInView={{ opacity: 1, scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="h-px mt-10 bg-gradient-to-r from-transparent via-[#00f0ff]/30 to-transparent"
+                />
+                <div className="grid grid-cols-3 gap-6 pt-10">
                   {[
                     { value: 3, suffix: "+", label: "Anos de\nexperiência", color: "#00f0ff" },
                     { value: 15, suffix: "+", label: "Projetos\nentregues", color: "#ff00ff" },
@@ -1446,9 +1506,34 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           TECH STACK — Interactive 3D Cards
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="stack" className="relative py-32">
+      <section id="stack" className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.015] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+
+        {/* Floating decorative particles */}
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={`stack-particle-${i}`}
+            className="absolute w-1 h-1 rounded-full"
+            style={{
+              left: `${15 + i * 18}%`,
+              top: `${20 + (i % 3) * 25}%`,
+              background: i % 2 === 0 ? "#00f0ff" : "#ff00ff",
+              boxShadow: `0 0 10px ${i % 2 === 0 ? "#00f0ff" : "#ff00ff"}60`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: 3 + i,
+              repeat: Infinity,
+              delay: i * 0.5,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
           {/* Header */}
@@ -1621,9 +1706,25 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           PROJECTS — Cinematic Showcase
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="projetos" className="relative py-32">
+      <section id="projetos" className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 cyber-grid opacity-15" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
+
+        {/* Scroll-linked side accent lines */}
+        <motion.div
+          initial={{ height: 0 }}
+          whileInView={{ height: "60%" }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute left-4 top-[20%] w-px bg-gradient-to-b from-[#ff00ff]/40 via-[#00f0ff]/40 to-transparent hidden xl:block"
+        />
+        <motion.div
+          initial={{ height: 0 }}
+          whileInView={{ height: "60%" }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute right-4 top-[20%] w-px bg-gradient-to-b from-[#00f0ff]/40 via-[#ff00ff]/40 to-transparent hidden xl:block"
+        />
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
           {/* Header */}
@@ -2285,8 +2386,14 @@ export default function HomePage() {
 
           {/* Timeline */}
           <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#00f0ff]/50 via-[#ff00ff]/50 to-[#00ff41]/50 hidden lg:block" />
+            {/* Animated vertical line */}
+            <motion.div
+              initial={{ height: 0 }}
+              whileInView={{ height: "100%" }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute left-1/2 top-0 w-px bg-gradient-to-b from-[#00f0ff]/50 via-[#ff00ff]/50 to-[#00ff41]/50 hidden lg:block"
+            />
             
             <div className="space-y-12 lg:space-y-24">
               {[
@@ -2752,7 +2859,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           CONTACT — Premium CTA
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="contato" className="relative py-32">
+      <section id="contato" className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
         <Particles />

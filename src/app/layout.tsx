@@ -78,6 +78,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-TileColor" content="#0a0a0f" />
+      </head>
       <body className="min-h-screen bg-[#0a0a0f] text-[#e2e2ef] antialiased">
         {children}
 
@@ -92,6 +100,25 @@ export default function RootLayout({
           }}
           richColors
           closeButton
+        />
+
+        {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(reg) {
+                      console.log('[PWA] Service Worker registrado:', reg.scope);
+                    })
+                    .catch(function(err) {
+                      console.log('[PWA] SW falhou:', err);
+                    });
+                });
+              }
+            `,
+          }}
         />
       </body>
     </html>

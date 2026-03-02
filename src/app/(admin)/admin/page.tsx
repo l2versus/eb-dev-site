@@ -1,7 +1,10 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📊 Admin Dashboard — Painel do Desenvolvedor Freelancer
+// 📊 Admin Dashboard — Painel Dinâmico do Desenvolvedor Freelancer
 // ══════════════════════════════════════════════════════════════════════════════
 
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DonutChart, BarChartCustom, LineChartCustom } from "@/components/charts/charts";
@@ -19,47 +22,57 @@ import {
   CheckCircle,
   AlertCircle,
   Timer,
+  MessageCircle,
+  Users,
+  RefreshCw,
+  Loader2,
+  Calendar,
+  Activity,
 } from "lucide-react";
 
-export const metadata = { title: "Admin — Dashboard Dev" };
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+interface Projeto {
+  id: string;
+  titulo: string;
+  descricao: string;
+  clienteNome: string;
+  clienteEmail: string;
+  status: string;
+  prioridade: string;
+  valor: number;
+  progresso: number;
+  prazo: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-// KPIs de Desenvolvedor
-const kpis = [
-  {
-    titulo: "Faturamento Mensal",
-    valor: "R$ 18.500",
-    variacao: "+25%",
-    positivo: true,
-    icon: DollarSign,
-    cor: "emerald" as const,
-  },
-  {
-    titulo: "Projetos Ativos",
-    valor: "4",
-    variacao: "+1 novo",
-    positivo: true,
-    icon: FolderKanban,
-    cor: "brand" as const,
-  },
-  {
-    titulo: "Propostas Enviadas",
-    valor: "12",
-    variacao: "6 pendentes",
-    positivo: true,
-    icon: FileText,
-    cor: "purple" as const,
-  },
-  {
-    titulo: "Taxa Conversão",
-    valor: "58%",
-    variacao: "+8%",
-    positivo: true,
-    icon: TrendingUp,
-    cor: "gold" as const,
-  },
-];
+interface Conversa {
+  id: string;
+  clienteNome: string;
+  ultimaMensagem: string;
+  ultimaHora: string;
+  naoLidas: number;
+  status: string;
+}
 
-// Faturamento últimos 6 meses
+// ─── Status config ────────────────────────────────────────────────────────────
+const statusConfig: Record<string, { label: string; css: string }> = {
+  briefing: { label: "Briefing", css: "text-purple-400 bg-purple-500/10" },
+  design: { label: "Design", css: "text-amber-400 bg-amber-500/10" },
+  desenvolvimento: { label: "Em Dev", css: "text-brand-400 bg-brand-500/10" },
+  revisao: { label: "Revisão", css: "text-orange-400 bg-orange-500/10" },
+  entregue: { label: "Entregue", css: "text-emerald-400 bg-emerald-500/10" },
+};
+
+const prioridadeConfig: Record<string, { label: string; css: string }> = {
+  baixa: { label: "Baixa", css: "text-dark-400" },
+  media: { label: "Média", css: "text-amber-400" },
+  alta: { label: "Alta", css: "text-orange-400" },
+  urgente: { label: "Urgente", css: "text-red-400" },
+};
+
+// ─── Faturamento Mock (6 meses) ──────────────────────────────────────────────
 const faturamentoMensal = [
   { label: "Set", valor: 8500 },
   { label: "Out", valor: 12000 },
@@ -69,97 +82,122 @@ const faturamentoMensal = [
   { label: "Fev", valor: 18500 },
 ];
 
-// Projetos por tipo
-const projetosPorTipo = [
-  { name: "Landing Page", valor: 8 },
-  { name: "Institucional", valor: 5 },
-  { name: "E-commerce", valor: 3 },
-  { name: "WebApp", valor: 2 },
-];
-
-// Status dos projetos
-const statusProjetos = [
-  { name: "Em Desenvolvimento", value: 4, color: "#00f0ff" },
-  { name: "Aguardando Feedback", value: 2, color: "#f59e0b" },
-  { name: "Entregues (mês)", value: 3, color: "#10b981" },
-];
-
-// Projetos em andamento
-const projetosAtivos = [
-  {
-    cliente: "Myka Procópio",
-    projeto: "Site Institucional + Agendamento",
-    tipo: "Pro",
-    progresso: 75,
-    valor: "R$ 5.500",
-    prazo: "15/03",
-    status: "EM_ANDAMENTO",
-  },
-  {
-    cliente: "João Silva",
-    projeto: "Landing Page Advocacia",
-    tipo: "Starter",
-    progresso: 90,
-    valor: "R$ 2.500",
-    prazo: "05/03",
-    status: "REVISAO",
-  },
-  {
-    cliente: "Tech Solutions",
-    projeto: "Dashboard Analytics",
-    tipo: "Enterprise",
-    progresso: 40,
-    valor: "R$ 15.000",
-    prazo: "30/03",
-    status: "EM_ANDAMENTO",
-  },
-  {
-    cliente: "Café Aroma",
-    projeto: "E-commerce Café",
-    tipo: "Pro",
-    progresso: 20,
-    valor: "R$ 8.000",
-    prazo: "15/04",
-    status: "INICIO",
-  },
-];
-
-// Propostas recentes
-const propostas = [
-  { cliente: "Clínica Vida", valor: "R$ 5.500", tipo: "Institucional", status: "PENDENTE" },
-  { cliente: "Loja Fashion", valor: "R$ 12.000", tipo: "E-commerce", status: "NEGOCIANDO" },
-  { cliente: "Academia Fit", valor: "R$ 2.500", tipo: "Landing", status: "APROVADA" },
-];
-
-const statusColors: Record<string, string> = {
-  EM_ANDAMENTO: "text-brand-400 bg-brand-500/10",
-  REVISAO: "text-amber-400 bg-amber-500/10",
-  INICIO: "text-purple-400 bg-purple-500/10",
-  ENTREGUE: "text-emerald-400 bg-emerald-500/10",
-  PENDENTE: "text-amber-400 bg-amber-500/10",
-  NEGOCIANDO: "text-purple-400 bg-purple-500/10",
-  APROVADA: "text-emerald-400 bg-emerald-500/10",
-  RECUSADA: "text-red-400 bg-red-500/10",
-};
-
-const statusLabels: Record<string, string> = {
-  EM_ANDAMENTO: "Em Andamento",
-  REVISAO: "Em Revisão",
-  INICIO: "Iniciando",
-  ENTREGUE: "Entregue",
-  PENDENTE: "Pendente",
-  NEGOCIANDO: "Negociando",
-  APROVADA: "Aprovada",
-  RECUSADA: "Recusada",
-};
-
 export default function AdminDashboardPage() {
-  const hoje = new Date().toLocaleDateString('pt-BR', { 
-    weekday: 'long', 
-    day: '2-digit', 
-    month: 'long', 
-    year: 'numeric' 
+  const [projetos, setProjetos] = useState<Projeto[]>([]);
+  const [conversas, setConversas] = useState<Conversa[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  const fetchDados = useCallback(async () => {
+    try {
+      const [projRes, chatRes] = await Promise.all([
+        fetch("/api/projetos").then((r) => (r.ok ? r.json() : [])),
+        fetch("/api/chat").then((r) => (r.ok ? r.json() : [])),
+      ]);
+      setProjetos(Array.isArray(projRes) ? projRes : []);
+      setConversas(Array.isArray(chatRes) ? chatRes : []);
+      setLastUpdate(new Date());
+    } catch {
+      // Manter dados anteriores em caso de erro
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDados();
+    const interval = setInterval(fetchDados, 30000); // Refresh a cada 30s
+    return () => clearInterval(interval);
+  }, [fetchDados]);
+
+  // ─── Métricas calculadas ──────────────────────────────────────────────────
+  const projetosAtivos = projetos.filter((p) => p.status !== "entregue");
+  const projetosEntregues = projetos.filter((p) => p.status === "entregue");
+  const faturamentoTotal = projetos.reduce((acc, p) => acc + (p.valor || 0), 0);
+  const faturamentoAtivos = projetosAtivos.reduce((acc, p) => acc + (p.valor || 0), 0);
+  const mensagensNaoLidas = conversas.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
+  const ticketMedio = projetos.length > 0 ? faturamentoTotal / projetos.length : 0;
+
+  // Status dos projetos para donut
+  const statusCount = projetos.reduce((acc, p) => {
+    acc[p.status] = (acc[p.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const statusDonut = [
+    { name: "Briefing", value: statusCount.briefing || 0, color: "#a855f7" },
+    { name: "Design", value: statusCount.design || 0, color: "#f59e0b" },
+    { name: "Em Dev", value: statusCount.desenvolvimento || 0, color: "#00f0ff" },
+    { name: "Revisão", value: statusCount.revisao || 0, color: "#f97316" },
+    { name: "Entregue", value: statusCount.entregue || 0, color: "#10b981" },
+  ].filter((s) => s.value > 0);
+
+  // Projetos por prioridade para bar chart
+  const prioridadeCount = projetos.reduce((acc, p) => {
+    acc[p.prioridade] = (acc[p.prioridade] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const prioridadeBar = [
+    { name: "Baixa", valor: prioridadeCount.baixa || 0 },
+    { name: "Média", valor: prioridadeCount.media || 0 },
+    { name: "Alta", valor: prioridadeCount.alta || 0 },
+    { name: "Urgente", valor: prioridadeCount.urgente || 0 },
+  ];
+
+  // Próximos prazos (projetos ativos ordenados por prazo)
+  const proximosEntregas = [...projetosAtivos].sort(
+    (a, b) => new Date(a.prazo).getTime() - new Date(b.prazo).getTime()
+  );
+
+  const hoje = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
+
+  // ─── KPIs ─────────────────────────────────────────────────────────────────
+  const kpis = [
+    {
+      titulo: "Faturamento Total",
+      valor: `R$ ${faturamentoTotal.toLocaleString("pt-BR")}`,
+      extra: `${projetosAtivos.length} ativos: R$ ${faturamentoAtivos.toLocaleString("pt-BR")}`,
+      icon: DollarSign,
+      cor: "emerald" as const,
+    },
+    {
+      titulo: "Projetos",
+      valor: `${projetos.length}`,
+      extra: `${projetosAtivos.length} ativos · ${projetosEntregues.length} entregues`,
+      icon: FolderKanban,
+      cor: "brand" as const,
+    },
+    {
+      titulo: "Mensagens não lidas",
+      valor: `${mensagensNaoLidas}`,
+      extra: `${conversas.length} conversas`,
+      icon: MessageCircle,
+      cor: "purple" as const,
+    },
+    {
+      titulo: "Ticket Médio",
+      valor: `R$ ${ticketMedio.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`,
+      extra: `${projetos.length} projetos no total`,
+      icon: TrendingUp,
+      cor: "gold" as const,
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-400 mx-auto" />
+          <p className="text-dark-400 text-sm">Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -167,13 +205,21 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Dashboard</h2>
-          <p className="text-dark-400 mt-1 capitalize">
-            Visão geral — {hoje}
-          </p>
+          <p className="text-dark-400 mt-1 capitalize">Visão geral — {hoje}</p>
         </div>
-        <Badge variant="gold">
-          <Zap className="h-3 w-3 mr-1" /> Tempo real
-        </Badge>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={fetchDados}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-dark-400 hover:text-white bg-dark-800/50 hover:bg-dark-700/50 border border-dark-700/50 rounded-lg transition-all"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Atualizar
+          </button>
+          <Badge variant="gold">
+            <Activity className="h-3 w-3 mr-1" />{" "}
+            {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          </Badge>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -184,18 +230,7 @@ export default function AdminDashboardPage() {
               <div>
                 <p className="text-xs text-dark-400 mb-1">{kpi.titulo}</p>
                 <p className="text-2xl font-bold text-white">{kpi.valor}</p>
-                <div
-                  className={`flex items-center gap-1 mt-1 text-xs ${
-                    kpi.positivo ? "text-emerald-400" : "text-red-400"
-                  }`}
-                >
-                  {kpi.positivo ? (
-                    <ArrowUp className="h-3 w-3" />
-                  ) : (
-                    <ArrowDown className="h-3 w-3" />
-                  )}
-                  {kpi.variacao}
-                </div>
+                <p className="text-xs text-dark-500 mt-1">{kpi.extra}</p>
               </div>
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-xl ${
@@ -226,9 +261,7 @@ export default function AdminDashboardPage() {
           />
           <LineChartCustom
             data={faturamentoMensal}
-            lines={[
-              { key: "valor", color: "#00f0ff", label: "Faturamento (R$)" },
-            ]}
+            lines={[{ key: "valor", color: "#00f0ff", label: "Faturamento (R$)" }]}
             area
             height={300}
           />
@@ -238,203 +271,269 @@ export default function AdminDashboardPage() {
         <Card variant="glass">
           <CardHeader
             title="Status Projetos"
-            subtitle="9 projetos no mês"
+            subtitle={`${projetos.length} projetos total`}
             icon={<FolderKanban className="h-5 w-5" />}
           />
-          <DonutChart
-            data={statusProjetos}
-            height={220}
-            centerValue="9"
-            centerLabel="projetos"
-          />
+          {statusDonut.length > 0 ? (
+            <DonutChart
+              data={statusDonut}
+              height={220}
+              centerValue={String(projetos.length)}
+              centerLabel="projetos"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[220px] text-dark-500 text-sm">
+              Nenhum projeto
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* Linha 2: Tipos + Projetos Ativos */}
+      {/* Linha 2: Prioridades + Projetos Ativos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Projetos por tipo */}
+        {/* Projetos por prioridade */}
         <Card variant="glass">
           <CardHeader
-            title="Projetos por Tipo"
-            subtitle="Histórico completo"
+            title="Por Prioridade"
+            subtitle="Distribuição atual"
             icon={<Code2 className="h-5 w-5" />}
           />
-          <BarChartCustom
-            data={projetosPorTipo}
-            barColor="#ff00ff"
-            height={250}
-          />
+          <BarChartCustom data={prioridadeBar} barColor="#ff00ff" height={250} />
         </Card>
 
-        {/* Tabela de projetos */}
+        {/* Tabela de projetos ativos */}
         <Card variant="glass" className="lg:col-span-2">
           <CardHeader
             title="Projetos em Andamento"
-            subtitle="Acompanhe o progresso"
+            subtitle={`${projetosAtivos.length} projetos ativos`}
             icon={<Rocket className="h-5 w-5" />}
           />
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-dark-500 border-b border-dark-700/50">
-                  <th className="text-left py-2 px-3 font-medium">Cliente</th>
-                  <th className="text-left py-2 px-3 font-medium">Projeto</th>
-                  <th className="text-left py-2 px-3 font-medium">Progresso</th>
-                  <th className="text-left py-2 px-3 font-medium">Prazo</th>
-                  <th className="text-left py-2 px-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projetosAtivos.map((proj, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors"
-                  >
-                    <td className="py-3 px-3">
-                      <div>
-                        <p className="text-white font-medium">{proj.cliente}</p>
-                        <p className="text-xs text-dark-500">{proj.valor}</p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3">
-                      <div>
-                        <p className="text-dark-300">{proj.projeto}</p>
-                        <p className="text-xs text-brand-400">{proj.tipo}</p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-dark-800 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-brand-500 to-purple-500 rounded-full"
-                            style={{ width: `${proj.progresso}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-dark-400 w-8">{proj.progresso}%</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3 text-dark-300">{proj.prazo}</td>
-                    <td className="py-3 px-3">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
-                          statusColors[proj.status] || "text-dark-400"
-                        }`}
-                      >
-                        {statusLabels[proj.status]}
-                      </span>
-                    </td>
+          {projetosAtivos.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-dark-500 border-b border-dark-700/50">
+                    <th className="text-left py-2 px-3 font-medium">Cliente</th>
+                    <th className="text-left py-2 px-3 font-medium">Projeto</th>
+                    <th className="text-left py-2 px-3 font-medium">Progresso</th>
+                    <th className="text-left py-2 px-3 font-medium">Prazo</th>
+                    <th className="text-left py-2 px-3 font-medium">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {projetosAtivos.map((proj) => (
+                    <tr
+                      key={proj.id}
+                      className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors"
+                    >
+                      <td className="py-3 px-3">
+                        <div>
+                          <p className="text-white font-medium">{proj.clienteNome}</p>
+                          <p className="text-xs text-dark-500">
+                            R$ {proj.valor.toLocaleString("pt-BR")}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div>
+                          <p className="text-dark-300">{proj.titulo}</p>
+                          <div className="flex gap-1 mt-1">
+                            {proj.tags.slice(0, 2).map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-[10px] px-1.5 py-0.5 bg-brand-500/10 text-brand-400 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 bg-dark-800 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-brand-500 to-purple-500 rounded-full transition-all"
+                              style={{ width: `${proj.progresso}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-dark-400 w-8">{proj.progresso}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-dark-300">
+                        {new Date(proj.prazo).toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                        })}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
+                            statusConfig[proj.status]?.css || "text-dark-400"
+                          }`}
+                        >
+                          {statusConfig[proj.status]?.label || proj.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32 text-dark-500 text-sm">
+              Nenhum projeto ativo
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* Propostas Recentes */}
-      <Card variant="glass">
-        <CardHeader
-          title="Propostas Recentes"
-          subtitle="Últimas oportunidades"
-          icon={<FileText className="h-5 w-5" />}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {propostas.map((prop, i) => (
-            <div
-              key={i}
-              className="p-4 rounded-xl bg-dark-800/50 border border-dark-700/50 hover:border-brand-500/30 transition-colors"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="text-white font-medium">{prop.cliente}</p>
-                  <p className="text-xs text-dark-500">{prop.tipo}</p>
-                </div>
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
-                    statusColors[prop.status] || "text-dark-400"
-                  }`}
+      {/* Chat + Métricas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Conversas recentes */}
+        <Card variant="glass" className="lg:col-span-2">
+          <CardHeader
+            title="Conversas Recentes"
+            subtitle={`${mensagensNaoLidas} não lidas`}
+            icon={<MessageCircle className="h-5 w-5" />}
+          />
+          {conversas.length > 0 ? (
+            <div className="divide-y divide-dark-700/50">
+              {conversas.slice(0, 5).map((conversa) => (
+                <div
+                  key={conversa.id}
+                  className="flex items-center gap-4 py-3 px-2 hover:bg-dark-800/30 rounded-lg transition-colors"
                 >
-                  {statusLabels[prop.status]}
-                </span>
-              </div>
-              <p className="text-xl font-bold text-brand-400">{prop.valor}</p>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-500/20 to-purple-500/20 text-sm font-bold text-brand-400 shrink-0">
+                    {conversa.clienteNome
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-white font-medium text-sm">{conversa.clienteNome}</p>
+                      <span className="text-[10px] text-dark-500">
+                        {new Date(conversa.ultimaHora).toLocaleTimeString("pt-BR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-dark-400 truncate">{conversa.ultimaMensagem}</p>
+                  </div>
+                  {conversa.naoLidas > 0 && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white shrink-0">
+                      {conversa.naoLidas}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </Card>
+          ) : (
+            <div className="flex items-center justify-center h-32 text-dark-500 text-sm">
+              Nenhuma conversa
+            </div>
+          )}
+        </Card>
 
-      {/* Métricas extras */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <Card variant="glass">
-          <div className="text-center">
-            <p className="text-3xl font-bold gradient-text-brand">R$ 5.125</p>
-            <p className="text-xs text-dark-400 mt-1">Ticket Médio</p>
-          </div>
-        </Card>
-        <Card variant="glass">
-          <div className="text-center">
-            <p className="text-3xl font-bold gradient-text-gold">18</p>
-            <p className="text-xs text-dark-400 mt-1">Projetos Entregues</p>
-          </div>
-        </Card>
-        <Card variant="glass">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-emerald-400">4.9★</p>
-            <p className="text-xs text-dark-400 mt-1">Avaliação Média</p>
-          </div>
-        </Card>
-        <Card variant="glass">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-purple-400">12 dias</p>
-            <p className="text-xs text-dark-400 mt-1">Prazo Médio Entrega</p>
-          </div>
-        </Card>
+        {/* Métricas rápidas */}
+        <div className="space-y-4">
+          <Card variant="glass">
+            <div className="text-center">
+              <p className="text-3xl font-bold gradient-text-brand">
+                R$ {ticketMedio.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+              </p>
+              <p className="text-xs text-dark-400 mt-1">Ticket Médio</p>
+            </div>
+          </Card>
+          <Card variant="glass">
+            <div className="text-center">
+              <p className="text-3xl font-bold gradient-text-gold">{projetosEntregues.length}</p>
+              <p className="text-xs text-dark-400 mt-1">Projetos Entregues</p>
+            </div>
+          </Card>
+          <Card variant="glass">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-emerald-400">{conversas.length}</p>
+              <p className="text-xs text-dark-400 mt-1">Conversas</p>
+            </div>
+          </Card>
+          <Card variant="glass">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-purple-400">{projetosAtivos.length}</p>
+              <p className="text-xs text-dark-400 mt-1">Em Andamento</p>
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* Próximas Entregas */}
-      <Card variant="gradient">
-        <CardHeader
-          title="Próximas Entregas"
-          subtitle="Atenção aos prazos"
-          icon={<Timer className="h-5 w-5" />}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          {projetosAtivos.sort((a, b) => {
-            const [diaA, mesA] = a.prazo.split('/').map(Number);
-            const [diaB, mesB] = b.prazo.split('/').map(Number);
-            return (mesA * 100 + diaA) - (mesB * 100 + diaB);
-          }).map((proj, i) => (
-            <div
-              key={i}
-              className={`p-4 rounded-xl border ${
-                i === 0 ? 'border-amber-500/30 bg-amber-500/5' : 'border-dark-700/50 bg-dark-800/30'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                {i === 0 ? (
-                  <AlertCircle className="h-4 w-4 text-amber-400" />
-                ) : (
-                  <CheckCircle className="h-4 w-4 text-dark-500" />
-                )}
-                <span className={`text-sm font-bold ${i === 0 ? 'text-amber-400' : 'text-dark-300'}`}>
-                  {proj.prazo}
-                </span>
-              </div>
-              <p className="text-white font-medium text-sm">{proj.cliente}</p>
-              <p className="text-xs text-dark-500 truncate">{proj.projeto}</p>
-              <div className="mt-2 flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-dark-700 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-brand-500'}`}
-                    style={{ width: `${proj.progresso}%` }}
-                  />
+      {proximosEntregas.length > 0 && (
+        <Card variant="gradient">
+          <CardHeader
+            title="Próximas Entregas"
+            subtitle="Atenção aos prazos"
+            icon={<Timer className="h-5 w-5" />}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+            {proximosEntregas.slice(0, 4).map((proj, i) => {
+              const diasRestantes = Math.ceil(
+                (new Date(proj.prazo).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+              );
+              const urgente = diasRestantes <= 3;
+
+              return (
+                <div
+                  key={proj.id}
+                  className={`p-4 rounded-xl border ${
+                    urgente
+                      ? "border-amber-500/30 bg-amber-500/5"
+                      : "border-dark-700/50 bg-dark-800/30"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    {urgente ? (
+                      <AlertCircle className="h-4 w-4 text-amber-400" />
+                    ) : (
+                      <Calendar className="h-4 w-4 text-dark-500" />
+                    )}
+                    <span
+                      className={`text-sm font-bold ${urgente ? "text-amber-400" : "text-dark-300"}`}
+                    >
+                      {new Date(proj.prazo).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </span>
+                    {diasRestantes > 0 && (
+                      <span className="text-[10px] text-dark-500 ml-auto">
+                        {diasRestantes}d restantes
+                      </span>
+                    )}
+                    {diasRestantes <= 0 && (
+                      <span className="text-[10px] text-red-400 ml-auto font-bold">ATRASADO</span>
+                    )}
+                  </div>
+                  <p className="text-white font-medium text-sm">{proj.clienteNome}</p>
+                  <p className="text-xs text-dark-500 truncate">{proj.titulo}</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex-1 h-1.5 bg-dark-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${urgente ? "bg-amber-500" : "bg-brand-500"}`}
+                        style={{ width: `${proj.progresso}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-dark-500">{proj.progresso}%</span>
+                  </div>
                 </div>
-                <span className="text-xs text-dark-500">{proj.progresso}%</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+              );
+            })}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
