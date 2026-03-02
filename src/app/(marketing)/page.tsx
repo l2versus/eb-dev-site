@@ -1006,18 +1006,53 @@ export default function HomePage() {
             <div className="relative rounded-3xl overflow-hidden border border-[#1e1e2e] glass-card">
               <div className="aspect-video bg-[#0a0a0f] relative group">
                 <video
+                  id="hero-video"
                   className="w-full h-full object-cover"
-                  src="/videos/video-app.mp4"
-                  controls
+                  src="/videos/video-app.mp4#t=0.5"
                   playsInline
                   preload="auto"
+                  controls={false}
+                  onClick={(e) => {
+                    const v = e.currentTarget;
+                    const overlay = document.getElementById("video-play-overlay");
+                    if (v.paused) {
+                      v.controls = true;
+                      v.play();
+                      if (overlay) overlay.style.display = "none";
+                    }
+                  }}
                 />
+
+                {/* Custom Play Overlay — clique para iniciar */}
+                <div
+                  id="video-play-overlay"
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+                  onClick={() => {
+                    const v = document.getElementById("hero-video") as HTMLVideoElement;
+                    if (v) {
+                      v.currentTime = 0;
+                      v.controls = true;
+                      v.play();
+                      const overlay = document.getElementById("video-play-overlay");
+                      if (overlay) overlay.style.display = "none";
+                    }
+                  }}
+                >
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-[#ff00ff] blur-xl opacity-40 animate-pulse" />
+                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-[#ff00ff] to-[#ff44ff] flex items-center justify-center shadow-lg shadow-[#ff00ff]/30 hover:scale-110 transition-transform">
+                      <svg className="h-7 w-7 sm:h-8 sm:w-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 
                 {/* Decorative corners */}
-                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50 pointer-events-none" />
-                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50 pointer-events-none" />
-                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50 pointer-events-none" />
-                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50 pointer-events-none" />
+                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50 pointer-events-none z-20" />
+                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50 pointer-events-none z-20" />
+                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50 pointer-events-none z-20" />
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50 pointer-events-none z-20" />
               </div>
             </div>
           </Reveal>
