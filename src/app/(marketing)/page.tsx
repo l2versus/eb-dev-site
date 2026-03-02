@@ -1010,8 +1010,7 @@ export default function HomePage() {
                   src="/videos/video-app.mp4"
                   controls
                   playsInline
-                  preload="metadata"
-                  poster=""
+                  preload="auto"
                 />
                 
                 {/* Decorative corners */}
