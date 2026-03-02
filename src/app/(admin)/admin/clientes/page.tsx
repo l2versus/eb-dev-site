@@ -1,26 +1,16 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 👥 Admin — Gerenciamento de Clientes e Leads (localStorage + shared-project)
+// 👥 Admin — Gerenciamento de Clientes e Leads (Prisma API)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "sonner";
-import {
-  loadClientes,
-  addCliente,
-  updateCliente,
-  deleteCliente as removeCliente,
-  getClienteStats,
-  type Cliente,
-  type ClienteStatus,
-  type ClienteTipo,
-} from "@/lib/shared-clientes";
 import {
   loadProjects,
   updateProject,
@@ -54,6 +44,41 @@ import {
   Circle,
   Send,
 } from "lucide-react";
+
+// ─── Types (compatíveis com Prisma schema) ──────────────────────────────────
+type ClienteStatus = "ATIVO" | "LEAD" | "PROSPECT" | "NEGOCIANDO" | "INATIVO" | "PERDIDO";
+type ClienteTipo = "PF" | "PJ";
+
+interface Cliente {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string | null;
+  empresa: string | null;
+  site: string | null;
+  tipo: ClienteTipo;
+  status: ClienteStatus;
+  faturamentoTotal: string | number;
+  rating: number;
+  tags: string[];
+  notas: string | null;
+  origemLead: string | null;
+  ultimoContato: string | null;
+  createdAt: string;
+  totalProjetos?: number;
+  totalPropostas?: number;
+}
+
+function getClienteStats(clientes: Cliente[]) {
+  return {
+    total: clientes.length,
+    ativos: clientes.filter((c) => c.status === "ATIVO").length,
+    leads: clientes.filter((c) => c.status === "LEAD").length,
+    prospects: clientes.filter((c) => c.status === "PROSPECT").length,
+    negociando: clientes.filter((c) => c.status === "NEGOCIANDO").length,
+    faturamentoTotal: clientes.reduce((acc, c) => acc + (Number(c.faturamentoTotal) || 0), 0),
+  };
+}
 
 const statusConfig: Record<ClienteStatus, { label: string; color: string }> = {
   ATIVO: { label: "Cliente Ativo", color: "text-emerald-400 bg-emerald-500/10" },
@@ -95,28 +120,49 @@ export default function ClientesPage() {
     origemLead: "",
   });
 
-  /* ═══ Carregar do localStorage ════════════════════════════════════════════ */
-  useEffect(() => {
-    setClientes(loadClientes());
-    setLoaded(true);
+  /* ═══ Carregar da API Prisma ══════════════════════════════════════════════ */
+  const fetchClientes = useCallback(async (search?: string, status?: string) => {
+    try {
+      const params = new URLSearchParams();
+      const s = status ?? statusFilter;
+      const q = search ?? searchTerm;
+      if (s !== "TODOS") params.set("status", s);
+      if (q) params.set("search", q);
+      const res = await fetch(`/api/clientes?${params.toString()}`);
+      if (!res.ok) throw new Error("Erro ao buscar clientes");
+      const data = await res.json();
+      setClientes(data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao carregar clientes.");
+    } finally {
+      setLoaded(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ═══ Filtros ═════════════════════════════════════════════════════════════ */
-  const clientesFiltrados = clientes.filter((cliente) => {
-    const term = searchTerm.toLowerCase();
-    const matchSearch =
-      !searchTerm ||
-      cliente.nome.toLowerCase().includes(term) ||
-      cliente.email.toLowerCase().includes(term) ||
-      (cliente.empresa?.toLowerCase().includes(term) ?? false);
-    const matchStatus = statusFilter === "TODOS" || cliente.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  // Carregar inicial + quando muda filtro de status
+  useEffect(() => {
+    fetchClientes(searchTerm, statusFilter);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter]);
+
+  // Debounce para busca por texto
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchClientes(searchTerm, statusFilter);
+    }, 400);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
+  /* ═══ Filtros (feitos pela API via searchTerm/statusFilter) ═════════════ */
+  const clientesFiltrados = clientes;
 
   const stats = getClienteStats(clientes);
 
-  /* ═══ CRUD — persiste em localStorage ═════════════════════════════════════ */
-  const salvarCliente = () => {
+  /* ═══ CRUD — persiste via API Prisma ══════════════════════════════════════ */
+  const salvarCliente = async () => {
     if (!form.nome.trim() || !form.email.trim()) return;
     setSaving(true);
     try {
@@ -125,61 +171,64 @@ export default function ClientesPage() {
         .map((t) => t.trim())
         .filter(Boolean);
 
+      const body = {
+        nome: form.nome,
+        email: form.email,
+        telefone: form.telefone || null,
+        empresa: form.empresa || null,
+        site: form.site || null,
+        tipo: form.tipo,
+        status: form.status,
+        tags: tagsArray,
+        notas: form.notas || null,
+        origemLead: form.origemLead || null,
+      };
+
       if (editingCliente) {
-        const updated = updateCliente(editingCliente.id, {
-          nome: form.nome,
-          email: form.email,
-          telefone: form.telefone || null,
-          empresa: form.empresa || null,
-          site: form.site || null,
-          tipo: form.tipo,
-          status: form.status,
-          tags: tagsArray,
-          notas: form.notas || null,
-          origemLead: form.origemLead || null,
-          ultimoContato: new Date().toISOString().split("T")[0],
+        const res = await fetch(`/api/clientes/${editingCliente.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...body, rating: editingCliente.rating }),
         });
-        setClientes(updated);
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Erro ao atualizar");
+        }
         toast.success("Cliente atualizado!");
       } else {
-        const novo: Cliente = {
-          id: `cli-${Date.now()}`,
-          nome: form.nome,
-          email: form.email,
-          telefone: form.telefone || null,
-          empresa: form.empresa || null,
-          site: form.site || null,
-          tipo: form.tipo,
-          status: form.status,
-          faturamentoTotal: 0,
-          rating: 0,
-          tags: tagsArray,
-          notas: form.notas || null,
-          origemLead: form.origemLead || null,
-          ultimoContato: new Date().toISOString().split("T")[0],
-          createdAt: new Date().toISOString().split("T")[0],
-          projetos: 0,
-          propostas: 0,
-        };
-        const updated = addCliente(novo);
-        setClientes(updated);
+        const res = await fetch("/api/clientes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Erro ao criar");
+        }
         toast.success("Cliente criado!");
       }
+
       setShowModal(false);
       setEditingCliente(null);
       resetForm();
-    } catch {
-      toast.error("Erro ao salvar cliente.");
+      await fetchClientes();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao salvar cliente.");
     } finally {
       setSaving(false);
     }
   };
 
-  const excluirCliente = (id: string) => {
+  const excluirCliente = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este cliente?")) return;
-    const updated = removeCliente(id);
-    setClientes(updated);
-    toast.success("Cliente excluído.");
+    try {
+      const res = await fetch(`/api/clientes/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao excluir");
+      toast.success("Cliente excluído.");
+      await fetchClientes();
+    } catch {
+      toast.error("Erro ao excluir cliente.");
+    }
   };
 
   /* ═══ Helpers ═════════════════════════════════════════════════════════════ */
@@ -508,7 +557,7 @@ export default function ClientesPage() {
                 {/* Métricas */}
                 <div className="flex items-center gap-6 lg:gap-8">
                   <div className="text-center">
-                    <p className="text-lg font-bold text-white">{cliente.projetos}</p>
+                    <p className="text-lg font-bold text-white">{cliente.totalProjetos ?? 0}</p>
                     <p className="text-xs text-dark-500">Projetos</p>
                   </div>
                   <div className="text-center">

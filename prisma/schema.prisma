@@ -712,3 +712,35 @@ model ConfiguracaoFreelancer {
 
   @@map("configuracao_freelancer")
 }
+
+// ─── 23. TRANSAÇÕES FINANCEIRAS ──────────────────────────────────────────────
+model Transacao {
+  id        String          @id @default(cuid())
+  tipo      TipoTransacao
+  descricao String
+  valor     Decimal         @db.Decimal(12, 2)
+  categoria String
+  data      DateTime
+  status    StatusTransacao @default(PAGO)
+  metodo    String?
+  cliente   String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([tipo])
+  @@index([status])
+  @@index([data])
+  @@map("transacoes")
+}
+
+enum TipoTransacao {
+  RECEITA
+  DESPESA
+}
+
+enum StatusTransacao {
+  PAGO
+  PENDENTE
+  ATRASADO
+  CANCELADO
+}

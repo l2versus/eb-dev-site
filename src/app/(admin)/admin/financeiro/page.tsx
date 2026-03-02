@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 💰 Financeiro — Persistência localStorage via shared-financeiro.ts
+// 💰 Financeiro — API Prisma (Transações reais)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
@@ -12,14 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { LineChartCustom, DonutChart, BarChartCustom } from "@/components/charts/charts";
 import { toast } from "sonner";
-import {
-  loadTransacoes,
-  addTransacao,
-  updateTransacao,
-  deleteTransacao as removeTransacao,
-  calcFaturamentoMensal,
-  type Transacao,
-} from "@/lib/shared-financeiro";
 import {
   DollarSign,
   TrendingUp,
@@ -45,6 +37,18 @@ import {
 } from "lucide-react";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
+interface Transacao {
+  id: string;
+  tipo: "receita" | "despesa";
+  descricao: string;
+  valor: number;
+  categoria: string;
+  data: string;
+  status: "pago" | "pendente" | "atrasado" | "cancelado";
+  metodo?: string;
+  cliente?: string;
+}
+
 interface Projeto {
   id: string;
   titulo: string;
@@ -54,6 +58,26 @@ interface Projeto {
   prazo: string;
   progresso: number;
   tags: string[];
+}
+
+// Calcular faturamento mensal a partir das transações
+function calcFaturamentoMensal(transacoes: Transacao[], meses: number = 6) {
+  const result: { label: string; receita: number; despesa: number }[] = [];
+  const now = new Date();
+  const labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  for (let i = meses - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const mes = d.getMonth();
+    const ano = d.getFullYear();
+    const receita = transacoes
+      .filter((t) => t.tipo === "receita" && t.status === "pago" && new Date(t.data).getMonth() === mes && new Date(t.data).getFullYear() === ano)
+      .reduce((s, t) => s + t.valor, 0);
+    const despesa = transacoes
+      .filter((t) => t.tipo === "despesa" && t.status === "pago" && new Date(t.data).getMonth() === mes && new Date(t.data).getFullYear() === ano)
+      .reduce((s, t) => s + t.valor, 0);
+    result.push({ label: labels[mes], receita, despesa });
+  }
+  return result;
 }
 
 const statusConfig: Record<string, { label: string; css: string; icon: typeof CheckCircle }> = {
@@ -84,10 +108,22 @@ export default function FinanceiroPage() {
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
 
-  // Carregar transações do localStorage ao montar
-  useEffect(() => {
-    setTransacoes(loadTransacoes());
+  // Carregar transações da API ao montar
+  const fetchTransacoes = useCallback(async () => {
+    try {
+      const res = await fetch("/api/financeiro");
+      if (!res.ok) throw new Error("Erro ao buscar transações");
+      const data = await res.json();
+      setTransacoes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao carregar transações.");
+    }
   }, []);
+
+  useEffect(() => {
+    fetchTransacoes();
+  }, [fetchTransacoes]);
 
   const fetchProjetos = useCallback(async () => {
     try {
@@ -125,45 +161,66 @@ export default function FinanceiroPage() {
     setShowModal(true);
   };
 
-  const salvarTransacao = () => {
+  const salvarTransacao = async () => {
     if (!form.descricao.trim() || !form.valor) return;
     setSaving(true);
     try {
-      const payload: Transacao = {
-        id: editingId || `txn-${Date.now()}`,
+      const payload = {
         tipo: form.tipo,
         descricao: form.descricao,
-        valor: parseFloat(form.valor) || 0,
+        valor: form.valor,
         categoria: form.categoria,
         data: form.data,
         status: form.status,
         metodo: form.metodo,
-        cliente: form.cliente || undefined,
+        cliente: form.cliente || null,
       };
+
       if (editingId) {
-        const updated = updateTransacao(editingId, payload);
-        setTransacoes(updated);
+        const res = await fetch(`/api/financeiro/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Erro ao atualizar");
+        }
         toast.success("Transação atualizada!");
       } else {
-        const updated = addTransacao(payload);
-        setTransacoes(updated);
+        const res = await fetch("/api/financeiro", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || "Erro ao criar");
+        }
         toast.success("Transação criada!");
       }
+
       setShowModal(false);
       setEditingId(null);
       setForm(defaultForm);
-    } catch {
-      toast.error("Erro ao salvar.");
+      await fetchTransacoes();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao salvar.");
     } finally {
       setSaving(false);
     }
   };
 
-  const excluirTransacao = (id: string) => {
+  const excluirTransacao = async (id: string) => {
     if (!confirm("Excluir esta transação?")) return;
-    const updated = removeTransacao(id);
-    setTransacoes(updated);
-    toast.success("Transação excluída.");
+    try {
+      const res = await fetch(`/api/financeiro/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao excluir");
+      toast.success("Transação excluída.");
+      await fetchTransacoes();
+    } catch {
+      toast.error("Erro ao excluir transação.");
+    }
   };
 
   // ═══ Exportar CSV ═══
