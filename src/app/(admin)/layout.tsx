@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   DollarSign,
@@ -21,9 +22,9 @@ import {
   Menu,
   X,
   Shield,
-  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationCenter } from "@/components/notifications/notification-center";
 
 const adminNav = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -104,15 +105,15 @@ export default function AdminLayout({
 
         {/* Footer */}
         <div className="p-3 border-t border-dark-800">
-          <Link
-            href="/"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-dark-500 hover:text-red-400 hover:bg-red-500/5 transition-all ${
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-dark-500 hover:text-red-400 hover:bg-red-500/5 transition-all w-full ${
               collapsed ? "justify-center" : ""
             }`}
           >
             <LogOut className="h-5 w-5 shrink-0" />
             {!collapsed && <span>Sair</span>}
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -173,14 +174,13 @@ export default function AdminLayout({
               
               {/* Botão Sair Mobile */}
               <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-dark-800">
-                <Link
-                  href="/"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-dark-500 hover:text-red-400 hover:bg-red-500/5 transition-all"
+                <button
+                  onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/login" }); }}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-dark-500 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"
                 >
                   <LogOut className="h-5 w-5" />
                   <span>Sair</span>
-                </Link>
+                </button>
               </div>
             </motion.aside>
           </>
@@ -203,10 +203,8 @@ export default function AdminLayout({
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="relative p-2 text-dark-400 hover:text-white transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-brand-500" />
-            </button>
+            {/* Notificações em tempo real */}
+            <NotificationCenter />
             <div className="flex items-center gap-2">
               <img
                 src="/images/foto-perfil.png"

@@ -1,14 +1,16 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 👥 Admin — Gerenciamento de Clientes e Leads
+// 👥 Admin — Gerenciamento de Clientes e Leads (Conectado à API)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
+import { useRealtime } from "@/hooks/use-realtime";
 import {
   Users,
   Search,
@@ -26,144 +28,111 @@ import {
   Building,
   Calendar,
   TrendingUp,
+  Loader2,
+  RefreshCw,
+  X,
+  Send,
+  Edit,
+  Trash2,
+  ExternalLink,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 
 // Tipos
-type ClienteStatus = "ATIVO" | "LEAD" | "PROSPECT" | "INATIVO";
+type ClienteStatus = "ATIVO" | "LEAD" | "PROSPECT" | "NEGOCIANDO" | "INATIVO" | "PERDIDO";
 type ClienteTipo = "PF" | "PJ";
 
 interface Cliente {
   id: string;
   nome: string;
   email: string;
-  telefone: string;
-  empresa?: string;
-  site?: string;
+  telefone: string | null;
+  empresa: string | null;
+  site: string | null;
   tipo: ClienteTipo;
   status: ClienteStatus;
-  totalProjetos: number;
-  faturamentoTotal: string;
-  ultimoContato: string;
+  faturamentoTotal: number;
   rating: number;
   tags: string[];
+  notas: string | null;
+  origemLead: string | null;
+  ultimoContato: string | null;
+  createdAt: string;
+  _count?: {
+    projetos: number;
+    propostas: number;
+  };
 }
-
-// Mock de dados de clientes
-const clientesMock: Cliente[] = [
-  {
-    id: "1",
-    nome: "Myka Procópio",
-    email: "contato@mykaprocopio.com.br",
-    telefone: "(85) 99999-8888",
-    empresa: "Myka Procópio Estética",
-    site: "mykaprocopio.com.br",
-    tipo: "PJ",
-    status: "ATIVO",
-    totalProjetos: 2,
-    faturamentoTotal: "R$ 8.500",
-    ultimoContato: "2024-02-28",
-    rating: 5,
-    tags: ["Premium", "Recorrente"],
-  },
-  {
-    id: "2",
-    nome: "João Silva",
-    email: "joao@advocaciasilva.com.br",
-    telefone: "(85) 98877-6655",
-    empresa: "Silva & Associados",
-    tipo: "PJ",
-    status: "ATIVO",
-    totalProjetos: 1,
-    faturamentoTotal: "R$ 2.500",
-    ultimoContato: "2024-02-25",
-    rating: 5,
-    tags: ["Advocacia"],
-  },
-  {
-    id: "3",
-    nome: "Tech Solutions Ltda",
-    email: "projetos@techsolutions.io",
-    telefone: "(11) 99888-7766",
-    empresa: "Tech Solutions",
-    site: "techsolutions.io",
-    tipo: "PJ",
-    status: "ATIVO",
-    totalProjetos: 3,
-    faturamentoTotal: "R$ 35.000",
-    ultimoContato: "2024-02-27",
-    rating: 5,
-    tags: ["Enterprise", "Tecnologia"],
-  },
-  {
-    id: "4",
-    nome: "Café Aroma",
-    email: "contato@cafearoma.com.br",
-    telefone: "(85) 98765-4321",
-    empresa: "Café Aroma LTDA",
-    tipo: "PJ",
-    status: "ATIVO",
-    totalProjetos: 1,
-    faturamentoTotal: "R$ 8.000",
-    ultimoContato: "2024-02-20",
-    rating: 4,
-    tags: ["E-commerce", "Alimentos"],
-  },
-  {
-    id: "5",
-    nome: "Marina Costa",
-    email: "marina.costa@gmail.com",
-    telefone: "(85) 99123-4567",
-    tipo: "PF",
-    status: "LEAD",
-    totalProjetos: 0,
-    faturamentoTotal: "R$ 0",
-    ultimoContato: "2024-02-29",
-    rating: 0,
-    tags: ["Landing Page"],
-  },
-  {
-    id: "6",
-    nome: "Clínica Vida",
-    email: "atendimento@clinicavida.com.br",
-    telefone: "(85) 3333-4444",
-    empresa: "Clínica Vida Saúde",
-    tipo: "PJ",
-    status: "PROSPECT",
-    totalProjetos: 0,
-    faturamentoTotal: "R$ 0",
-    ultimoContato: "2024-02-28",
-    rating: 0,
-    tags: ["Saúde", "Institucional"],
-  },
-  {
-    id: "7",
-    nome: "Academia Fit",
-    email: "marketing@academiafit.com.br",
-    telefone: "(85) 99777-8888",
-    empresa: "Academia Fit Center",
-    tipo: "PJ",
-    status: "PROSPECT",
-    totalProjetos: 0,
-    faturamentoTotal: "R$ 0",
-    ultimoContato: "2024-02-27",
-    rating: 0,
-    tags: ["Fitness", "Landing"],
-  },
-];
 
 const statusConfig: Record<ClienteStatus, { label: string; color: string }> = {
   ATIVO: { label: "Cliente Ativo", color: "text-emerald-400 bg-emerald-500/10" },
   LEAD: { label: "Lead", color: "text-brand-400 bg-brand-500/10" },
   PROSPECT: { label: "Prospect", color: "text-purple-400 bg-purple-500/10" },
+  NEGOCIANDO: { label: "Negociando", color: "text-gold-400 bg-gold-500/10" },
   INATIVO: { label: "Inativo", color: "text-dark-500 bg-dark-700/30" },
+  PERDIDO: { label: "Perdido", color: "text-red-400 bg-red-500/10" },
 };
 
 export default function ClientesPage() {
+  // Estados
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClienteStatus | "TODOS">("TODOS");
+  const [showModal, setShowModal] = useState(false);
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const clientesFiltrados = clientesMock.filter((cliente) => {
+  // Form state
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    empresa: "",
+    site: "",
+    tipo: "PF" as ClienteTipo,
+    status: "LEAD" as ClienteStatus,
+    tags: [] as string[],
+    notas: "",
+    origemLead: "",
+  });
+
+  // Realtime connection
+  const { connected, emit } = useRealtime({
+    onEvent: (event) => {
+      if (event.type === "novo_cliente") {
+        carregarClientes();
+      }
+    },
+  });
+
+  // Carregar clientes
+  const carregarClientes = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (statusFilter !== "TODOS") params.set("status", statusFilter);
+      if (searchTerm) params.set("search", searchTerm);
+
+      const res = await fetch(`/api/clientes?${params}`);
+      if (!res.ok) throw new Error("Erro ao carregar clientes");
+      const data = await res.json();
+      setClientes(data);
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, searchTerm]);
+
+  useEffect(() => {
+    carregarClientes();
+  }, [carregarClientes]);
+
+  // Filtrar clientes localmente para busca rápida
+  const clientesFiltrados = clientes.filter((cliente) => {
     const matchSearch =
+      !searchTerm ||
       cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cliente.empresa?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -171,11 +140,103 @@ export default function ClientesPage() {
     return matchSearch && matchStatus;
   });
 
+  // Stats
   const stats = {
-    total: clientesMock.length,
-    ativos: clientesMock.filter((c) => c.status === "ATIVO").length,
-    leads: clientesMock.filter((c) => c.status === "LEAD").length,
-    prospects: clientesMock.filter((c) => c.status === "PROSPECT").length,
+    total: clientes.length,
+    ativos: clientes.filter((c) => c.status === "ATIVO").length,
+    leads: clientes.filter((c) => c.status === "LEAD").length,
+    prospects: clientes.filter((c) => c.status === "PROSPECT").length,
+    negociando: clientes.filter((c) => c.status === "NEGOCIANDO").length,
+  };
+
+  // Salvar cliente (criar ou editar)
+  const salvarCliente = async () => {
+    setSaving(true);
+    try {
+      const url = editingCliente ? `/api/clientes/${editingCliente.id}` : "/api/clientes";
+      const method = editingCliente ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error("Erro ao salvar");
+
+      // Emitir evento em tempo real
+      emit("novo_cliente", { nome: form.nome });
+
+      setShowModal(false);
+      setEditingCliente(null);
+      resetForm();
+      carregarClientes();
+    } catch (error) {
+      console.error("Erro:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Excluir cliente
+  const excluirCliente = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este cliente?")) return;
+
+    try {
+      const res = await fetch(`/api/clientes/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao excluir");
+      carregarClientes();
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  // Abrir modal de edição
+  const abrirEdicao = (cliente: Cliente) => {
+    setEditingCliente(cliente);
+    setForm({
+      nome: cliente.nome,
+      email: cliente.email,
+      telefone: cliente.telefone || "",
+      empresa: cliente.empresa || "",
+      site: cliente.site || "",
+      tipo: cliente.tipo,
+      status: cliente.status,
+      tags: cliente.tags || [],
+      notas: cliente.notas || "",
+      origemLead: cliente.origemLead || "",
+    });
+    setShowModal(true);
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setForm({
+      nome: "",
+      email: "",
+      telefone: "",
+      empresa: "",
+      site: "",
+      tipo: "PF",
+      status: "LEAD",
+      tags: [],
+      notas: "",
+      origemLead: "",
+    });
+  };
+
+  // Enviar WhatsApp
+  const enviarWhatsApp = (telefone: string) => {
+    const numero = telefone.replace(/\D/g, "");
+    window.open(`https://wa.me/55${numero}`, "_blank");
+  };
+
+  // Formatar valor
+  const formatarValor = (valor: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(valor);
   };
 
   return (
@@ -183,13 +244,28 @@ export default function ClientesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Clientes & Leads</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-white">Clientes & Leads</h2>
+            {/* Indicador de conexão tempo real */}
+            <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+              connected ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+            }`}>
+              {connected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+              {connected ? "Ao vivo" : "Offline"}
+            </span>
+          </div>
           <p className="text-dark-400 mt-1">Gerencie seu funil de vendas e clientes</p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Cliente
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={carregarClientes} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Atualizar</span>
+          </Button>
+          <Button onClick={() => { resetForm(); setEditingCliente(null); setShowModal(true); }} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Cliente
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -289,10 +365,10 @@ export default function ClientesPage() {
                     <h3 className="text-white font-semibold truncate">{cliente.nome}</h3>
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
-                        statusConfig[cliente.status].color
+                        statusConfig[cliente.status]?.color || "text-dark-400 bg-dark-700/30"
                       }`}
                     >
-                      {statusConfig[cliente.status].label}
+                      {statusConfig[cliente.status]?.label || cliente.status}
                     </span>
                     {cliente.tipo === "PJ" && (
                       <Badge variant="default" className="text-xs">
@@ -309,10 +385,12 @@ export default function ClientesPage() {
                       <Mail className="h-3 w-3" />
                       {cliente.email}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Phone className="h-3 w-3" />
-                      {cliente.telefone}
-                    </span>
+                    {cliente.telefone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {cliente.telefone}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -320,11 +398,11 @@ export default function ClientesPage() {
               {/* Métricas */}
               <div className="flex items-center gap-6 lg:gap-8">
                 <div className="text-center">
-                  <p className="text-lg font-bold text-white">{cliente.totalProjetos}</p>
+                  <p className="text-lg font-bold text-white">{cliente._count?.projetos || 0}</p>
                   <p className="text-xs text-dark-500">Projetos</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-brand-400">{cliente.faturamentoTotal}</p>
+                  <p className="text-lg font-bold text-brand-400">{formatarValor(Number(cliente.faturamentoTotal) || 0)}</p>
                   <p className="text-xs text-dark-500">Faturado</p>
                 </div>
                 {cliente.rating > 0 && (
@@ -336,26 +414,50 @@ export default function ClientesPage() {
                     <p className="text-xs text-dark-500">Rating</p>
                   </div>
                 )}
-                <div className="text-center hidden sm:block">
-                  <p className="text-sm text-dark-300">
-                    {new Date(cliente.ultimoContato).toLocaleDateString("pt-BR")}
-                  </p>
-                  <p className="text-xs text-dark-500">Último contato</p>
-                </div>
+                {cliente.ultimoContato && (
+                  <div className="text-center hidden sm:block">
+                    <p className="text-sm text-dark-300">
+                      {new Date(cliente.ultimoContato).toLocaleDateString("pt-BR")}
+                    </p>
+                    <p className="text-xs text-dark-500">Último contato</p>
+                  </div>
+                )}
               </div>
 
               {/* Tags e Ações */}
               <div className="flex items-center gap-3">
                 <div className="flex flex-wrap gap-1">
-                  {cliente.tags.map((tag) => (
+                  {cliente.tags?.map((tag) => (
                     <Badge key={tag} variant="default" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
                 </div>
-                <button className="p-2 rounded-lg hover:bg-dark-700 transition-colors">
-                  <MoreVertical className="h-4 w-4 text-dark-400" />
-                </button>
+                <div className="flex items-center gap-1">
+                  {cliente.telefone && (
+                    <button
+                      onClick={() => enviarWhatsApp(cliente.telefone!)}
+                      className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-400 transition-colors"
+                      title="Enviar WhatsApp"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => abrirEdicao(cliente)}
+                    className="p-2 rounded-lg hover:bg-brand-500/10 text-brand-400 transition-colors"
+                    title="Editar"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => excluirCliente(cliente.id)}
+                    className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
+                    title="Excluir"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </Card>
@@ -379,10 +481,10 @@ export default function ClientesPage() {
         />
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-4">
           {[
-            { label: "Leads", count: stats.leads, value: "R$ 7.500", color: "brand" },
-            { label: "Prospects", count: stats.prospects, value: "R$ 8.000", color: "purple" },
-            { label: "Negociação", count: 2, value: "R$ 17.500", color: "gold" },
-            { label: "Fechados", count: stats.ativos, value: "R$ 54.000", color: "emerald" },
+            { label: "Leads", count: stats.leads, color: "brand" },
+            { label: "Prospects", count: stats.prospects, color: "purple" },
+            { label: "Negociação", count: stats.negociando, color: "gold" },
+            { label: "Fechados", count: stats.ativos, color: "emerald" },
           ].map((stage, i) => (
             <div
               key={stage.label}
@@ -412,7 +514,7 @@ export default function ClientesPage() {
                   {stage.count}
                 </span>
               </div>
-              <p className="text-xl font-bold text-white">{stage.value}</p>
+              <p className="text-2xl font-bold text-white">{stage.count}</p>
               {i < 3 && (
                 <div className="mt-2">
                   <ArrowUpRight
@@ -430,6 +532,128 @@ export default function ClientesPage() {
           ))}
         </div>
       </Card>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-dark-950/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-dark-900 rounded-2xl p-8 flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-500" />
+            <p className="text-dark-300">Carregando clientes...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Criação/Edição */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false); setEditingCliente(null); resetForm(); }}
+        title={editingCliente ? "Editar Cliente" : "Novo Cliente"}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Nome *"
+              value={form.nome}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              placeholder="Nome do cliente"
+            />
+            <Input
+              label="Email *"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="email@exemplo.com"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Telefone"
+              value={form.telefone}
+              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+              placeholder="(85) 99999-9999"
+            />
+            <Input
+              label="Empresa"
+              value={form.empresa}
+              onChange={(e) => setForm({ ...form, empresa: e.target.value })}
+              placeholder="Nome da empresa"
+            />
+          </div>
+
+          <Input
+            label="Site"
+            value={form.site}
+            onChange={(e) => setForm({ ...form, site: e.target.value })}
+            placeholder="www.exemplo.com.br"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-2">Tipo</label>
+              <select
+                value={form.tipo}
+                onChange={(e) => setForm({ ...form, tipo: e.target.value as ClienteTipo })}
+                className="w-full bg-dark-800 border border-dark-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              >
+                <option value="PF">Pessoa Física</option>
+                <option value="PJ">Pessoa Jurídica</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-2">Status</label>
+              <select
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value as ClienteStatus })}
+                className="w-full bg-dark-800 border border-dark-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              >
+                <option value="LEAD">Lead</option>
+                <option value="PROSPECT">Prospect</option>
+                <option value="NEGOCIANDO">Negociando</option>
+                <option value="ATIVO">Cliente Ativo</option>
+                <option value="INATIVO">Inativo</option>
+                <option value="PERDIDO">Perdido</option>
+              </select>
+            </div>
+          </div>
+
+          <Input
+            label="Origem do Lead"
+            value={form.origemLead}
+            onChange={(e) => setForm({ ...form, origemLead: e.target.value })}
+            placeholder="Ex: Google, Instagram, Indicação..."
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Notas</label>
+            <textarea
+              value={form.notas}
+              onChange={(e) => setForm({ ...form, notas: e.target.value })}
+              placeholder="Observações sobre o cliente..."
+              rows={3}
+              className="w-full bg-dark-800 border border-dark-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              variant="secondary"
+              onClick={() => { setShowModal(false); setEditingCliente(null); resetForm(); }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={salvarCliente}
+              loading={saving}
+              disabled={!form.nome || !form.email || saving}
+            >
+              {editingCliente ? "Salvar Alterações" : "Criar Cliente"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

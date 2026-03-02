@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const statusInterno = statusMap[pagamento.status ?? ""] || "PENDENTE";
     const paymentIdStr = String(paymentId);
 
-    // ─── 6. Atualizar no banco ──────────────────────────────────────────
+    // ─── 6. Atualizar no banco (Pagamento antigo) ─────────────────────────
     await prisma.pagamento.updateMany({
       where: { mercadoPagoId: paymentIdStr },
       data: {
@@ -75,6 +75,45 @@ export async function POST(request: NextRequest) {
         fraudeMotivo: fraudeResult.motivo,
       },
     });
+
+    // ─── 6.1. Atualizar Pedido (novo modelo) ────────────────────────────
+    const statusPedidoMap: Record<string, string> = {
+      APROVADO: "PAGO",
+      PENDENTE: "AGUARDANDO_PAGAMENTO",
+      PROCESSANDO: "PROCESSANDO",
+      REJEITADO: "CANCELADO",
+      CANCELADO: "CANCELADO",
+    };
+    const statusPedido = statusPedidoMap[statusInterno] || "PENDENTE";
+
+    const pedidoAtualizado = await prisma.pedido.updateMany({
+      where: { mercadoPagoId: paymentIdStr },
+      data: {
+        status: statusPedido as any,
+        paidAt: statusPedido === "PAGO" ? new Date() : undefined,
+      },
+    });
+
+    // ─── 6.2. Emitir evento em tempo real ───────────────────────────────
+    if (statusPedido === "PAGO") {
+      try {
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        await fetch(`${baseUrl}/api/events`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "pagamento_aprovado",
+            data: {
+              mercadoPagoId: paymentIdStr,
+              valor: valorPago,
+              status: statusPedido,
+            },
+          }),
+        });
+      } catch (e) {
+        console.error("[WEBHOOK] Erro ao emitir evento SSE:", e);
+      }
+    }
 
     // Se aprovado, confirmar agendamento vinculado (relação 1:1)
     if (statusInterno === "APROVADO" && !isFraude) {
