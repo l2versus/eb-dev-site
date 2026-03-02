@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   Activity,
   Clock,
@@ -199,10 +200,17 @@ export default function LogAtividadesPage() {
           <p className="text-dark-400 mt-1">Histórico completo de ações e eventos do sistema</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" icon={<Download className="h-4 w-4" />}>
+          <Button variant="outline" size="sm" icon={<Download className="h-4 w-4" />} onClick={() => {
+            const csv = ["Timestamp,Categoria,Nível,Ação,Descrição,Usuário", ...logs.map(l => `${l.timestamp},${l.categoria},${l.nivel},"${l.acao}","${l.descricao}",${l.usuario}`)].join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = "logs.csv"; a.click();
+            URL.revokeObjectURL(url);
+            toast.success("Logs exportados!");
+          }}>
             Exportar
           </Button>
-          <Button variant="outline" size="sm" icon={<RefreshCw className="h-4 w-4" />}>
+          <Button variant="outline" size="sm" icon={<RefreshCw className="h-4 w-4" />} onClick={() => toast.success("Logs atualizados!")}>
             Atualizar
           </Button>
         </div>

@@ -1,19 +1,16 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📊 Admin Dashboard — Painel 100% localStorage (sem API)
+// 📊 Admin Dashboard — Dados reais via API Prisma
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DonutChart, BarChartCustom, LineChartCustom } from "@/components/charts/charts";
-import { loadTransacoes, calcFaturamentoMensal } from "@/lib/shared-financeiro";
 import { loadProjetos, getProjetoStats, type Projeto } from "@/lib/shared-projetos";
 import { loadConversas, getChatStats, type Conversa } from "@/lib/shared-chat";
-import { loadClientes } from "@/lib/shared-clientes";
-import { loadCompromissos } from "@/lib/shared-agenda";
 import { toast } from "sonner";
 import {
   DollarSign,
@@ -49,31 +46,63 @@ export default function AdminDashboardPage() {
   const [loaded, setLoaded] = useState(false);
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [conversas, setConversas] = useState<Conversa[]>([]);
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [transacoes, setTransacoes] = useState<any[]>([]);
+  const [compromissos, setCompromissos] = useState<any[]>([]);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  const refresh = () => {
+  const refresh = useCallback(async () => {
+    // localStorage data (projetos + chat still use localStorage)
     setProjetos(loadProjetos());
     setConversas(loadConversas());
+
+    // API data (clientes, financeiro, compromissos from Prisma)
+    try {
+      const [clientesRes, financeiroRes, compromissosRes] = await Promise.all([
+        fetch("/api/clientes"),
+        fetch("/api/financeiro"),
+        fetch("/api/compromissos"),
+      ]);
+      if (clientesRes.ok) setClientes(await clientesRes.json());
+      if (financeiroRes.ok) setTransacoes(await financeiroRes.json());
+      if (compromissosRes.ok) setCompromissos(await compromissosRes.json());
+    } catch {
+      // fallback: continue with empty arrays
+    }
+
     setLastUpdate(new Date());
     setLoaded(true);
-  };
+  }, []);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
 
   // ─── Dados derivados ────────────────────────────────────────────────────────
   const stats = getProjetoStats(projetos);
   const chatStats = getChatStats(conversas);
-  const clientes = loaded ? loadClientes() : [];
-  const compromissos = loaded ? loadCompromissos() : [];
 
-  // Faturamento real do localStorage financeiro
-  const transacoes = loaded ? loadTransacoes() : [];
-  const faturamentoMensal = calcFaturamentoMensal(transacoes).map((m) => ({
-    label: m.label,
-    valor: m.receita,
-  }));
+  // Faturamento mensal real via API financeiro
+  const faturamentoMensal = (() => {
+    const meses: Record<string, number> = {};
+    for (const t of transacoes) {
+      if (t.tipo === "RECEITA" && (t.status === "PAGO" || t.status === "PENDENTE")) {
+        const d = new Date(t.data);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+        if (!meses[key]) meses[key] = 0;
+        meses[key] += Number(t.valor || 0);
+      }
+    }
+    return Object.entries(meses)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-6)
+      .map(([key, valor]) => {
+        const [y, m] = key.split("-");
+        const d = new Date(parseInt(y), parseInt(m) - 1);
+        return { label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), valor };
+      });
+  })();
 
   // Status dos projetos para donut
   const statusCount = projetos.reduce((acc, p) => {
@@ -113,10 +142,10 @@ export default function AdminDashboardPage() {
     year: "numeric",
   });
 
-  // Próximos compromissos
+  // Próximos compromissos (from API — uses cliente relation)
   const proximosCompromissos = compromissos
-    .filter((c) => new Date(c.dataHora) >= new Date())
-    .sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
+    .filter((c: any) => new Date(c.dataHora) >= new Date())
+    .sort((a: any, b: any) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
     .slice(0, 3);
 
   // ─── KPIs ─────────────────────────────────────────────────────────────────
@@ -509,7 +538,7 @@ export default function AdminDashboardPage() {
             icon={<CalendarDays className="h-5 w-5" />}
           />
           <div className="divide-y divide-dark-700/50 mt-2">
-            {proximosCompromissos.map((comp) => (
+            {proximosCompromissos.map((comp: any) => (
               <Link
                 key={comp.id}
                 href="/admin/agenda"
@@ -530,7 +559,7 @@ export default function AdminDashboardPage() {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                    {comp.clienteNome && ` · ${comp.clienteNome}`}
+                    {(comp.cliente?.nome || comp.clienteNome) && ` · ${comp.cliente?.nome || comp.clienteNome}`}
                   </p>
                 </div>
                 <Badge variant={comp.tipo === "REUNIAO" ? "info" : comp.tipo === "ENTREGA" ? "success" : "default"}>

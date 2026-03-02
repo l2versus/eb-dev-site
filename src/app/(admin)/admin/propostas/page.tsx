@@ -564,7 +564,14 @@ export default function PropostasPage() {
                   size="sm"
                   icon={<Send className="h-4 w-4" />}
                   onClick={() => {
-                    update("status", "enviada");
+                    if (!editando) return;
+                    const updated = { ...editando, status: "enviada" as const };
+                    setEditando(updated);
+                    const idx = propostas.findIndex((p) => p.id === updated.id);
+                    const novas = [...propostas];
+                    if (idx >= 0) { novas[idx] = updated; } else { novas.unshift(updated); }
+                    setPropostas(novas);
+                    savePropostas(novas);
                     toast.success("Status alterado para 'Enviada'");
                   }}
                 >

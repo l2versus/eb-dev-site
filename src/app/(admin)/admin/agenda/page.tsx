@@ -1,23 +1,16 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📅 Agenda Admin — Persistência localStorage via shared-agenda.ts
+// 📅 Agenda Admin — Persistência via API Prisma /api/compromissos
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "sonner";
-import {
-  loadCompromissos,
-  addCompromisso,
-  updateCompromisso,
-  deleteCompromisso as removeCompromisso,
-  type Compromisso,
-} from "@/lib/shared-agenda";
 import {
   CalendarDays,
   ChevronLeft,
@@ -50,10 +43,10 @@ type StatusCompromisso =
 type TipoCompromisso =
   | "CALL"
   | "BRIEFING"
-  | "PROPOSTA"
+  | "APRESENTACAO"
   | "ENTREGA"
   | "REVIEW"
-  | "FOLLOWUP"
+  | "FOLLOW_UP"
   | "REUNIAO";
 
 const statusConfig: Record<StatusCompromisso, { label: string; color: string; bg: string }> = {
@@ -68,31 +61,62 @@ const statusConfig: Record<StatusCompromisso, { label: string; color: string; bg
 const tipoConfig: Record<TipoCompromisso, { label: string; icon: typeof Video; color: string }> = {
   CALL: { label: "Call", icon: Video, color: "text-brand-400" },
   BRIEFING: { label: "Briefing", icon: MessageSquare, color: "text-purple-400" },
-  PROPOSTA: { label: "Proposta", icon: Presentation, color: "text-gold-400" },
+  APRESENTACAO: { label: "Proposta", icon: Presentation, color: "text-gold-400" },
   ENTREGA: { label: "Entrega", icon: Rocket, color: "text-emerald-400" },
   REVIEW: { label: "Review", icon: Code, color: "text-blue-400" },
-  FOLLOWUP: { label: "Follow-up", icon: Phone, color: "text-amber-400" },
+  FOLLOW_UP: { label: "Follow-up", icon: Phone, color: "text-amber-400" },
   REUNIAO: { label: "Reunião", icon: Video, color: "text-cyan-400" },
 };
+
+// Compromisso type from API
+interface CompromissoAPI {
+  id: string;
+  clienteId?: string | null;
+  titulo: string;
+  descricao?: string | null;
+  tipo: TipoCompromisso;
+  dataHora: string;
+  duracao: number;
+  status: StatusCompromisso;
+  plataforma?: string | null;
+  linkReuniao?: string | null;
+  notas?: string | null;
+  lembrete?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  cliente?: { id: string; nome: string; email?: string; telefone?: string } | null;
+}
 
 // Compromisso type é importado de shared-agenda.ts
 
 export default function AgendaPage() {
-  // Estados — carrega do localStorage
-  const [compromissos, setCompromissos] = useState<Compromisso[]>([]);
+  // Estados — carrega da API Prisma
+  const [compromissos, setCompromissos] = useState<CompromissoAPI[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [dataSelecionada, setDataSelecionada] = useState(new Date());
   const [filtroStatus, setFiltroStatus] = useState<StatusCompromisso | "TODOS">("TODOS");
   const [filtroTipo, setFiltroTipo] = useState<TipoCompromisso | "TODOS">("TODOS");
   const [showModal, setShowModal] = useState(false);
-  const [editingCompromisso, setEditingCompromisso] = useState<Compromisso | null>(null);
+  const [editingCompromisso, setEditingCompromisso] = useState<CompromissoAPI | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Carregar compromissos do localStorage ao montar
-  useEffect(() => {
-    setCompromissos(loadCompromissos());
+  // ═══ Fetch compromissos from API ═══
+  const fetchCompromissos = useCallback(async () => {
+    try {
+      const res = await fetch("/api/compromissos");
+      if (res.ok) {
+        setCompromissos(await res.json());
+      }
+    } catch {
+      toast.error("Erro ao carregar compromissos");
+    }
     setLoaded(true);
   }, []);
+
+  // Carregar compromissos da API ao montar
+  useEffect(() => {
+    fetchCompromissos();
+  }, [fetchCompromissos]);
 
   // Form state
   const [form, setForm] = useState({
@@ -199,7 +223,7 @@ export default function AgendaPage() {
   };
 
   // Abrir modal edição
-  const abrirEdicao = (comp: Compromisso) => {
+  const abrirEdicao = (comp: CompromissoAPI) => {
     setEditingCompromisso(comp);
     setForm({
       titulo: comp.titulo,
@@ -210,27 +234,50 @@ export default function AgendaPage() {
       status: comp.status,
       plataforma: comp.plataforma || "Google Meet",
       linkReuniao: comp.linkReuniao || "",
-      notas: comp.notas || "",
-      clienteNome: comp.clienteNome || "",
+      notas: comp.notas?.replace(/\[Cliente:\s*[^\]]+\]\s*/, "") || "",
+      clienteNome: comp.cliente?.nome || (() => { const m = comp.notas?.match(/\[Cliente:\s*([^\]]+)\]/); return m ? m[1] : ""; })(),
     });
     setShowModal(true);
   };
 
-  // ═══ Salvar compromisso → persiste em localStorage ═══
-  const salvarCompromisso = () => {
+  // ═══ Salvar compromisso → API Prisma ═══
+  const salvarCompromisso = async () => {
     if (!form.titulo.trim() || !form.dataHora) return;
     setSaving(true);
     try {
+      const payload = {
+        titulo: form.titulo,
+        descricao: form.descricao || null,
+        tipo: form.tipo,
+        dataHora: form.dataHora,
+        duracao: form.duracao,
+        status: form.status,
+        plataforma: form.plataforma || null,
+        linkReuniao: form.linkReuniao || null,
+        notas: form.clienteNome
+          ? `[Cliente: ${form.clienteNome}] ${form.notas || ""}`.trim()
+          : form.notas || null,
+      };
+
       if (editingCompromisso) {
-        const updated = updateCompromisso(editingCompromisso.id, { ...form });
-        setCompromissos(updated);
+        const res = await fetch(`/api/compromissos/${editingCompromisso.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Erro ao atualizar");
         toast.success("Compromisso atualizado!");
       } else {
-        const novo: Compromisso = { id: `comp-${Date.now()}`, ...form };
-        const updated = addCompromisso(novo);
-        setCompromissos(updated);
+        const res = await fetch("/api/compromissos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Erro ao criar");
         toast.success("Compromisso criado!");
       }
+
+      await fetchCompromissos();
       setShowModal(false);
       setEditingCompromisso(null);
       resetForm();
@@ -241,19 +288,33 @@ export default function AgendaPage() {
     }
   };
 
-  // ═══ Excluir compromisso → persiste em localStorage ═══
-  const excluirCompromisso = (id: string) => {
+  // ═══ Excluir compromisso → API ═══
+  const excluirCompromisso = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este compromisso?")) return;
-    const updated = removeCompromisso(id);
-    setCompromissos(updated);
-    toast.success("Compromisso excluído.");
+    try {
+      const res = await fetch(`/api/compromissos/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro");
+      await fetchCompromissos();
+      toast.success("Compromisso excluído.");
+    } catch {
+      toast.error("Erro ao excluir compromisso.");
+    }
   };
 
-  // ═══ Alterar status rápido → persiste em localStorage ═══
-  const alterarStatus = (id: string, novoStatus: StatusCompromisso) => {
-    const updated = updateCompromisso(id, { status: novoStatus });
-    setCompromissos(updated);
-    toast.success(`Status: ${statusConfig[novoStatus].label}`);
+  // ═══ Alterar status rápido → API ═══
+  const alterarStatus = async (id: string, novoStatus: StatusCompromisso) => {
+    try {
+      const res = await fetch(`/api/compromissos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: novoStatus }),
+      });
+      if (!res.ok) throw new Error("Erro");
+      await fetchCompromissos();
+      toast.success(`Status: ${statusConfig[novoStatus].label}`);
+    } catch {
+      toast.error("Erro ao alterar status.");
+    }
   };
 
   if (!loaded) {
@@ -414,12 +475,14 @@ export default function AgendaPage() {
                         </span>
                         <Badge variant="default" className="text-[10px]">{tipoCfg.label}</Badge>
                       </div>
-                      {comp.clienteNome && (
-                        <p className="text-xs text-brand-400">{comp.clienteNome}</p>
+                      {(comp.cliente?.nome || comp.notas?.match(/\[Cliente:\s*([^\]]+)\]/)) && (
+                        <p className="text-xs text-brand-400">
+                          {comp.cliente?.nome || comp.notas?.match(/\[Cliente:\s*([^\]]+)\]/)?.[1]}
+                        </p>
                       )}
                       <div className="flex items-center gap-4 text-xs text-dark-500 mt-0.5">
                         {comp.plataforma && <span>📍 {comp.plataforma}</span>}
-                        {comp.notas && <span className="truncate">💬 {comp.notas}</span>}
+                        {comp.notas && <span className="truncate">💬 {comp.notas.replace(/\[Cliente:\s*[^\]]+\]\s*/, "")}</span>}
                       </div>
                     </div>
 

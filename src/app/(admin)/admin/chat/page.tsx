@@ -214,13 +214,13 @@ export default function ChatPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 text-dark-400 hover:text-brand-400 transition-colors rounded-lg hover:bg-dark-800">
+                <button onClick={() => toast.info("Ligação — em breve")} className="p-2 text-dark-400 hover:text-brand-400 transition-colors rounded-lg hover:bg-dark-800">
                   <Phone className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-dark-400 hover:text-brand-400 transition-colors rounded-lg hover:bg-dark-800">
+                <button onClick={() => toast.info("Videochamada — em breve")} className="p-2 text-dark-400 hover:text-brand-400 transition-colors rounded-lg hover:bg-dark-800">
                   <Video className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-dark-400 hover:text-brand-400 transition-colors rounded-lg hover:bg-dark-800">
+                <button onClick={() => toast.info("Mais opções — em breve")} className="p-2 text-dark-400 hover:text-brand-400 transition-colors rounded-lg hover:bg-dark-800">
                   <MoreVertical className="h-4 w-4" />
                 </button>
               </div>
@@ -273,6 +273,7 @@ export default function ChatPage() {
               >
                 <button
                   type="button"
+                  onClick={() => toast.info("Anexar arquivo — em breve")}
                   className="p-2 text-dark-400 hover:text-brand-400 transition-colors"
                 >
                   <Paperclip className="h-5 w-5" />
@@ -286,6 +287,7 @@ export default function ChatPage() {
                 />
                 <button
                   type="button"
+                  onClick={() => toast.info("Emojis — em breve")}
                   className="p-2 text-dark-400 hover:text-brand-400 transition-colors"
                 >
                   <Smile className="h-5 w-5" />
