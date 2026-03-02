@@ -3,54 +3,14 @@
 // ══════════════════════════════════════════════════════════════════════════════
 
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-
-// Store de conexões ativas
-const connections = new Map<string, ReadableStreamDefaultController>();
-
-// Tipos de eventos
-export type EventType =
-  | "novo_cliente"
-  | "novo_pedido"
-  | "pagamento_aprovado"
-  | "novo_compromisso"
-  | "proposta_visualizada"
-  | "mensagem_chat"
-  | "ping";
-
-interface SSEEvent {
-  type: EventType;
-  data: any;
-  timestamp: string;
-}
-
-// Função para enviar evento para todas as conexões
-export function broadcastEvent(event: SSEEvent) {
-  const message = `data: ${JSON.stringify(event)}\n\n`;
-  connections.forEach((controller) => {
-    try {
-      controller.enqueue(new TextEncoder().encode(message));
-    } catch (error) {
-      // Conexão pode ter sido fechada
-    }
-  });
-}
-
-// Função auxiliar para enviar eventos
-export function emitirEvento(type: EventType, data: any) {
-  broadcastEvent({
-    type,
-    data,
-    timestamp: new Date().toISOString(),
-  });
-}
+import { sseConnections, emitirEvento } from "@/lib/sse";
 
 export async function GET(request: NextRequest) {
   const connectionId = crypto.randomUUID();
 
   const stream = new ReadableStream({
     start(controller) {
-      connections.set(connectionId, controller);
+      sseConnections.set(connectionId, controller);
 
       // Enviar ping inicial
       const initialMessage = `data: ${JSON.stringify({
@@ -77,7 +37,7 @@ export async function GET(request: NextRequest) {
       // Cleanup quando a conexão for fechada
       request.signal.addEventListener("abort", () => {
         clearInterval(pingInterval);
-        connections.delete(connectionId);
+        sseConnections.delete(connectionId);
         try {
           controller.close();
         } catch {
@@ -86,7 +46,7 @@ export async function GET(request: NextRequest) {
       });
     },
     cancel() {
-      connections.delete(connectionId);
+      sseConnections.delete(connectionId);
     },
   });
 

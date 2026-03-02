@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         descricao,
         valorOriginal: valorNumerico,
         valorFinal: valorNumerico,
-        metodoPagamento: metodoPagamento === "pix" ? "PIX" : "CARTAO",
+        metodoPagamento: metodoPagamento === "pix" ? "PIX" : "CARTAO_CREDITO",
         parcelas: parcelas || 1,
         status: "PENDENTE",
       },
@@ -164,9 +164,6 @@ export async function GET(request: NextRequest) {
         cliente: {
           select: { nome: true, email: true },
         },
-        proposta: {
-          select: { titulo: true },
-        },
       },
     });
 
@@ -190,7 +187,7 @@ export async function GET(request: NextRequest) {
       checkoutUrl: pedido.checkoutUrl,
       pagoEm: pedido.pagoEm,
       cliente: pedido.cliente,
-      proposta: pedido.proposta,
+      proposta: pedido.propostaId,
     });
   } catch (error) {
     console.error("[API Checkout GET]", error);

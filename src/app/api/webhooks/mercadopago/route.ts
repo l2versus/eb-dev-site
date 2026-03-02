@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       where: { mercadoPagoId: paymentIdStr },
       data: {
         status: statusPedido as any,
-        paidAt: statusPedido === "PAGO" ? new Date() : undefined,
+        pagoEm: statusPedido === "PAGO" ? new Date() : undefined,
       },
     });
 

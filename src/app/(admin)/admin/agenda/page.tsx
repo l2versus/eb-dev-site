@@ -562,10 +562,12 @@ export default function AgendaPage() {
 
       {/* Modal */}
       <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditingCompromisso(null);
+        open={showModal}
+        onOpenChange={(v) => {
+          if (!v) {
+            setShowModal(false);
+            setEditingCompromisso(null);
+          }
         }}
         title={editingCompromisso ? "Editar Compromisso" : "Novo Compromisso"}
         size="lg"

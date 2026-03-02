@@ -6,10 +6,11 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import type { Role } from "@prisma/client";
+// import { PrismaAdapter } from "@auth/prisma-adapter";
+// import { prisma } from "@/lib/prisma";
+// import bcrypt from "bcryptjs";
+
+type Role = "ADMIN" | "SUPER_ADMIN" | "USER";
 
 declare module "next-auth" {
   interface Session {
@@ -35,21 +36,24 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma) as any,
+  // adapter: PrismaAdapter(prisma) as any,
+  secret: process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 hora - expira rápido
+    maxAge: 60 * 60 * 24, // 24 horas
   },
 
   cookies: {
     sessionToken: {
-      name: "next-auth.session-token",
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-authjs.session-token"
+          : "authjs.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        // Sem maxAge = cookie de sessão (expira ao fechar navegador)
       },
     },
   },
@@ -85,34 +89,55 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Email e senha são obrigatórios");
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
+        const email = credentials.email as string;
+        const password = credentials.password as string;
 
-        if (!user || !user.passwordHash) {
+        // Admin hardcoded (sem necessidade de DB)
+        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@emmanuelbezerra.dev";
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "@Luna1992_";
+
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+          return {
+            id: "admin-1",
+            name: "Emmanuel Bezerra",
+            email: ADMIN_EMAIL,
+            image: null,
+            role: "ADMIN" as Role,
+          };
+        }
+
+        // Tentar Prisma como fallback (se DB estiver rodando)
+        try {
+          const { prisma } = await import("@/lib/prisma");
+          const bcrypt = (await import("bcryptjs")).default;
+
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user || !user.passwordHash) {
+            throw new Error("Credenciais inválidas");
+          }
+
+          if (!user.active) {
+            throw new Error("Conta desativada.");
+          }
+
+          const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+          if (!isPasswordValid) {
+            throw new Error("Credenciais inválidas");
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: user.role as Role,
+          };
+        } catch {
           throw new Error("Credenciais inválidas");
         }
-
-        if (!user.active) {
-          throw new Error("Conta desativada. Entre em contato com o suporte.");
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
-          user.passwordHash
-        );
-
-        if (!isPasswordValid) {
-          throw new Error("Credenciais inválidas");
-        }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -156,44 +181,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 
-  // ─── Configuração de Cookies HTTP-only (Segurança Bancária) ─────────
-  cookies: {
-    sessionToken: {
-      name:
-        process.env.NODE_ENV === "production"
-          ? "__Secure-authjs.session-token"
-          : "authjs.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-  },
-
   // ─── Eventos de auditoria ───────────────────────────────────────────
   events: {
     async signIn({ user }) {
-      await prisma.auditLog.create({
-        data: {
-          userId: user.id,
-          action: "LOGIN",
-          entity: "User",
-          entityId: user.id,
-        },
-      });
-    },
-    async signOut(message) {
-      if ("token" in message && message.token?.sub) {
+      try {
+        const { prisma } = await import("@/lib/prisma");
         await prisma.auditLog.create({
           data: {
-            userId: message.token.sub,
-            action: "LOGOUT",
+            userId: user.id,
+            action: "LOGIN",
             entity: "User",
-            entityId: message.token.sub,
+            entityId: user.id,
           },
         });
+      } catch {
+        // DB offline — ignora silenciosamente
+      }
+    },
+    async signOut(message) {
+      try {
+        if ("token" in message && message.token?.sub) {
+          const { prisma } = await import("@/lib/prisma");
+          await prisma.auditLog.create({
+            data: {
+              userId: message.token.sub,
+              action: "LOGOUT",
+              entity: "User",
+              entityId: message.token.sub,
+            },
+          });
+        }
+      } catch {
+        // DB offline — ignora silenciosamente
       }
     },
   },

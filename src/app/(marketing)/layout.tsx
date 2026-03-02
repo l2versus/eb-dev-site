@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { Menu, X, Github, Instagram, Mail, Terminal, MapPin, Phone, Heart, ArrowUp, Code2, ExternalLink, Sun, Moon, Lock } from "lucide-react";
 import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { ThemeProvider, useTheme } from "@/lib/theme-provider";
@@ -16,6 +17,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
+
+  // Rotas do portal do cliente — renderizam sem header/footer do marketing
+  const isClientePortal = pathname.startsWith("/cliente");
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -31,6 +36,15 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     { label: "Depoimentos", href: "#depoimentos" },
     { label: "Orçamento", href: "/orcamento", isRoute: true },
   ];
+
+  // Se for rota de cliente portal, renderizar só o children sem header/footer
+  if (isClientePortal) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#0a0a0f]">
+        <main className="flex-1">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

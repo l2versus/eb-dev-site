@@ -1191,6 +1191,115 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
+          VIDEO SHOWCASE — Demonstrações de Projetos
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="videos" className="relative py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0d0d15] to-[#08080d]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-14">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
+                <svg className="w-4 h-4 text-[#ff00ff]" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                <span className="text-sm font-mono text-[#ff00ff]">
+                  {"<VideoShowcase />"}
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                Veja os projetos{" "}
+                <span className="gradient-text-cyber">em ação</span>
+              </h2>
+              <p className="text-[#6b6b80] max-w-xl mx-auto">
+                Demonstrações reais de projetos entregues — navegação, animações e funcionalidades
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Video Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "App Myka Procópio",
+                desc: "Aplicativo de estética com agendamento e acompanhamento de sessões",
+                src: "/videos/myka-demo.mp4",
+                poster: "/images/project-estetica.png",
+                color: "#ff00ff",
+                tag: "App Mobile",
+              },
+              {
+                title: "Myka Procópio — Detalhes",
+                desc: "Fluxo completo de agendamento e galeria de resultados",
+                src: "/videos/myka-detalhes.mp4",
+                poster: "/images/project-estetica.png",
+                color: "#00f0ff",
+                tag: "UX/UI",
+              },
+              {
+                title: "Myka Procópio — Admin",
+                desc: "Painel administrativo com gestão de clientes e financeiro",
+                src: "/videos/myka-admin.mp4",
+                poster: "/images/project-estetica.png",
+                color: "#00ff41",
+                tag: "Dashboard",
+              },
+            ].map((video, i) => (
+              <Reveal key={video.title} delay={i * 0.1}>
+                <div className="group relative rounded-2xl overflow-hidden border border-[#1e1e2e] bg-[#0f0f18] hover:border-[#ff00ff]/30 transition-all duration-500">
+                  {/* Video Player */}
+                  <div className="aspect-[9/16] sm:aspect-video relative bg-black">
+                    <video
+                      className="w-full h-full object-cover"
+                      src={video.src}
+                      poster={video.poster}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
+                      onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
+                      onTouchStart={(e) => {
+                        const v = e.target as HTMLVideoElement;
+                        if (v.paused) v.play(); else { v.pause(); v.currentTime = 0; }
+                      }}
+                    />
+                    {/* Play overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                      <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
+                        style={{ backgroundColor: video.color, boxShadow: `0 0 30px ${video.color}40` }}
+                      >
+                        <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                    {/* Tag */}
+                    <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider glass" style={{ color: video.color }}>
+                      {video.tag}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4">
+                    <h3 className="text-sm font-bold text-white mb-1 group-hover:text-[#ff00ff] transition-colors">
+                      {video.title}
+                    </h3>
+                    <p className="text-xs text-[#6b6b80] line-clamp-2">{video.desc}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Hint */}
+          <Reveal delay={0.4}>
+            <p className="text-center text-xs text-[#6b6b80] mt-8">
+              Passe o mouse (ou toque) nos vídeos para assistir · Mais projetos em breve
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
           GOOGLE REVIEWS — Social Proof
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative py-20 overflow-hidden">

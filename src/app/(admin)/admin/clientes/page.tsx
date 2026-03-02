@@ -12,6 +12,15 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { useRealtime } from "@/hooks/use-realtime";
 import {
+  loadProjects,
+  updateProject,
+  addMessage,
+  addFile,
+  genId,
+  type ProjetoCliente,
+  type ProjetoFase,
+} from "@/lib/shared-project";
+import {
   Users,
   Search,
   Filter,
@@ -37,6 +46,14 @@ import {
   ExternalLink,
   Wifi,
   WifiOff,
+  FileText,
+  ClipboardList,
+  Upload,
+  CheckCircle2,
+  Clock,
+  Circle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 // Tipos
@@ -213,6 +230,13 @@ export default function ClientesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Briefing state
+  const [showBriefing, setShowBriefing] = useState(false);
+  const [briefingCliente, setBriefingCliente] = useState<Cliente | null>(null);
+  const [briefingProjeto, setBriefingProjeto] = useState<ProjetoCliente | null>(null);
+  const [briefingTab, setBriefingTab] = useState<"fases" | "arquivos" | "mensagens">("fases");
+  const [novaMensagem, setNovaMensagem] = useState("");
 
   // Form state
   const [form, setForm] = useState({
@@ -402,6 +426,99 @@ export default function ClientesPage() {
   const enviarWhatsApp = (telefone: string) => {
     const numero = telefone.replace(/\D/g, "");
     window.open(`https://wa.me/55${numero}`, "_blank");
+  };
+
+  // Abrir briefing de um cliente
+  const abrirBriefing = (cliente: Cliente) => {
+    setBriefingCliente(cliente);
+    // Buscar projeto associado
+    const projetos = loadProjects();
+    const projeto = projetos.find(
+      (p) => p.clienteNome.toLowerCase() === cliente.nome.toLowerCase() ||
+             p.clienteEmail?.toLowerCase() === cliente.email.toLowerCase()
+    );
+    if (projeto) {
+      setBriefingProjeto({ ...projeto });
+    } else {
+      // Criar projeto básico para o cliente
+      const novoProjeto: ProjetoCliente = {
+        id: `PRJ-${Date.now()}`,
+        name: `Projeto — ${cliente.nome}`,
+        clienteNome: cliente.nome,
+        clienteEmail: cliente.email,
+        status: "in_progress",
+        package: "Standard",
+        startDate: new Date().toISOString().split("T")[0],
+        expectedDelivery: "",
+        progress: 0,
+        investment: "A definir",
+        paid: "R$ 0",
+        remaining: "A definir",
+        phases: [
+          { id: 1, name: "Briefing & Discovery", status: "pending", date: "-", description: "Levantamento de requisitos" },
+          { id: 2, name: "Wireframes & UX", status: "pending", date: "-", description: "Estrutura visual" },
+          { id: 3, name: "Design Visual", status: "pending", date: "-", description: "Layout final" },
+          { id: 4, name: "Desenvolvimento", status: "pending", date: "-", description: "Codificação" },
+          { id: 5, name: "Testes & QA", status: "pending", date: "-", description: "Validação" },
+          { id: 6, name: "Entrega Final", status: "pending", date: "-", description: "Deploy" },
+        ],
+        files: [],
+        messages: [],
+        nextSteps: ["Definir escopo do projeto"],
+        accessCode: cliente.nome.split(" ")[0].toLowerCase(),
+      };
+      updateProject(novoProjeto);
+      setBriefingProjeto(novoProjeto);
+    }
+    setBriefingTab("fases");
+    setShowBriefing(true);
+  };
+
+  // Atualizar fase do projeto
+  const atualizarFase = (faseId: number, novoStatus: ProjetoFase["status"]) => {
+    if (!briefingProjeto) return;
+    const updated = { ...briefingProjeto };
+    updated.phases = updated.phases.map((f) => f.id === faseId ? { ...f, status: novoStatus } : f);
+    const completed = updated.phases.filter((f) => f.status === "completed").length;
+    updated.progress = Math.round((completed / updated.phases.length) * 100);
+    updateProject(updated);
+    setBriefingProjeto({ ...updated });
+  };
+
+  // Enviar mensagem do admin
+  const enviarMensagemBriefing = () => {
+    if (!briefingProjeto || !novaMensagem.trim()) return;
+    const msg = {
+      id: genId(),
+      from: "Emmanuel" as const,
+      date: new Date().toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
+      message: novaMensagem.trim(),
+    };
+    addMessage(briefingProjeto.id, msg);
+    setBriefingProjeto((prev) => prev ? { ...prev, messages: [msg, ...prev.messages] } : prev);
+    setNovaMensagem("");
+  };
+
+  // Upload de arquivo (conversor base64 simples)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!briefingProjeto || !e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const novoArquivo = {
+        id: genId(),
+        name: file.name,
+        type: file.name.split(".").pop() || "file",
+        size: file.size > 1048576 ? `${(file.size / 1048576).toFixed(1)} MB` : `${(file.size / 1024).toFixed(0)} KB`,
+        date: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        uploadedBy: "admin" as const,
+        url: reader.result as string,
+      };
+      addFile(briefingProjeto.id, novoArquivo);
+      setBriefingProjeto((prev) => prev ? { ...prev, files: [...prev.files, novoArquivo] } : prev);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   // Formatar valor
@@ -607,6 +724,13 @@ export default function ClientesPage() {
                   ))}
                 </div>
                 <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => abrirBriefing(cliente)}
+                    className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-400 transition-colors"
+                    title="Ver Briefing"
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                  </button>
                   {cliente.telefone && (
                     <button
                       onClick={() => enviarWhatsApp(cliente.telefone!)}
@@ -718,8 +842,8 @@ export default function ClientesPage() {
 
       {/* Modal de Criação/Edição */}
       <Modal
-        isOpen={showModal}
-        onClose={() => { setShowModal(false); setEditingCliente(null); resetForm(); }}
+        open={showModal}
+        onOpenChange={(v) => { if (!v) { setShowModal(false); setEditingCliente(null); resetForm(); } }}
         title={editingCliente ? "Editar Cliente" : "Novo Cliente"}
         size="lg"
       >
@@ -826,6 +950,176 @@ export default function ClientesPage() {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* ═══ Modal de Briefing ═══════════════════════════════════════════════ */}
+      <Modal
+        open={showBriefing}
+        onOpenChange={(v) => { if (!v) { setShowBriefing(false); setBriefingCliente(null); setBriefingProjeto(null); } }}
+        title={briefingCliente ? `Briefing — ${briefingCliente.nome}` : "Briefing"}
+        size="full"
+      >
+        {briefingProjeto && (
+          <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+            {/* Resumo rápido */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-dark-800/50 rounded-xl p-3 text-center">
+                <p className="text-xs text-dark-400">Progresso</p>
+                <p className="text-xl font-bold text-brand-400">{briefingProjeto.progress}%</p>
+              </div>
+              <div className="bg-dark-800/50 rounded-xl p-3 text-center">
+                <p className="text-xs text-dark-400">Investimento</p>
+                <p className="text-sm font-bold text-white">{briefingProjeto.investment}</p>
+              </div>
+              <div className="bg-dark-800/50 rounded-xl p-3 text-center">
+                <p className="text-xs text-dark-400">Pago</p>
+                <p className="text-sm font-bold text-emerald-400">{briefingProjeto.paid}</p>
+              </div>
+              <div className="bg-dark-800/50 rounded-xl p-3 text-center">
+                <p className="text-xs text-dark-400">Código Acesso</p>
+                <p className="text-sm font-bold text-gold-400">{briefingProjeto.accessCode}</p>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 border-b border-dark-700 pb-2">
+              {([
+                { key: "fases" as const, label: "Fases do Projeto", icon: <FolderKanban className="h-4 w-4" /> },
+                { key: "arquivos" as const, label: "Arquivos", icon: <FileText className="h-4 w-4" /> },
+                { key: "mensagens" as const, label: "Mensagens", icon: <MessageSquare className="h-4 w-4" /> },
+              ]).map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setBriefingTab(tab.key)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    briefingTab === tab.key ? "bg-brand-500 text-white" : "text-dark-400 hover:bg-dark-800"
+                  }`}
+                >
+                  {tab.icon} {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab: Fases */}
+            {briefingTab === "fases" && (
+              <div className="space-y-3">
+                {briefingProjeto.phases.map((fase) => (
+                  <div key={fase.id} className="flex items-center gap-3 bg-dark-800/40 rounded-xl p-3">
+                    <div className="flex-shrink-0">
+                      {fase.status === "completed" ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      ) : fase.status === "in_progress" ? (
+                        <Clock className="h-5 w-5 text-brand-400 animate-pulse" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-dark-600" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium text-sm ${fase.status === "completed" ? "text-emerald-300" : fase.status === "in_progress" ? "text-white" : "text-dark-400"}`}>
+                        {fase.name}
+                      </p>
+                      <p className="text-xs text-dark-500">{fase.description} · {fase.date}</p>
+                    </div>
+                    <select
+                      value={fase.status}
+                      onChange={(e) => atualizarFase(fase.id, e.target.value as ProjetoFase["status"])}
+                      className="bg-dark-700 border border-dark-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    >
+                      <option value="pending">Pendente</option>
+                      <option value="in_progress">Em Progresso</option>
+                      <option value="completed">Concluído</option>
+                    </select>
+                  </div>
+                ))}
+
+                {/* Barra de progresso */}
+                <div className="mt-4">
+                  <div className="flex justify-between text-xs text-dark-400 mb-1">
+                    <span>Progresso Geral</span>
+                    <span className="text-brand-400 font-bold">{briefingProjeto.progress}%</span>
+                  </div>
+                  <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-brand-500 to-emerald-500 rounded-full transition-all duration-500"
+                      style={{ width: `${briefingProjeto.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Arquivos */}
+            {briefingTab === "arquivos" && (
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-dark-600 hover:border-brand-500 cursor-pointer transition-colors">
+                  <Upload className="h-5 w-5 text-brand-400" />
+                  <span className="text-sm text-dark-300">Enviar novo arquivo</span>
+                  <input type="file" className="hidden" onChange={handleFileUpload} />
+                </label>
+                {briefingProjeto.files.length === 0 && (
+                  <p className="text-sm text-dark-500 text-center py-4">Nenhum arquivo ainda</p>
+                )}
+                {briefingProjeto.files.map((file) => (
+                  <div key={file.id} className="flex items-center gap-3 bg-dark-800/40 rounded-xl p-3">
+                    <FileText className="h-5 w-5 text-brand-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">{file.name}</p>
+                      <p className="text-xs text-dark-500">{file.size} · {file.date} · por {file.uploadedBy === "admin" ? "Emmanuel" : "Cliente"}</p>
+                    </div>
+                    {file.url && (
+                      <a href={file.url} download={file.name} className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
+                        <ExternalLink className="h-4 w-4 text-brand-400" />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Tab: Mensagens */}
+            {briefingTab === "mensagens" && (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    value={novaMensagem}
+                    onChange={(e) => setNovaMensagem(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && enviarMensagemBriefing()}
+                    placeholder="Escreva uma mensagem..."
+                    className="flex-1 bg-dark-800 border border-dark-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                  />
+                  <button
+                    onClick={enviarMensagemBriefing}
+                    disabled={!novaMensagem.trim()}
+                    className="p-2 rounded-xl bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40 transition-colors"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+                {briefingProjeto.messages.length === 0 && (
+                  <p className="text-sm text-dark-500 text-center py-4">Nenhuma mensagem ainda</p>
+                )}
+                {briefingProjeto.messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`rounded-xl p-3 ${
+                      msg.from === "Emmanuel"
+                        ? "bg-brand-500/10 border border-brand-500/20 ml-4"
+                        : "bg-dark-800/60 border border-dark-700 mr-4"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-xs font-medium ${msg.from === "Emmanuel" ? "text-brand-400" : "text-purple-400"}`}>
+                        {msg.from}
+                      </span>
+                      <span className="text-xs text-dark-500">{msg.date}</span>
+                    </div>
+                    <p className="text-sm text-dark-200">{msg.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -45,21 +45,32 @@ export default async function middleware(request: NextRequest) {
 
   // ─── 2. Proteção de Rotas Admin ──────────────────────────────────────
   if (pathname.startsWith("/admin")) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.AUTH_SECRET 
-    });
+    try {
+      const token = await getToken({ 
+        req: request, 
+        secret: process.env.AUTH_SECRET,
+        cookieName: process.env.NODE_ENV === "production"
+          ? "__Secure-authjs.session-token"
+          : "authjs.session-token",
+      });
 
-    // Não autenticado → redireciona para login
-    if (!token) {
+      // Não autenticado → redireciona para login
+      if (!token) {
+        const loginUrl = new URL("/login", request.url);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      // Verifica se é ADMIN
+      if (token.role !== "ADMIN" && token.role !== "SUPER_ADMIN") {
+        return new NextResponse("Acesso negado", { status: 403 });
+      }
+    } catch (error) {
+      // Se getToken falhar por qualquer razão, redireciona para login
+      console.error("Middleware auth error:", error);
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
-    }
-
-    // Verifica se é ADMIN
-    if (token.role !== "ADMIN") {
-      return new NextResponse("Acesso negado", { status: 403 });
     }
   }
 

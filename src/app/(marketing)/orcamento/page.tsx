@@ -43,8 +43,9 @@ const projectTypes = [
     icon: Globe,
     title: "Landing Page",
     desc: "Página única focada em conversão",
-    price: "A partir de R$ 2.500",
-    features: ["Design responsivo", "SEO otimizado", "Formulário de contato", "Analytics integrado"],
+    price: "A partir de R$ 1.500",
+    priceValue: 1500,
+    features: ["Design responsivo", "SEO otimizado", "Formulário de contato", "Analytics integrado", "Hospedagem 1 mês grátis"],
     timeline: "5-7 dias",
     color: "#00f0ff",
   },
@@ -53,8 +54,9 @@ const projectTypes = [
     icon: Layers,
     title: "Site Institucional",
     desc: "Múltiplas páginas com CMS",
-    price: "A partir de R$ 5.500",
-    features: ["Até 10 páginas", "Painel admin", "Blog integrado", "Otimização de performance"],
+    price: "A partir de R$ 3.000",
+    priceValue: 3000,
+    features: ["Até 10 páginas", "Painel admin", "Blog integrado", "Otimização de performance", "Domínio + SSL"],
     timeline: "10-14 dias",
     color: "#ff00ff",
   },
@@ -63,8 +65,9 @@ const projectTypes = [
     icon: ShoppingCart,
     title: "E-commerce",
     desc: "Loja virtual completa",
-    price: "A partir de R$ 12.000",
-    features: ["Catálogo de produtos", "Carrinho + checkout", "Gateway de pagamento", "Gestão de pedidos"],
+    price: "A partir de R$ 6.000",
+    priceValue: 6000,
+    features: ["Catálogo de produtos", "Carrinho + checkout", "Gateway de pagamento", "Gestão de pedidos", "Painel de vendas"],
     timeline: "20-30 dias",
     color: "#00ff41",
   },
@@ -73,8 +76,9 @@ const projectTypes = [
     icon: Rocket,
     title: "Web App / SaaS",
     desc: "Sistema web personalizado",
-    price: "A partir de R$ 15.000",
-    features: ["Autenticação segura", "Dashboard interativo", "APIs customizadas", "Integrações"],
+    price: "A partir de R$ 8.000",
+    priceValue: 8000,
+    features: ["Autenticação segura", "Dashboard interativo", "APIs customizadas", "Integrações", "Deploy em nuvem"],
     timeline: "30-60 dias",
     color: "#ffaa00",
   },
@@ -83,18 +87,21 @@ const projectTypes = [
     icon: Smartphone,
     title: "App Mobile",
     desc: "React Native / PWA",
-    price: "A partir de R$ 20.000",
-    features: ["iOS + Android", "Notificações push", "Modo offline", "Publicação nas lojas"],
+    price: "A partir de R$ 12.000",
+    priceValue: 12000,
+    features: ["iOS + Android", "Notificações push", "Modo offline", "Publicação nas lojas", "Backend incluso"],
     timeline: "45-90 dias",
     color: "#aa00ff",
   },
 ];
 
 const addons = [
-  { id: "chatbot", icon: MessageSquare, title: "Chatbot com IA", price: "+ R$ 1.500" },
-  { id: "analytics", icon: BarChart3, title: "Dashboard Analytics", price: "+ R$ 2.500" },
-  { id: "schedule", icon: Calendar, title: "Sistema de Agendamento", price: "+ R$ 3.000" },
-  { id: "payments", icon: ShoppingCart, title: "Integração Pagamentos", price: "+ R$ 2.000" },
+  { id: "chatbot", icon: MessageSquare, title: "Chatbot com IA", price: "+ R$ 800", priceValue: 800 },
+  { id: "analytics", icon: BarChart3, title: "Dashboard Analytics", price: "+ R$ 1.200", priceValue: 1200 },
+  { id: "schedule", icon: Calendar, title: "Sistema de Agendamento", price: "+ R$ 1.500", priceValue: 1500 },
+  { id: "payments", icon: ShoppingCart, title: "Integração Pagamentos", price: "+ R$ 1.000", priceValue: 1000 },
+  { id: "seo", icon: Globe, title: "SEO Avançado", price: "+ R$ 600", priceValue: 600 },
+  { id: "manutencao", icon: Shield, title: "Manutenção Mensal", price: "+ R$ 300/mês", priceValue: 300 },
 ];
 
 const techShowcase = [
@@ -168,7 +175,7 @@ function Reveal({
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function OrcamentoPage() {
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -182,11 +189,31 @@ export default function OrcamentoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const toggleType = (id: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    );
+  };
+
   const toggleAddon = (id: string) => {
     setSelectedAddons((prev) =>
       prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
     );
   };
+
+  // Cálculo do investimento estimado
+  const estimatedTotal = (() => {
+    let total = 0;
+    selectedTypes.forEach((id) => {
+      const t = projectTypes.find((p) => p.id === id);
+      if (t) total += t.priceValue;
+    });
+    selectedAddons.forEach((id) => {
+      const a = addons.find((ad) => ad.id === id);
+      if (a) total += a.priceValue;
+    });
+    return total;
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,7 +223,10 @@ export default function OrcamentoPage() {
     await new Promise((r) => setTimeout(r, 2000));
 
     // Monta mensagem para WhatsApp
-    const selectedProject = projectTypes.find((p) => p.id === selectedType);
+    const selectedProjectNames = selectedTypes
+      .map((id) => projectTypes.find((p) => p.id === id)?.title)
+      .filter(Boolean)
+      .join(", ");
     const selectedAddonNames = selectedAddons
       .map((id) => addons.find((a) => a.id === id)?.title)
       .filter(Boolean)
@@ -208,9 +238,10 @@ export default function OrcamentoPage() {
         `*Email:* ${formData.email}\n` +
         `*Telefone:* ${formData.phone}\n` +
         `*Empresa:* ${formData.company || "Não informado"}\n\n` +
-        `*Tipo de Projeto:* ${selectedProject?.title || "Não selecionado"}\n` +
+        `*Serviços:* ${selectedProjectNames || "Não selecionado"}\n` +
         `*Recursos Adicionais:* ${selectedAddonNames || "Nenhum"}\n` +
-        `*Orçamento Estimado:* ${formData.budget || "Não informado"}\n` +
+        `*Investimento Estimado:* R$ ${estimatedTotal.toLocaleString("pt-BR")}\n` +
+        `*Orçamento do Cliente:* ${formData.budget || "Não informado"}\n` +
         `*Prazo Desejado:* ${formData.deadline || "Não informado"}\n\n` +
         `*Descrição do Projeto:*\n${formData.description}`
     );
@@ -311,7 +342,8 @@ export default function OrcamentoPage() {
                         1
                       </div>
                       <h2 className="text-2xl font-bold text-white">
-                        Tipo de Projeto
+                        Tipo de Projeto{" "}
+                        <span className="text-[#6b6b80] text-base font-normal">(selecione um ou mais)</span>
                       </h2>
                     </div>
                   </Reveal>
@@ -323,15 +355,15 @@ export default function OrcamentoPage() {
                           type="button"
                           whileHover={{ y: -4, scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => setSelectedType(type.id)}
+                          onClick={() => toggleType(type.id)}
                           className={`relative w-full text-left p-6 rounded-2xl border transition-all duration-300 ${
-                            selectedType === type.id
-                              ? "border-[#00f0ff]/50 bg-[#00f0ff]/5"
+                            selectedTypes.includes(type.id)
+                              ? "border-[#00f0ff]/50 bg-[#00f0ff]/5 ring-1 ring-[#00f0ff]/20"
                               : "border-[#1e1e2e] bg-[#0f0f18] hover:border-[#1e1e2e]/80"
                           }`}
                         >
                           {/* Selected indicator */}
-                          {selectedType === type.id && (
+                          {selectedTypes.includes(type.id) && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
@@ -371,7 +403,7 @@ export default function OrcamentoPage() {
 
                           {/* Features on hover/selected */}
                           <AnimatePresence>
-                            {selectedType === type.id && (
+                            {selectedTypes.includes(type.id) && (
                               <motion.ul
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
@@ -526,7 +558,8 @@ export default function OrcamentoPage() {
                           <option value="2k-5k">R$ 2.000 - R$ 5.000</option>
                           <option value="5k-10k">R$ 5.000 - R$ 10.000</option>
                           <option value="10k-20k">R$ 10.000 - R$ 20.000</option>
-                          <option value="acima-20k">Acima de R$ 20.000</option>
+                          <option value="20k-50k">R$ 20.000 - R$ 50.000</option>
+                          <option value="acima-50k">Acima de R$ 50.000</option>
                         </select>
                       </div>
 
@@ -566,10 +599,53 @@ export default function OrcamentoPage() {
 
                   {/* Submit */}
                   <Reveal delay={0.2}>
-                    <div className="mt-10">
+                    {/* Resumo do Investimento */}
+                    {(selectedTypes.length > 0 || selectedAddons.length > 0) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 p-6 rounded-2xl border border-[#00f0ff]/20 bg-[#00f0ff]/5"
+                      >
+                        <h3 className="text-sm font-semibold text-[#00f0ff] mb-3 uppercase tracking-wider">
+                          Resumo do Investimento
+                        </h3>
+                        <div className="space-y-2">
+                          {selectedTypes.map((id) => {
+                            const t = projectTypes.find((p) => p.id === id);
+                            return t ? (
+                              <div key={id} className="flex justify-between text-sm">
+                                <span className="text-[#9999ab]">{t.title}</span>
+                                <span className="text-white font-medium">R$ {t.priceValue.toLocaleString("pt-BR")}+</span>
+                              </div>
+                            ) : null;
+                          })}
+                          {selectedAddons.map((id) => {
+                            const a = addons.find((ad) => ad.id === id);
+                            return a ? (
+                              <div key={id} className="flex justify-between text-sm">
+                                <span className="text-[#9999ab]">{a.title}</span>
+                                <span className="text-[#ff00ff] font-medium">{a.price}</span>
+                              </div>
+                            ) : null;
+                          })}
+                          <div className="pt-3 mt-3 border-t border-[#1e1e2e] flex justify-between">
+                            <span className="text-white font-bold">Total estimado</span>
+                            <span className="text-[#00f0ff] font-bold text-lg">
+                              a partir de R$ {estimatedTotal.toLocaleString("pt-BR")}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-[#6b6b80] mt-3">
+                          * Valores iniciais — o orçamento final é personalizado conforme a complexidade do seu projeto.
+                          Combo com desconto para múltiplos serviços!
+                        </p>
+                      </motion.div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                       <motion.button
                         type="submit"
-                        disabled={isSubmitting || !selectedType}
+                        disabled={isSubmitting || selectedTypes.length === 0}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="inline-flex items-center gap-3 px-10 py-4 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
@@ -592,9 +668,16 @@ export default function OrcamentoPage() {
                         )}
                       </motion.button>
 
-                      {!selectedType && (
-                        <p className="text-sm text-[#ff00ff] mt-3">
-                          * Selecione um tipo de projeto para continuar
+                      {selectedTypes.length === 0 && (
+                        <p className="text-sm text-[#ff00ff]">
+                          * Selecione pelo menos um serviço para continuar
+                        </p>
+                      )}
+
+                      {selectedTypes.length > 1 && (
+                        <p className="text-sm text-[#00ff41] flex items-center gap-1">
+                          <Zap className="w-4 h-4" />
+                          {selectedTypes.length} serviços selecionados — combo com desconto!
                         </p>
                       )}
 
