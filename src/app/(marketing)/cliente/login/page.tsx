@@ -182,6 +182,16 @@ export default function ClienteLoginPage() {
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
+          
+          {/* Demo */}
+          <div className="mt-4 pt-4 border-t border-dark-800 text-center">
+            <Link
+              href="/cliente"
+              className="text-xs text-dark-500 hover:text-dark-400 transition-colors"
+            >
+              ✨ Ver demonstração do painel
+            </Link>
+          </div>
         </div>
 
         {/* Footer */}

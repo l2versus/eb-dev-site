@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Github, Instagram, Mail, Terminal, MapPin, Phone, Heart, ArrowUp, Code2, ExternalLink, Sun, Moon } from "lucide-react";
+import { Menu, X, Github, Instagram, Mail, Terminal, MapPin, Phone, Heart, ArrowUp, Code2, ExternalLink, Sun, Moon, Lock } from "lucide-react";
 import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { ThemeProvider, useTheme } from "@/lib/theme-provider";
 
@@ -111,10 +111,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             
             {/* Access Buttons */}
             <Link
-              href="/cliente"
-              className="ml-2 px-4 py-2 text-sm font-semibold rounded-lg bg-[#ff00ff]/10 border border-[#ff00ff]/30 text-[#ff00ff] hover:bg-[#ff00ff]/20 hover:shadow-[0_0_20px_rgba(255,0,255,0.2)] transition-all"
+              href="/cliente/login"
+              className="ml-2 px-4 py-2 text-sm font-semibold rounded-lg bg-[#ff00ff]/10 border border-[#ff00ff]/30 text-[#ff00ff] hover:bg-[#ff00ff]/20 hover:shadow-[0_0_20px_rgba(255,0,255,0.2)] transition-all flex items-center gap-2"
             >
-              Área Cliente
+              <Lock className="h-4 w-4" />
+              <span className="hidden xl:inline">Área</span> Cliente
             </Link>
             <Link
               href="/admin"
@@ -168,11 +169,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 {/* Access Buttons Mobile */}
                 <div className="pt-4 border-t border-[#1e1e2e] space-y-3">
                   <Link
-                    href="/cliente"
+                    href="/cliente/login"
                     onClick={() => setMenuOpen(false)}
                     className="block w-full text-center px-4 py-3 text-sm font-semibold rounded-lg bg-[#ff00ff]/10 border border-[#ff00ff]/30 text-[#ff00ff]"
                   >
-                    Área Cliente
+                    🔐 Área Cliente
                   </Link>
                   <Link
                     href="/admin"
