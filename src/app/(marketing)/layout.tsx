@@ -30,10 +30,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { label: "Início", href: "#hero" },
-    { label: "Sobre", href: "#sobre" },
     { label: "Projetos", href: "#projetos" },
-    { label: "Pacotes", href: "#pacotes" },
     { label: "Depoimentos", href: "#depoimentos" },
+    { label: "Processo", href: "#processo" },
+    { label: "Pacotes", href: "#pacotes" },
     { label: "Orçamento", href: "/orcamento", isRoute: true },
   ];
 
@@ -308,9 +308,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               <ul className="space-y-3">
                 {[
                   { label: "Início", href: "#hero" },
-                  { label: "Sobre mim", href: "#sobre" },
-                  { label: "Tech Stack", href: "#stack" },
                   { label: "Projetos", href: "#projetos" },
+                  { label: "Processo", href: "#processo" },
+                  { label: "Pacotes", href: "#pacotes" },
                   { label: "Contato", href: "#contato" },
                   { label: "Orçamento", href: "/orcamento" },
                 ].map((item) => (

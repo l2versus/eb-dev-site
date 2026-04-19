@@ -989,860 +989,6 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          VIDEO INTRO — Meet Me Section
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f]" />
-        
-        <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-12">
-          <Reveal>
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
-                <span className="text-sm font-mono text-[#ff00ff]">
-                  {"<MeetTheCreator />"}
-                </span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                Conheça quem está por trás do{" "}
-                <span className="gradient-text-cyber">código</span>
-              </h2>
-              <p className="text-[#6b6b80] max-w-xl mx-auto">
-                2 minutos para você entender como posso ajudar seu negócio
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Video Container */}
-          <Reveal delay={0.2}>
-            <div className="relative rounded-3xl overflow-hidden border border-[#1e1e2e] glass-card">
-              <div className="aspect-video bg-[#0a0a0f] relative group">
-                <video
-                  id="hero-video"
-                  className="w-full h-full object-cover"
-                  src="/videos/video-app.mp4#t=0.5"
-                  playsInline
-                  preload="metadata"
-                  controls={false}
-                  onClick={(e) => {
-                    const v = e.currentTarget;
-                    const overlay = document.getElementById("video-play-overlay");
-                    if (v.paused) {
-                      v.controls = true;
-                      v.play();
-                      if (overlay) overlay.style.display = "none";
-                    }
-                  }}
-                />
-
-                {/* Custom Play Overlay — clique para iniciar */}
-                <div
-                  id="video-play-overlay"
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
-                  onClick={() => {
-                    const v = document.getElementById("hero-video") as HTMLVideoElement;
-                    if (v) {
-                      v.currentTime = 0;
-                      v.controls = true;
-                      v.play();
-                      const overlay = document.getElementById("video-play-overlay");
-                      if (overlay) overlay.style.display = "none";
-                    }
-                  }}
-                >
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-[#ff00ff] blur-xl opacity-40 animate-pulse" />
-                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-[#ff00ff] to-[#ff44ff] flex items-center justify-center shadow-lg shadow-[#ff00ff]/30 hover:scale-110 transition-transform">
-                      <svg className="h-7 w-7 sm:h-8 sm:w-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Decorative corners */}
-                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50 pointer-events-none z-20" />
-                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50 pointer-events-none z-20" />
-                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50 pointer-events-none z-20" />
-                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50 pointer-events-none z-20" />
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Video features */}
-          <Reveal delay={0.3}>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-8">
-              {[
-                { icon: "🎯", text: "Minha abordagem" },
-                { icon: "💡", text: "Como resolvo problemas" },
-                { icon: "🚀", text: "Resultados reais" },
-              ].map((item, i) => (
-                <div key={i} className="text-center p-3 sm:p-4 rounded-xl glass-card">
-                  <span className="text-2xl mb-2 block">{item.icon}</span>
-                  <span className="text-sm text-[#6b6b80]">{item.text}</span>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          CASE STUDY — Featured Project Deep Dive
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section id="case-study" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-          <Reveal>
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/20 bg-[#00ff41]/5 mb-6">
-                <Award className="w-4 h-4 text-[#00ff41]" />
-                <span className="text-sm font-mono text-[#00ff41]">
-                  Case Study em Destaque
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
-                De conceito a{" "}
-                <span className="neon-text-green">+150% de clientes</span>
-              </h2>
-              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
-                Veja como transformei a presença digital de uma clínica de estética
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Mockup/Screenshot */}
-            <Reveal direction="left">
-              <div className="relative">
-                <div className="relative rounded-2xl overflow-hidden border border-[#00ff41]/20 shadow-[0_0_60px_rgba(0,255,65,0.1)]">
-                  <Image
-                    src="/images/project-estetica.png"
-                    alt="Myka Procópio Case Study"
-                    width={600}
-                    height={400}
-                    className="w-full"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent" />
-                  
-                  {/* Floating metrics */}
-                  <motion.div
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{ repeat: Infinity, duration: 3 }}
-                    className="absolute top-4 right-4 glass-card rounded-xl px-4 py-3"
-                  >
-                    <div className="text-2xl font-black text-[#00ff41]">+150%</div>
-                    <div className="text-xs text-[#6b6b80]">Novos Clientes</div>
-                  </motion.div>
-                  
-                  <motion.div
-                    animate={{ y: [0, 5, 0] }}
-                    transition={{ repeat: Infinity, duration: 4 }}
-                    className="absolute bottom-4 left-4 glass-card rounded-xl px-4 py-3"
-                  >
-                    <div className="text-2xl font-black text-[#00f0ff]">0.8s</div>
-                    <div className="text-xs text-[#6b6b80]">Load Time</div>
-                  </motion.div>
-                </div>
-              </div>
-            </Reveal>
-
-            {/* Details */}
-            <Reveal direction="right" delay={0.2}>
-              <div>
-                <h3 className="text-2xl font-bold text-white mb-2">Myka Procópio Clínica</h3>
-                <p className="text-[#ff00ff] font-mono text-sm mb-6">Sistema SaaS Completo</p>
-                
-                {/* Problem/Solution */}
-                <div className="space-y-6 mb-8">
-                  <div className="glass-card rounded-xl p-6 border-l-4 border-[#ff00ff]">
-                    <h4 className="font-bold text-white mb-2 flex items-center gap-2">
-                      <span className="text-[#ff00ff]">❌</span> O Problema
-                    </h4>
-                    <p className="text-[#9999ab] text-sm">
-                      Agendamentos via WhatsApp, controle financeiro em planilha, sem presença digital profissional. Clínica perdia clientes para concorrentes com sites modernos.
-                    </p>
-                  </div>
-                  
-                  <div className="glass-card rounded-xl p-6 border-l-4 border-[#00ff41]">
-                    <h4 className="font-bold text-white mb-2 flex items-center gap-2">
-                      <span className="text-[#00ff41]">✅</span> A Solução
-                    </h4>
-                    <p className="text-[#9999ab] text-sm">
-                      Sistema completo: site institucional + agendamento online + dashboard financeiro + chatbot IA + notificações WhatsApp automatizadas.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Metrics grid */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {[
-                    { metric: "+150%", label: "Novos clientes/mês", color: "#00ff41" },
-                    { metric: "60%", label: "Menos no-shows", color: "#00f0ff" },
-                    { metric: "R$2k", label: "Economia mensal", color: "#ff00ff" },
-                    { metric: "4.9★", label: "Avaliação Google", color: "#ffaa00" },
-                  ].map((item, i) => (
-                    <div key={i} className="glass-card rounded-xl p-4 text-center">
-                      <div 
-                        className="text-2xl font-black"
-                        style={{ color: item.color, textShadow: `0 0 20px ${item.color}40` }}
-                      >
-                        {item.metric}
-                      </div>
-                      <div className="text-xs text-[#6b6b80]">{item.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Tech stack used */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {["Next.js", "TypeScript", "Prisma", "Mercado Pago", "Tailwind", "AI"].map((tech) => (
-                    <span key={tech} className="px-3 py-1 text-xs font-mono rounded-full bg-white/5 text-[#9999ab] border border-[#1e1e2e]">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                {/* CTA */}
-                <a
-                  href="https://www.mykaprocopio.com.br"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[#00ff41] hover:underline font-bold"
-                >
-                  Ver projeto ao vivo
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          VIDEO SHOWCASE — Demonstrações de Projetos
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section id="videos" className="relative py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0d0d15] to-[#08080d]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
-
-        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
-          <Reveal>
-            <div className="text-center mb-14">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
-                <svg className="w-4 h-4 text-[#ff00ff]" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                <span className="text-sm font-mono text-[#ff00ff]">
-                  {"<VideoShowcase />"}
-                </span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                Veja os projetos{" "}
-                <span className="gradient-text-cyber">em ação</span>
-              </h2>
-              <p className="text-[#6b6b80] max-w-xl mx-auto">
-                Demonstrações reais de projetos entregues — navegação, animações e funcionalidades
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Video Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "App Myka Procópio",
-                desc: "Aplicativo de estética com agendamento e acompanhamento de sessões",
-                src: "/videos/video-app.mp4",
-                poster: "/images/project-estetica.png",
-                color: "#ff00ff",
-                tag: "App Mobile",
-              },
-              {
-                title: "Myka Procópio — Detalhes",
-                desc: "Fluxo completo de agendamento e galeria de resultados",
-                src: "/videos/video-app.mp4",
-                poster: "/images/project-estetica.png",
-                color: "#00f0ff",
-                tag: "UX/UI",
-              },
-              {
-                title: "Myka Procópio — Admin",
-                desc: "Painel administrativo com gestão de clientes e financeiro",
-                src: "/videos/video-app.mp4",
-                poster: "/images/project-estetica.png",
-                color: "#00ff41",
-                tag: "Dashboard",
-              },
-            ].map((video, i) => (
-              <Reveal key={video.title} delay={i * 0.1}>
-                <div className="group relative rounded-2xl overflow-hidden border border-[#1e1e2e] bg-[#0f0f18] hover:border-[#ff00ff]/30 transition-all duration-500">
-                  {/* Video Player */}
-                  <div className="aspect-video relative bg-black">
-                    <video
-                      className="w-full h-full object-cover"
-                      src={video.src}
-                      poster={video.poster}
-                      muted
-                      loop
-                      playsInline
-                      preload="metadata"
-                      onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
-                      onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
-                      onTouchStart={(e) => {
-                        const v = e.target as HTMLVideoElement;
-                        if (v.paused) v.play(); else { v.pause(); v.currentTime = 0; }
-                      }}
-                    />
-                    {/* Play overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
-                      <div
-                        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
-                        style={{ backgroundColor: video.color, boxShadow: `0 0 30px ${video.color}40` }}
-                      >
-                        <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                      </div>
-                    </div>
-                    {/* Tag */}
-                    <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider glass" style={{ color: video.color }}>
-                      {video.tag}
-                    </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="text-sm font-bold text-white mb-1 group-hover:text-[#ff00ff] transition-colors">
-                      {video.title}
-                    </h3>
-                    <p className="text-xs text-[#6b6b80] line-clamp-2">{video.desc}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          {/* Hint */}
-          <Reveal delay={0.4}>
-            <p className="text-center text-xs text-[#6b6b80] mt-8">
-              Passe o mouse (ou toque) nos vídeos para assistir · Mais projetos em breve
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          GOOGLE REVIEWS — Social Proof
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[#08080d]" />
-        
-        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
-          <Reveal>
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <svg className="w-8 h-8" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                <span className="text-2xl font-bold text-white">4.9</span>
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-[#6b6b80] text-sm">
-                Avaliação média no Google • 15+ reviews
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Reviews carousel */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Mykaele P.",
-                avatar: "MP",
-                rating: 5,
-                text: "Profissional excepcional! Meu site ficou muito além do esperado. Comunicação clara e entrega antes do prazo. Super recomendo!",
-                date: "há 2 semanas",
-              },
-              {
-                name: "Lucas O.",
-                avatar: "LO",
-                rating: 5,
-                text: "Emmanuel transformou nossa ideia em realidade. O sistema que ele desenvolveu aumentou nossa produtividade em 200%. Trabalho impecável!",
-                date: "há 1 mês",
-              },
-              {
-                name: "Amanda S.",
-                avatar: "AS",
-                rating: 5,
-                text: "Incrível atenção aos detalhes! O e-commerce que ele criou já faturou R$50k no primeiro mês. Investimento que se pagou rápido.",
-                date: "há 1 mês",
-              },
-            ].map((review, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <div className="glass-card rounded-2xl p-6 h-full border border-[#1e1e2e]">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00f0ff] to-[#ff00ff] flex items-center justify-center text-sm font-bold text-white">
-                        {review.avatar}
-                      </div>
-                      <div>
-                        <p className="font-bold text-white text-sm">{review.name}</p>
-                        <p className="text-xs text-[#6b6b80]">{review.date}</p>
-                      </div>
-                    </div>
-                    <svg className="w-5 h-5 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    </svg>
-                  </div>
-                  
-                  {/* Stars */}
-                  <div className="flex text-yellow-400 mb-3">
-                    {[...Array(review.rating)].map((_, si) => (
-                      <Star key={si} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  
-                  {/* Text */}
-                  <p className="text-[#9999ab] text-sm leading-relaxed">
-                    "{review.text}"
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-
-          <Reveal delay={0.3}>
-            <div className="text-center mt-8">
-              <a
-                href="https://g.page/r/emmanuelbezerradev/review"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-[#00f0ff] hover:underline"
-              >
-                Ver todas as avaliações no Google
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          ABOUT — Parallax Photo + Cinematic Text
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section
-        id="sobre"
-        ref={aboutRef}
-        className="relative py-16 sm:py-24 lg:py-32 overflow-hidden"
-      >
-        {/* Background effects */}
-        <div className="absolute inset-0 cyber-grid opacity-20" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Photo with parallax + decorative elements */}
-            <Reveal direction="left">
-              <div className="relative flex justify-center">
-                {/* Main photo container */}
-                <motion.div
-                  style={{ y: photoY, rotate: photoRotate }}
-                  className="relative"
-                >
-                  {/* Neon border frame */}
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#00f0ff]/30 via-transparent to-[#ff00ff]/30 blur-sm" />
-
-                  <div className="relative w-80 h-96 rounded-2xl overflow-hidden border border-[#00f0ff]/15">
-                    <Image
-                      src="/images/foto-perfil.png"
-                      alt="Emmanuel Bezerra"
-                      fill
-                      className="object-cover"
-                      sizes="320px"
-                    />
-                    {/* Gradient overlays */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/60 via-transparent to-transparent" />
-                    <div className="absolute inset-0 scanlines opacity-15" />
-                  </div>
-                </motion.div>
-
-                {/* Decorative floating code snippet */}
-                <motion.div
-                  animate={{ rotate: [0, 3, -3, 0], y: [0, -8, 0] }}
-                  transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-                  className="absolute -top-6 right-0 lg:-right-6 glass-card rounded-xl px-3 py-2 border border-[#00f0ff]/20 backdrop-blur-md hidden sm:block"
-                >
-                  <pre className="text-[10px] font-mono text-[#00f0ff]/70 leading-relaxed">
-                    <span className="text-[#ff00ff]/60">const</span> dev = {'{'}<br/>
-                    &nbsp;&nbsp;stack: <span className="text-[#00ff41]/70">&apos;fullstack&apos;</span>,<br/>
-                    &nbsp;&nbsp;passion: <span className="text-[#00f0ff]">∞</span><br/>
-                    {'}'};
-                  </pre>
-                </motion.div>
-
-                {/* Decorative glowing orb */}
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    opacity: [0.4, 0.8, 0.4],
-                  }}
-                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                  className="absolute bottom-0 left-0 w-16 h-16 rounded-full hidden sm:block"
-                  style={{
-                    background: "radial-gradient(circle, rgba(255,0,255,0.3) 0%, transparent 70%)",
-                    boxShadow: "0 0 40px rgba(255,0,255,0.15)",
-                  }}
-                />
-
-                {/* Experience badge */}
-                <motion.div
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                  className="absolute right-0 sm:-right-4 top-1/4 glass-card rounded-xl px-4 py-3 text-center"
-                >
-                  <div className="text-2xl font-black neon-text-cyan">3+</div>
-                  <div className="text-[10px] text-[#6b6b80] uppercase tracking-wider font-mono">
-                    Anos XP
-                  </div>
-                </motion.div>
-
-                {/* Projects badge */}
-                <motion.div
-                  animate={{ y: [0, 8, 0] }}
-                  transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                  className="absolute left-0 sm:-left-4 bottom-1/4 glass-card rounded-xl px-4 py-3 text-center"
-                >
-                  <div className="text-2xl font-black neon-text-magenta">15+</div>
-                  <div className="text-[10px] text-[#6b6b80] uppercase tracking-wider font-mono">
-                    Projetos
-                  </div>
-                </motion.div>
-              </div>
-            </Reveal>
-
-            {/* Text */}
-            <Reveal direction="right" delay={0.2}>
-              <div>
-                {/* Section label */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-px w-12 bg-gradient-to-r from-[#00f0ff] to-transparent" />
-                  <span className="text-sm font-mono text-[#00f0ff] uppercase tracking-[0.2em]">
-                    Sobre mim
-                  </span>
-                </div>
-
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-8 leading-tight">
-                  <motion.span
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                    className="block"
-                  >
-                    Código limpo.
-                  </motion.span>
-                  <motion.span
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                    className="block gradient-text-cyber"
-                  >
-                    Alta performance.
-                  </motion.span>
-                  <motion.span
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    className="block text-[#6b6b80]"
-                  >
-                    Resultados reais.
-                  </motion.span>
-                </h2>
-
-                <div className="space-y-5 text-[#9999ab] leading-relaxed text-lg">
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                  >
-                    Sou desenvolvedor Full-Stack focado em{" "}
-                    <span className="text-white font-medium">aplicações web modernas</span>{" "}
-                    e escaláveis. Cada projeto é uma oportunidade de entregar
-                    excelência técnica e impacto real.
-                  </motion.p>
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.35 }}
-                  >
-                    Do{" "}
-                    <span className="text-[#00f0ff]">frontend</span>{" "}
-                    com React/Next.js ao{" "}
-                    <span className="text-[#ff00ff]">backend</span>{" "}
-                    com Node.js e Python — domino toda a stack.
-                    Bancos SQL, APIs robustas, Docker, CI/CD e deploy em cloud.
-                  </motion.p>
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                  >
-                    Baseado em{" "}
-                    <span className="text-white font-medium">Fortaleza - CE</span>,
-                    atendo clientes de todo o Brasil com projetos que
-                    vão de landing pages a plataformas SaaS completas.
-                  </motion.p>
-                </div>
-
-                {/* Stats row with animated counters */}
-                <motion.div
-                  initial={{ opacity: 0, scaleX: 0 }}
-                  whileInView={{ opacity: 1, scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="h-px mt-10 bg-gradient-to-r from-transparent via-[#00f0ff]/30 to-transparent"
-                />
-                <div className="grid grid-cols-3 gap-6 pt-10">
-                  {[
-                    { value: 3, suffix: "+", label: "Anos de\nexperiência", color: "#00f0ff" },
-                    { value: 15, suffix: "+", label: "Projetos\nentregues", color: "#ff00ff" },
-                    { value: 100, suffix: "%", label: "Clientes\nsatisfeitos", color: "#00ff41" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-center">
-                      <div
-                        className="text-3xl sm:text-4xl font-black"
-                        style={{
-                          color: stat.color,
-                          textShadow: `0 0 20px ${stat.color}40`,
-                        }}
-                      >
-                        <Counter value={stat.value} suffix={stat.suffix} />
-                      </div>
-                      <div className="text-xs text-[#6b6b80] mt-2 whitespace-pre-line font-mono uppercase tracking-wider">
-                        {stat.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          TECH STACK — Interactive 3D Cards
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section id="stack" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.015] to-transparent" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
-
-        {/* Floating decorative particles */}
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={`stack-particle-${i}`}
-            className="absolute w-1 h-1 rounded-full"
-            style={{
-              left: `${15 + i * 18}%`,
-              top: `${20 + (i % 3) * 25}%`,
-              background: i % 2 === 0 ? "#00f0ff" : "#ff00ff",
-              boxShadow: `0 0 10px ${i % 2 === 0 ? "#00f0ff" : "#ff00ff"}60`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.3, 0.8, 0.3],
-              scale: [1, 1.5, 1],
-            }}
-            transition={{
-              duration: 3 + i,
-              repeat: Infinity,
-              delay: i * 0.5,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-
-        <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-          {/* Header */}
-          <Reveal>
-            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="h-px w-12 bg-gradient-to-r from-transparent to-[#00f0ff]" />
-                <span className="text-sm font-mono text-[#00f0ff] uppercase tracking-[0.2em]">
-                  Habilidades
-                </span>
-                <div className="h-px w-12 bg-gradient-to-l from-transparent to-[#00f0ff]" />
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-                Minha{" "}
-                <span className="gradient-text-cyber">Tech Stack</span>
-              </h2>
-            </div>
-          </Reveal>
-
-          {/* Service pillars */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 sm:mb-16 lg:mb-20">
-            {[
-              {
-                icon: <Code2 className="h-7 w-7" />,
-                title: "Frontend",
-                desc: "React, Next.js, TypeScript, Tailwind CSS, Framer Motion. Interfaces responsivas, acessíveis e com animações cinematográficas.",
-                color: "#00f0ff",
-                items: ["React / Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
-              },
-              {
-                icon: <Server className="h-7 w-7" />,
-                title: "Backend",
-                desc: "Node.js, Python, APIs REST & GraphQL, PostgreSQL, Prisma ORM. Arquitetura limpa, segura e performática.",
-                color: "#ff00ff",
-                items: ["Node.js / Express", "Python / FastAPI", "PostgreSQL / Prisma", "Redis / Queue"],
-              },
-              {
-                icon: <Layers className="h-7 w-7" />,
-                title: "DevOps & Cloud",
-                desc: "Docker, CI/CD, Linux, AWS, Vercel, Nginx. Infra automatizada do dev ao production.",
-                color: "#00ff41",
-                items: ["Docker / Compose", "GitHub Actions", "AWS / Vercel", "Nginx / SSL"],
-              },
-            ].map((service, i) => (
-              <Reveal key={service.title} delay={i * 0.15} direction="scale">
-                <TiltCard className="h-full">
-                  <div className="glass-card rounded-2xl p-8 h-full relative overflow-hidden group">
-                    {/* Subtle glow on hover */}
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                      style={{
-                        background: `radial-gradient(circle at 50% 0%, ${service.color}08 0%, transparent 70%)`,
-                      }}
-                    />
-
-                    <div className="relative z-10">
-                      <div
-                        className="flex h-14 w-14 items-center justify-center rounded-xl mb-6"
-                        style={{
-                          background: `${service.color}10`,
-                          border: `1px solid ${service.color}25`,
-                          color: service.color,
-                          boxShadow: `0 0 20px ${service.color}10`,
-                        }}
-                      >
-                        {service.icon}
-                      </div>
-
-                      <h3 className="text-xl font-bold text-white mb-3">
-                        {service.title}
-                      </h3>
-
-                      <p className="text-sm text-[#6b6b80] leading-relaxed mb-6">
-                        {service.desc}
-                      </p>
-
-                      {/* Bullet list */}
-                      <ul className="space-y-2">
-                        {service.items.map((item) => (
-                          <li key={item} className="flex items-center gap-2 text-sm">
-                            <div
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ background: service.color }}
-                            />
-                            <span className="text-[#9999ab]">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </TiltCard>
-              </Reveal>
-            ))}
-          </div>
-
-          {/* Tech grid with skill bars - CLICÁVEL */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {techStack.map((tech, i) => {
-              const catColors: Record<string, string> = {
-                Frontend: "#00f0ff",
-                Backend: "#ff00ff",
-                DevOps: "#00ff41",
-              };
-              const color = catColors[tech.cat] || "#00f0ff";
-              
-              return (
-                <Reveal key={tech.name} delay={i * 0.04}>
-                  <motion.div
-                    whileHover={{ y: -8, scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    onClick={() => setSelectedTech(tech)}
-                    className="glass-card rounded-xl p-4 cursor-pointer group relative overflow-hidden"
-                  >
-                    {/* Hover glow effect */}
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{
-                        background: `radial-gradient(circle at 50% 50%, ${color}15 0%, transparent 70%)`,
-                      }}
-                    />
-                    
-                    {/* Click indicator */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: color, boxShadow: `0 0 8px ${color}` }} />
-                    </motion.div>
-                    
-                    <div className="relative z-10 flex items-center gap-3 mb-3">
-                      <span className="text-2xl group-hover:scale-110 transition-transform">{tech.icon}</span>
-                      <div>
-                        <div className="text-sm font-semibold text-white group-hover:text-[#00f0ff] transition-colors">
-                          {tech.name}
-                        </div>
-                        <div className="text-[10px] text-[#6b6b80] font-mono">
-                          {tech.cat}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Skill bar */}
-                    <div className="relative z-10 h-1.5 bg-[#1e1e2e] rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${tech.level}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1.2, delay: i * 0.05, ease: "easeOut" }}
-                        className="h-full rounded-full"
-                        style={{
-                          background: `linear-gradient(to right, ${color}, ${color}aa)`,
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Hint text */}
-                    <div className="relative z-10 mt-2 text-[9px] text-[#6b6b80] font-mono opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                      Clique para saber mais
-                    </div>
-                  </motion.div>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
           PROJECTS — Cinematic Showcase
       ═══════════════════════════════════════════════════════════════════ */}
       <section id="projetos" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
@@ -2070,6 +1216,249 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
+          VIDEO SHOWCASE — Demonstrações de Projetos
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="videos" className="relative py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0d0d15] to-[#08080d]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-14">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
+                <svg className="w-4 h-4 text-[#ff00ff]" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                <span className="text-sm font-mono text-[#ff00ff]">
+                  {"<VideoShowcase />"}
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                Veja os projetos{" "}
+                <span className="gradient-text-cyber">em ação</span>
+              </h2>
+              <p className="text-[#6b6b80] max-w-xl mx-auto">
+                Demonstrações reais de projetos entregues — navegação, animações e funcionalidades
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Video Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "App Myka Procópio",
+                desc: "Aplicativo de estética com agendamento e acompanhamento de sessões",
+                src: "/videos/video-app.mp4",
+                poster: "/images/project-estetica.png",
+                color: "#ff00ff",
+                tag: "App Mobile",
+              },
+              {
+                title: "Myka Procópio — Detalhes",
+                desc: "Fluxo completo de agendamento e galeria de resultados",
+                src: "/videos/video-app.mp4",
+                poster: "/images/project-estetica.png",
+                color: "#00f0ff",
+                tag: "UX/UI",
+              },
+              {
+                title: "Myka Procópio — Admin",
+                desc: "Painel administrativo com gestão de clientes e financeiro",
+                src: "/videos/video-app.mp4",
+                poster: "/images/project-estetica.png",
+                color: "#00ff41",
+                tag: "Dashboard",
+              },
+            ].map((video, i) => (
+              <Reveal key={video.title} delay={i * 0.1}>
+                <div className="group relative rounded-2xl overflow-hidden border border-[#1e1e2e] bg-[#0f0f18] hover:border-[#ff00ff]/30 transition-all duration-500">
+                  {/* Video Player */}
+                  <div className="aspect-video relative bg-black">
+                    <video
+                      className="w-full h-full object-cover"
+                      src={video.src}
+                      poster={video.poster}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
+                      onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
+                      onTouchStart={(e) => {
+                        const v = e.target as HTMLVideoElement;
+                        if (v.paused) v.play(); else { v.pause(); v.currentTime = 0; }
+                      }}
+                    />
+                    {/* Play overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                      <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
+                        style={{ backgroundColor: video.color, boxShadow: `0 0 30px ${video.color}40` }}
+                      >
+                        <svg className="w-6 h-6 text-black ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                    {/* Tag */}
+                    <div className="absolute top-3 left-3 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider glass" style={{ color: video.color }}>
+                      {video.tag}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4">
+                    <h3 className="text-sm font-bold text-white mb-1 group-hover:text-[#ff00ff] transition-colors">
+                      {video.title}
+                    </h3>
+                    <p className="text-xs text-[#6b6b80] line-clamp-2">{video.desc}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Hint */}
+          <Reveal delay={0.4}>
+            <p className="text-center text-xs text-[#6b6b80] mt-8">
+              Passe o mouse (ou toque) nos vídeos para assistir · Mais projetos em breve
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          CASE STUDY — Featured Project Deep Dive
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="case-study" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/20 bg-[#00ff41]/5 mb-6">
+                <Award className="w-4 h-4 text-[#00ff41]" />
+                <span className="text-sm font-mono text-[#00ff41]">
+                  Case Study em Destaque
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
+                De conceito a{" "}
+                <span className="neon-text-green">+150% de clientes</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
+                Veja como transformei a presença digital de uma clínica de estética
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Mockup/Screenshot */}
+            <Reveal direction="left">
+              <div className="relative">
+                <div className="relative rounded-2xl overflow-hidden border border-[#00ff41]/20 shadow-[0_0_60px_rgba(0,255,65,0.1)]">
+                  <Image
+                    src="/images/project-estetica.png"
+                    alt="Myka Procópio Case Study"
+                    width={600}
+                    height={400}
+                    className="w-full"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent" />
+                  
+                  {/* Floating metrics */}
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ repeat: Infinity, duration: 3 }}
+                    className="absolute top-4 right-4 glass-card rounded-xl px-4 py-3"
+                  >
+                    <div className="text-2xl font-black text-[#00ff41]">+150%</div>
+                    <div className="text-xs text-[#6b6b80]">Novos Clientes</div>
+                  </motion.div>
+                  
+                  <motion.div
+                    animate={{ y: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 4 }}
+                    className="absolute bottom-4 left-4 glass-card rounded-xl px-4 py-3"
+                  >
+                    <div className="text-2xl font-black text-[#00f0ff]">0.8s</div>
+                    <div className="text-xs text-[#6b6b80]">Load Time</div>
+                  </motion.div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Details */}
+            <Reveal direction="right" delay={0.2}>
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-2">Myka Procópio Clínica</h3>
+                <p className="text-[#ff00ff] font-mono text-sm mb-6">Sistema SaaS Completo</p>
+                
+                {/* Problem/Solution */}
+                <div className="space-y-6 mb-8">
+                  <div className="glass-card rounded-xl p-6 border-l-4 border-[#ff00ff]">
+                    <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                      <span className="text-[#ff00ff]">❌</span> O Problema
+                    </h4>
+                    <p className="text-[#9999ab] text-sm">
+                      Agendamentos via WhatsApp, controle financeiro em planilha, sem presença digital profissional. Clínica perdia clientes para concorrentes com sites modernos.
+                    </p>
+                  </div>
+                  
+                  <div className="glass-card rounded-xl p-6 border-l-4 border-[#00ff41]">
+                    <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                      <span className="text-[#00ff41]">✅</span> A Solução
+                    </h4>
+                    <p className="text-[#9999ab] text-sm">
+                      Sistema completo: site institucional + agendamento online + dashboard financeiro + chatbot IA + notificações WhatsApp automatizadas.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Metrics grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  {[
+                    { metric: "+150%", label: "Novos clientes/mês", color: "#00ff41" },
+                    { metric: "60%", label: "Menos no-shows", color: "#00f0ff" },
+                    { metric: "R$2k", label: "Economia mensal", color: "#ff00ff" },
+                    { metric: "4.9★", label: "Avaliação Google", color: "#ffaa00" },
+                  ].map((item, i) => (
+                    <div key={i} className="glass-card rounded-xl p-4 text-center">
+                      <div 
+                        className="text-2xl font-black"
+                        style={{ color: item.color, textShadow: `0 0 20px ${item.color}40` }}
+                      >
+                        {item.metric}
+                      </div>
+                      <div className="text-xs text-[#6b6b80]">{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Tech stack used */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {["Next.js", "TypeScript", "Prisma", "Mercado Pago", "Tailwind", "AI"].map((tech) => (
+                    <span key={tech} className="px-3 py-1 text-xs font-mono rounded-full bg-white/5 text-[#9999ab] border border-[#1e1e2e]">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <a
+                  href="https://www.mykaprocopio.com.br"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-[#00ff41] hover:underline font-bold"
+                >
+                  Ver projeto ao vivo
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
           TESTIMONIALS — Client Reviews
       ═══════════════════════════════════════════════════════════════════ */}
       <section id="depoimentos" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
@@ -2198,79 +1587,104 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          FAQ — Frequently Asked Questions
+          GOOGLE REVIEWS — Social Proof
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="faq" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-[#08080d]" />
         
-        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-12">
-          {/* Section Header */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
           <Reveal>
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/20 bg-[#00ff41]/5 mb-6">
-                <span className="text-sm font-mono text-[#00ff41]">
-                  {"<FAQ />"}
-                </span>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <svg className="w-8 h-8" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span className="text-2xl font-bold text-white">4.9</span>
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-current" />
+                  ))}
+                </div>
               </div>
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
-                Perguntas{" "}
-                <span className="gradient-text-cyber">frequentes</span>
-              </h2>
-              <p className="text-[#6b6b80] text-lg">
-                Dúvidas comuns sobre meus serviços e processo de trabalho
+              <p className="text-[#6b6b80] text-sm">
+                Avaliação média no Google • 15+ reviews
               </p>
             </div>
           </Reveal>
 
-          {/* FAQ Accordion */}
-          <div className="space-y-4">
+          {/* Reviews carousel */}
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                q: "Qual é o prazo médio de entrega de um projeto?",
-                a: "Depende da complexidade: Landing pages de 1-2 semanas, sites institucionais de 2-4 semanas, e-commerces ou apps de 4-8 semanas. Sempre defino prazos realistas após entender seu projeto.",
-                color: "#00f0ff",
+                name: "Mykaele P.",
+                avatar: "MP",
+                rating: 5,
+                text: "Profissional excepcional! Meu site ficou muito além do esperado. Comunicação clara e entrega antes do prazo. Super recomendo!",
+                date: "há 2 semanas",
               },
               {
-                q: "Como funciona o processo de desenvolvimento?",
-                a: "1) Briefing e análise de requisitos, 2) Proposta e orçamento, 3) Wireframes e aprovação do design, 4) Desenvolvimento com atualizações semanais, 5) Testes e ajustes, 6) Deploy e entrega com documentação.",
-                color: "#ff00ff",
+                name: "Lucas O.",
+                avatar: "LO",
+                rating: 5,
+                text: "Emmanuel transformou nossa ideia em realidade. O sistema que ele desenvolveu aumentou nossa produtividade em 200%. Trabalho impecável!",
+                date: "há 1 mês",
               },
               {
-                q: "Você oferece suporte após a entrega?",
-                a: "Sim! Ofereço 30 dias de suporte gratuito para correção de bugs. Também tenho planos de manutenção mensal para atualizações, novas features e suporte técnico contínuo.",
-                color: "#00ff41",
+                name: "Amanda S.",
+                avatar: "AS",
+                rating: 5,
+                text: "Incrível atenção aos detalhes! O e-commerce que ele criou já faturou R$50k no primeiro mês. Investimento que se pagou rápido.",
+                date: "há 1 mês",
               },
-              {
-                q: "Quais formas de pagamento você aceita?",
-                a: "Aceito PIX, transferência bancária e cartão de crédito (via Mercado Pago). Para projetos maiores, trabalho com pagamento em etapas: entrada + parcelas no desenvolvimento + saldo na entrega.",
-                color: "#00f0ff",
-              },
-              {
-                q: "Você desenvolve para mobile também?",
-                a: "Sim! Desenvolvo apps mobile com React Native (iOS e Android) e também PWAs (Progressive Web Apps) que funcionam como apps instaláveis diretamente do navegador.",
-                color: "#ff00ff",
-              },
-              {
-                q: "O site fica responsivo em todos os dispositivos?",
-                a: "Com certeza! Todos os meus projetos são desenvolvidos com mobile-first, garantindo perfeito funcionamento em celulares, tablets, laptops e desktops de qualquer tamanho.",
-                color: "#00ff41",
-              },
-            ].map((faq, i) => (
-              <FAQItem key={i} faq={faq} index={i} />
+            ].map((review, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <div className="glass-card rounded-2xl p-6 h-full border border-[#1e1e2e]">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00f0ff] to-[#ff00ff] flex items-center justify-center text-sm font-bold text-white">
+                        {review.avatar}
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-sm">{review.name}</p>
+                        <p className="text-xs text-[#6b6b80]">{review.date}</p>
+                      </div>
+                    </div>
+                    <svg className="w-5 h-5 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Stars */}
+                  <div className="flex text-yellow-400 mb-3">
+                    {[...Array(review.rating)].map((_, si) => (
+                      <Star key={si} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  
+                  {/* Text */}
+                  <p className="text-[#9999ab] text-sm leading-relaxed">
+                    "{review.text}"
+                  </p>
+                </div>
+              </Reveal>
             ))}
           </div>
 
-          {/* CTA */}
-          <Reveal delay={0.4}>
-            <div className="text-center mt-12">
-              <p className="text-[#6b6b80] mb-4">Não encontrou sua dúvida?</p>
+          <Reveal delay={0.3}>
+            <div className="text-center mt-8">
               <a
-                href="#contato"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-500"
+                href="https://g.page/r/emmanuelbezerradev/review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-[#00f0ff] hover:underline"
               >
-                <Mail className="h-4 w-4" />
-                Entre em contato
+                Ver todas as avaliações no Google
+                <ExternalLink className="w-4 h-4" />
               </a>
             </div>
           </Reveal>
@@ -2278,181 +1692,98 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CERTIFICATIONS — Skills & Badges
+          VIDEO INTRO — Meet Me Section
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="certificacoes" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-          <Reveal>
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-6">
-                <span className="text-sm font-mono text-[#00f0ff]">
-                  {"<Certifications />"}
-                </span>
-              </div>
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
-                Certificações &{" "}
-                <span className="gradient-text-cyber">Skills</span>
-              </h2>
-              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
-                Aprendizado contínuo é a chave para entregar soluções de qualidade
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { name: "React.js", provider: "Meta", year: "2023", icon: "⚛️", color: "#00f0ff" },
-              { name: "Node.js", provider: "OpenJS", year: "2023", icon: "🟢", color: "#00ff41" },
-              { name: "TypeScript", provider: "Microsoft", year: "2024", icon: "📘", color: "#3178c6" },
-              { name: "AWS Cloud", provider: "Amazon", year: "2024", icon: "☁️", color: "#ff9900" },
-              { name: "Docker", provider: "Docker Inc", year: "2023", icon: "🐳", color: "#2496ed" },
-              { name: "PostgreSQL", provider: "EDB", year: "2023", icon: "🐘", color: "#336791" },
-              { name: "Next.js", provider: "Vercel", year: "2024", icon: "▲", color: "#ffffff" },
-              { name: "Python", provider: "PSF", year: "2023", icon: "🐍", color: "#ffd43b" },
-            ].map((cert, i) => (
-              <Reveal key={i} delay={i * 0.05}>
-                <motion.div
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  className="glass-card p-6 rounded-xl border border-[#1e1e2e] hover:border-[color:var(--cert-color)]/30 transition-all duration-300"
-                  style={{ "--cert-color": cert.color } as React.CSSProperties}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-3xl">{cert.icon}</span>
-                    <span className="text-xs font-mono px-2 py-1 rounded-full bg-white/5 text-[#6b6b80]">
-                      {cert.year}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-white mb-1">{cert.name}</h3>
-                  <p className="text-sm text-[#6b6b80]">{cert.provider}</p>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          BLOG — Video Showcase
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section id="blog" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f]" />
         
         <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-12">
           <Reveal>
-            <div className="text-center mb-10 sm:mb-16">
+            <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
                 <span className="text-sm font-mono text-[#ff00ff]">
-                  {"<Demo />"}
+                  {"<MeetTheCreator />"}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
-                Veja em{" "}
-                <span className="gradient-text-cyber">Ação</span>
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                Conheça quem está por trás do{" "}
+                <span className="gradient-text-cyber">código</span>
               </h2>
-              <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
-                Uma demonstração real do tipo de aplicação que eu desenvolvo
+              <p className="text-[#6b6b80] max-w-xl mx-auto">
+                2 minutos para você entender como posso ajudar seu negócio
               </p>
             </div>
           </Reveal>
 
-          <Reveal delay={0.15}>
-            <div className="relative group">
-              {/* Glow border */}
-              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#00f0ff]/20 via-[#ff00ff]/20 to-[#00ff41]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              
-              <div className="relative glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-[#1e1e2e] group-hover:border-[#ff00ff]/30 transition-all duration-500">
+          {/* Video Container */}
+          <Reveal delay={0.2}>
+            <div className="relative rounded-3xl overflow-hidden border border-[#1e1e2e] glass-card">
+              <div className="aspect-video bg-[#0a0a0f] relative group">
                 <video
-                  className="w-full aspect-video object-cover"
-                  controls
+                  id="hero-video"
+                  className="w-full h-full object-cover"
+                  src="/videos/video-app.mp4#t=0.5"
                   playsInline
                   preload="metadata"
-                  poster=""
-                >
-                  <source src="/videos/Next.mp4" type="video/mp4" />
-                  Seu navegador não suporta vídeos HTML5.
-                </video>
-              </div>
-            </div>
-          </Reveal>
+                  controls={false}
+                  onClick={(e) => {
+                    const v = e.currentTarget;
+                    const overlay = document.getElementById("video-play-overlay");
+                    if (v.paused) {
+                      v.controls = true;
+                      v.play();
+                      if (overlay) overlay.style.display = "none";
+                    }
+                  }}
+                />
 
-          <Reveal delay={0.3}>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-8 sm:mt-12">
-              <div className="flex items-center gap-2 text-sm text-[#6b6b80]">
-                <div className="w-2 h-2 rounded-full bg-[#00f0ff]" />
-                Design Responsivo
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#6b6b80]">
-                <div className="w-2 h-2 rounded-full bg-[#ff00ff]" />
-                Animações Fluidas
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#6b6b80]">
-                <div className="w-2 h-2 rounded-full bg-[#00ff41]" />
-                Alta Performance
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          NEWSLETTER — Subscribe CTA
-      ═══════════════════════════════════════════════════════════════════ */}
-      <section id="newsletter" className="relative py-24">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
-        
-        <div className="relative z-10 max-w-3xl mx-auto px-6 lg:px-12">
-          <Reveal>
-            <div className="glass-card rounded-3xl p-10 lg:p-16 border border-[#00ff41]/20 text-center relative overflow-hidden">
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#00ff41] rounded-full blur-[150px] opacity-5" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#00f0ff] rounded-full blur-[120px] opacity-5" />
-              
-              <div className="relative z-10">
-                <motion.div
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
-                  className="text-5xl mb-6"
-                >
-                  📬
-                </motion.div>
-                
-                <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                  Receba dicas de{" "}
-                  <span className="neon-text-green">dev</span>
-                </h2>
-                <p className="text-[#9999ab] mb-8 max-w-md mx-auto">
-                  Artigos, tutoriais e novidades sobre React, Next.js e desenvolvimento web moderno. Sem spam, prometo!
-                </p>
-                
-                <form 
-                  className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    // TODO: Integrar com serviço de newsletter
-                    alert("Newsletter em breve! Por enquanto, me siga no Instagram @emmanuelbezerra_");
+                {/* Custom Play Overlay — clique para iniciar */}
+                <div
+                  id="video-play-overlay"
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+                  onClick={() => {
+                    const v = document.getElementById("hero-video") as HTMLVideoElement;
+                    if (v) {
+                      v.currentTime = 0;
+                      v.controls = true;
+                      v.play();
+                      const overlay = document.getElementById("video-play-overlay");
+                      if (overlay) overlay.style.display = "none";
+                    }
                   }}
                 >
-                  <input
-                    type="email"
-                    placeholder="seu@email.com"
-                    className="flex-1 px-5 py-4 rounded-xl bg-white/5 border border-[#1e1e2e] text-white placeholder:text-[#6b6b80] focus:border-[#00ff41]/50 focus:outline-none transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    className="px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.5)] transition-all duration-300"
-                  >
-                    Inscrever
-                  </button>
-                </form>
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-[#ff00ff] blur-xl opacity-40 animate-pulse" />
+                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-[#ff00ff] to-[#ff44ff] flex items-center justify-center shadow-lg shadow-[#ff00ff]/30 hover:scale-110 transition-transform">
+                      <svg className="h-7 w-7 sm:h-8 sm:w-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 
-                <p className="text-xs text-[#6b6b80] mt-4">
-                  +500 devs já inscritos • Cancele quando quiser
-                </p>
+                {/* Decorative corners */}
+                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-[#00f0ff]/50 pointer-events-none z-20" />
+                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-[#00f0ff]/50 pointer-events-none z-20" />
+                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-[#ff00ff]/50 pointer-events-none z-20" />
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-[#ff00ff]/50 pointer-events-none z-20" />
               </div>
+            </div>
+          </Reveal>
+
+          {/* Video features */}
+          <Reveal delay={0.3}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-8">
+              {[
+                { icon: "🎯", text: "Minha abordagem" },
+                { icon: "💡", text: "Como resolvo problemas" },
+                { icon: "🚀", text: "Resultados reais" },
+              ].map((item, i) => (
+                <div key={i} className="text-center p-3 sm:p-4 rounded-xl glass-card">
+                  <span className="text-2xl mb-2 block">{item.icon}</span>
+                  <span className="text-sm text-[#6b6b80]">{item.text}</span>
+                </div>
+              ))}
             </div>
           </Reveal>
         </div>
@@ -2950,6 +2281,86 @@ export default function HomePage() {
                   📞 Discovery call de 30min • Sem compromisso • 100% gratuita
                 </p>
               </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          FAQ — Frequently Asked Questions
+      ═══════════════════════════════════════════════════════════════════ */}
+      <section id="faq" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-12">
+          {/* Section Header */}
+          <Reveal>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00ff41]/20 bg-[#00ff41]/5 mb-6">
+                <span className="text-sm font-mono text-[#00ff41]">
+                  {"<FAQ />"}
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
+                Perguntas{" "}
+                <span className="gradient-text-cyber">frequentes</span>
+              </h2>
+              <p className="text-[#6b6b80] text-lg">
+                Dúvidas comuns sobre meus serviços e processo de trabalho
+              </p>
+            </div>
+          </Reveal>
+
+          {/* FAQ Accordion */}
+          <div className="space-y-4">
+            {[
+              {
+                q: "Qual é o prazo médio de entrega de um projeto?",
+                a: "Depende da complexidade: Landing pages de 1-2 semanas, sites institucionais de 2-4 semanas, e-commerces ou apps de 4-8 semanas. Sempre defino prazos realistas após entender seu projeto.",
+                color: "#00f0ff",
+              },
+              {
+                q: "Como funciona o processo de desenvolvimento?",
+                a: "1) Briefing e análise de requisitos, 2) Proposta e orçamento, 3) Wireframes e aprovação do design, 4) Desenvolvimento com atualizações semanais, 5) Testes e ajustes, 6) Deploy e entrega com documentação.",
+                color: "#ff00ff",
+              },
+              {
+                q: "Você oferece suporte após a entrega?",
+                a: "Sim! Ofereço 30 dias de suporte gratuito para correção de bugs. Também tenho planos de manutenção mensal para atualizações, novas features e suporte técnico contínuo.",
+                color: "#00ff41",
+              },
+              {
+                q: "Quais formas de pagamento você aceita?",
+                a: "Aceito PIX, transferência bancária e cartão de crédito (via Mercado Pago). Para projetos maiores, trabalho com pagamento em etapas: entrada + parcelas no desenvolvimento + saldo na entrega.",
+                color: "#00f0ff",
+              },
+              {
+                q: "Você desenvolve para mobile também?",
+                a: "Sim! Desenvolvo apps mobile com React Native (iOS e Android) e também PWAs (Progressive Web Apps) que funcionam como apps instaláveis diretamente do navegador.",
+                color: "#ff00ff",
+              },
+              {
+                q: "O site fica responsivo em todos os dispositivos?",
+                a: "Com certeza! Todos os meus projetos são desenvolvidos com mobile-first, garantindo perfeito funcionamento em celulares, tablets, laptops e desktops de qualquer tamanho.",
+                color: "#00ff41",
+              },
+            ].map((faq, i) => (
+              <FAQItem key={i} faq={faq} index={i} />
+            ))}
+          </div>
+
+          {/* CTA */}
+          <Reveal delay={0.4}>
+            <div className="text-center mt-12">
+              <p className="text-[#6b6b80] mb-4">Não encontrou sua dúvida?</p>
+              <a
+                href="#contato"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-500"
+              >
+                <Mail className="h-4 w-4" />
+                Entre em contato
+              </a>
             </div>
           </Reveal>
         </div>
