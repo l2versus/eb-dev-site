@@ -246,15 +246,31 @@ export function ChatbotWidget() {
                   {/* Sugestões rápidas */}
                   {msg.suggestions && msg.suggestions.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2 ml-9">
-                      {msg.suggestions.map((sug) => (
-                        <button
-                          key={sug}
-                          onClick={() => sendMessage(sug)}
-                          className="text-[11px] px-3 py-1.5 rounded-full border border-[#00f0ff]/20 text-[#00f0ff] hover:bg-[#00f0ff]/10 hover:border-[#00f0ff]/40 transition-all font-mono"
-                        >
-                          {sug}
-                        </button>
-                      ))}
+                      {msg.suggestions.map((sug) => {
+                        const isWhatsApp = /whatsapp|wpp|wp/i.test(sug);
+                        if (isWhatsApp) {
+                          return (
+                            <a
+                              key={sug}
+                              href="https://wa.me/5585998500344?text=Ol%C3%A1%20Emmanuel!%20Vim%20pelo%20chat%20do%20site%20e%20quero%20falar%20sobre%20meu%20projeto."
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] px-3 py-1.5 rounded-full border border-[#00ff41]/40 text-[#00ff41] bg-[#00ff41]/5 hover:bg-[#00ff41]/15 hover:border-[#00ff41]/60 transition-all font-mono"
+                            >
+                              {sug}
+                            </a>
+                          );
+                        }
+                        return (
+                          <button
+                            key={sug}
+                            onClick={() => sendMessage(sug)}
+                            className="text-[11px] px-3 py-1.5 rounded-full border border-[#00f0ff]/20 text-[#00f0ff] hover:bg-[#00f0ff]/10 hover:border-[#00f0ff]/40 transition-all font-mono"
+                          >
+                            {sug}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

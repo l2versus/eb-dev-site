@@ -1723,6 +1723,7 @@ export default function HomePage() {
                   id="hero-video"
                   className="w-full h-full object-cover"
                   src="/videos/video-app.mp4#t=0.5"
+                  poster="/images/foto-perfil.png"
                   playsInline
                   preload="metadata"
                   controls={false}

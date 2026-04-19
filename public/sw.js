@@ -3,7 +3,7 @@
 // Cache-first para assets, Network-first para APIs
 // ══════════════════════════════════════════════════════════════════════════════
 
-const CACHE_NAME = "eb-dev-v1";
+const CACHE_NAME = "eb-dev-v2";
 const OFFLINE_URL = "/offline";
 
 // Assets para pre-cache (shell do app)
