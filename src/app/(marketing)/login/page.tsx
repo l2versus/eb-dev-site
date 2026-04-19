@@ -6,7 +6,6 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -106,14 +105,51 @@ function LoginContent() {
             </span>
           </div>
 
-          {/* Mockup */}
+          {/* Mockup — preview do painel admin */}
           <div className="mt-10 relative">
-            <div className="aspect-[9/16] max-w-[220px] mx-auto rounded-3xl border border-dark-700/50 overflow-hidden shadow-2xl">
-              <img
-                src="/images/mockup-phone.png"
-                alt="App mobile"
-                className="w-full h-full object-cover"
-              />
+            <div className="aspect-[9/16] max-w-[220px] mx-auto rounded-[2.2rem] border-[3px] border-dark-700/60 overflow-hidden shadow-2xl bg-dark-950 relative p-2">
+              <div className="absolute top-1 left-1/2 -translate-x-1/2 w-16 h-4 bg-dark-950 rounded-b-xl z-10" />
+              <div className="w-full h-full rounded-[1.5rem] bg-gradient-to-br from-dark-900 to-dark-800 p-3 flex flex-col gap-2 text-left">
+                <div className="flex items-center gap-1.5 pt-2">
+                  <Sparkles className="h-3 w-3 text-brand-500" />
+                  <span className="text-[8px] font-bold text-white">Painel Admin</span>
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 mt-1">
+                  <div className="rounded-md bg-brand-500/10 border border-brand-500/20 p-1.5">
+                    <div className="text-[7px] text-dark-400">Clientes</div>
+                    <div className="text-[10px] font-bold text-brand-400">142</div>
+                  </div>
+                  <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 p-1.5">
+                    <div className="text-[7px] text-dark-400">Receita</div>
+                    <div className="text-[10px] font-bold text-emerald-400">R$47k</div>
+                  </div>
+                </div>
+                <div className="rounded-md bg-dark-900/60 p-1.5 mt-1">
+                  <div className="text-[7px] text-dark-400 mb-1">Projetos ativos</div>
+                  <div className="space-y-1">
+                    {[
+                      { name: "Myka Clínica", pct: 85, color: "bg-fuchsia-500" },
+                      { name: "Rautenberg", pct: 60, color: "bg-amber-400" },
+                      { name: "Landing XYZ", pct: 30, color: "bg-cyan-400" },
+                    ].map((p) => (
+                      <div key={p.name}>
+                        <div className="flex justify-between text-[7px] text-dark-300">
+                          <span className="truncate">{p.name}</span>
+                          <span>{p.pct}%</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-dark-700 overflow-hidden">
+                          <div className={`h-full ${p.color}`} style={{ width: `${p.pct}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-auto flex items-center justify-between text-[7px] text-dark-500 pt-1">
+                  <span>●●●●</span>
+                  <span>100%</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -220,12 +256,14 @@ function LoginContent() {
 
             {/* Forgot password */}
             <div className="flex justify-end">
-              <Link
-                href="/recuperar-senha"
+              <a
+                href="https://wa.me/5585998500344?text=Ol%C3%A1%20Emmanuel!%20Preciso%20recuperar%20minha%20senha%20de%20acesso."
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
               >
                 Esqueceu a senha?
-              </Link>
+              </a>
             </div>
 
             <Button
@@ -243,12 +281,14 @@ function LoginContent() {
           {/* Register link */}
           <p className="text-center text-sm text-dark-400 mt-6">
             Não tem conta?{" "}
-            <Link
-              href="/registro"
+            <a
+              href="https://wa.me/5585998500344?text=Ol%C3%A1%20Emmanuel!%20Gostaria%20de%20criar%20uma%20conta%20no%20sistema."
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-brand-400 hover:text-brand-300 font-medium transition-colors"
             >
               Cadastre-se grátis
-            </Link>
+            </a>
           </p>
 
           {/* Security note */}
