@@ -832,37 +832,48 @@ export default function HomePage() {
 
             {/* Description */}
             <Reveal delay={0.6}>
-              <p className="text-[#6b6b80] max-w-sm sm:max-w-lg mx-auto lg:mx-0 mb-8 sm:mb-10 leading-relaxed text-base sm:text-lg px-2 sm:px-0">
+              <p className="text-[#6b6b80] max-w-sm sm:max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed text-base sm:text-lg px-2 sm:px-0">
                 Crio aplicações web de alta performance com código
                 limpo, arquitetura escalável e design que converte.
               </p>
             </Reveal>
 
-            {/* CTAs */}
+            {/* Social proof strip */}
+            <Reveal delay={0.65}>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 mb-8 sm:mb-10 text-xs sm:text-sm font-mono">
+                <span className="text-[#9999ab]">
+                  <span className="text-[#00f0ff] font-bold">2+</span> projetos ativos
+                </span>
+                <span className="text-[#2a2a3e]">•</span>
+                <span className="text-[#9999ab]">
+                  <span className="text-[#ff00ff] font-bold">R$50k+</span> processados
+                </span>
+                <span className="text-[#2a2a3e]">•</span>
+                <span className="text-[#9999ab]">
+                  <span className="text-[#00ff41] font-bold">99.9%</span> uptime
+                </span>
+              </div>
+            </Reveal>
+
+            {/* CTAs — 1 primário dominante + 1 secundário */}
             <Reveal delay={0.7}>
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4">
+                <a
+                  href="https://wa.me/5585998500344?text=Ol%C3%A1%20Emmanuel!%20Quero%20um%20site%20pro%20meu%20neg%C3%B3cio."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 px-7 py-4 sm:px-10 sm:py-5 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_50px_rgba(0,255,65,0.6)] hover:scale-[1.03] transition-all duration-500 text-base sm:text-lg shadow-[0_0_25px_rgba(0,255,65,0.25)]"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  Quero meu site
+                  <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </a>
+
                 <MagneticButton
                   href="#projetos"
-                  className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-500 text-sm sm:text-base"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Ver Projetos
-                  <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </MagneticButton>
-
-                <Link
-                  href="/orcamento"
-                  className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.5)] transition-all duration-500 text-sm sm:text-base"
-                >
-                  <FileText className="h-4 w-4" />
-                  Orçamento
-                </Link>
-
-                <MagneticButton
-                  href="#contato"
                   className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-semibold border border-[#1e1e2e] text-white hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/5 hover:shadow-[0_0_20px_rgba(0,240,255,0.1)] transition-all duration-500 text-sm sm:text-base"
                 >
-                  Fale Comigo
+                  Ver projetos
                 </MagneticButton>
               </div>
             </Reveal>
@@ -1010,7 +1021,7 @@ export default function HomePage() {
                   className="w-full h-full object-cover"
                   src="/videos/video-app.mp4#t=0.5"
                   playsInline
-                  preload="auto"
+                  preload="metadata"
                   controls={false}
                   onClick={(e) => {
                     const v = e.currentTarget;
