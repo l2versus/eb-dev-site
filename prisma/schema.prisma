@@ -519,29 +519,43 @@ model ArquivoProjeto {
 
 // ─── 18. PROPOSTA COMERCIAL ──────────────────────────────────────────────────
 model Proposta {
-  id             String         @id @default(cuid())
-  clienteId      String
-  titulo         String
-  descricao      String?        @db.Text
-  valor          Decimal        @db.Decimal(12, 2)
-  desconto       Decimal?       @db.Decimal(12, 2)
-  valorFinal     Decimal        @db.Decimal(12, 2)
-  validade       DateTime
-  status         StatusProposta @default(PENDENTE)
-  tipoProjeto    TipoProjeto
-  prazoEstimado  String?
-  itensInclusos  String[]       @default([])
-  termosContrato String?        @db.Text
-  observacoes    String?        @db.Text
-  enviadaEm      DateTime?
-  respondidaEm   DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id                    String         @id @default(cuid())
+  clienteId             String
+  slug                  String         @unique @default(cuid())
+  titulo                String
+  subtitulo             String?
+  chamadaPrincipal      String?        @db.Text
+  descricao             String?        @db.Text
+  valor                 Decimal        @db.Decimal(12, 2)
+  desconto              Decimal?       @db.Decimal(12, 2)
+  valorFinal            Decimal        @db.Decimal(12, 2)
+  moeda                 String         @default("BRL")
+  parcelamento          String?
+  custoMensalRecorrente Decimal?       @db.Decimal(12, 2)
+  validade              DateTime
+  status                StatusProposta @default(PENDENTE)
+  tipoProjeto           TipoProjeto
+  prazoEstimado         String?
+  itensInclusos         String[]       @default([])
+  escopoDetalhado       Json?
+  cronograma            Json?
+  custosOperacionais    Json?
+  comparativo           Json?
+  upgradesFuturos       Json?
+  termosContrato        String?        @db.Text
+  observacoes           String?        @db.Text
+  geradaPorIA           Boolean        @default(false)
+  briefingIA            String?        @db.Text
+  enviadaEm             DateTime?
+  respondidaEm          DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   cliente Cliente @relation(fields: [clienteId], references: [id])
 
   @@index([clienteId])
   @@index([status])
+  @@index([slug])
   @@map("propostas")
 }
 

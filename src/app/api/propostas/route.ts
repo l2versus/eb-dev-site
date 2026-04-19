@@ -4,9 +4,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/api-auth";
 
 // GET - Listar propostas ou buscar por ID
 export async function GET(request: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -71,20 +75,35 @@ export async function GET(request: NextRequest) {
 
 // POST - Criar nova proposta
 export async function POST(request: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const body = await request.json();
     const {
       clienteId,
       titulo,
+      subtitulo,
+      chamadaPrincipal,
       descricao,
       valor,
       desconto,
+      moeda,
+      parcelamento,
+      custoMensalRecorrente,
       tipoProjeto,
       prazoEstimado,
       itensInclusos,
+      escopoDetalhado,
+      cronograma,
+      custosOperacionais,
+      comparativo,
+      upgradesFuturos,
       termosContrato,
       observacoes,
       validade,
+      geradaPorIA,
+      briefingIA,
     } = body;
 
     if (!clienteId || !titulo || !valor || !tipoProjeto) {
@@ -94,25 +113,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const valorNumerico = parseFloat(valor);
-    const descontoNumerico = desconto ? parseFloat(desconto) : 0;
+    const valorNumerico = parseFloat(String(valor));
+    const descontoNumerico = desconto ? parseFloat(String(desconto)) : 0;
     const valorFinal = valorNumerico - descontoNumerico;
 
     const proposta = await prisma.proposta.create({
       data: {
         clienteId,
         titulo,
+        subtitulo,
+        chamadaPrincipal,
         descricao,
         valor: valorNumerico,
         desconto: descontoNumerico,
         valorFinal,
+        moeda: moeda || "BRL",
+        parcelamento,
+        custoMensalRecorrente: custoMensalRecorrente != null ? parseFloat(String(custoMensalRecorrente)) : null,
         tipoProjeto,
         prazoEstimado,
         itensInclusos: itensInclusos || [],
+        escopoDetalhado: escopoDetalhado ?? undefined,
+        cronograma: cronograma ?? undefined,
+        custosOperacionais: custosOperacionais ?? undefined,
+        comparativo: comparativo ?? undefined,
+        upgradesFuturos: upgradesFuturos ?? undefined,
         termosContrato,
         observacoes,
-        validade: validade ? new Date(validade) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
+        validade: validade ? new Date(validade) : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 dias
         status: "RASCUNHO",
+        geradaPorIA: !!geradaPorIA,
+        briefingIA,
       },
       include: {
         cliente: true,
@@ -131,6 +162,9 @@ export async function POST(request: NextRequest) {
 
 // PATCH - Atualizar status ou dados da proposta
 export async function PATCH(request: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const body = await request.json();
     const { id, ...data } = body;
