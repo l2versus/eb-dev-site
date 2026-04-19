@@ -284,7 +284,7 @@ export default function OrcamentoPage() {
           </Reveal>
 
           <Reveal delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-6 leading-tight">
               Vamos transformar sua
               <br />
               <span className="gradient-text-cyber">ideia em realidade</span>
@@ -439,7 +439,7 @@ export default function OrcamentoPage() {
                     </div>
                   </Reveal>
 
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {addons.map((addon, i) => (
                       <Reveal key={addon.id} delay={i * 0.05}>
                         <motion.button
@@ -846,7 +846,7 @@ export default function OrcamentoPage() {
           
           <div className="flex flex-wrap items-center justify-center gap-12 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
             {[
-              { name: "L2 Versus", icon: "⚔️" },
+              { name: "Ricardo Rautenberg", icon: "🏙️" },
               { name: "Myka Clínica", icon: "💆" },
               { name: "TechStartup", icon: "🚀" },
               { name: "E-commerce Plus", icon: "🛒" },

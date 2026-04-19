@@ -34,8 +34,8 @@ const intencoes: Record<string, IntencaoConfig> = {
     sugestoes: ["Quanto custa?", "Ver projetos", "O que é React?", "Quero um orçamento"],
   },
   projetos: {
-    keywords: ["projeto", "projetos", "portfolio", "portfólio", "exemplo", "já fez", "trabalhos", "case", "l2", "versus", "estetica", "estética"],
-    resposta: "Confira nossos projetos em destaque! 🎯\n\n🎮 **L2 Versus** — Plataforma de game com ranking, loja virtual, pagamentos e painel admin. Milhares de jogadores ativos!\n→ l2versus.com\n\n💆 **Emmanuel Estética** — Sistema SaaS completo com agendamento, pagamentos PIX, chatbot IA e dashboard financeiro.\n\nRole até a seção Projetos para ver mais detalhes e screenshots! 👇",
+    keywords: ["projeto", "projetos", "portfolio", "portfólio", "exemplo", "já fez", "trabalhos", "case", "ricardo", "rautenberg", "imovel", "imóvel", "corretor", "estetica", "estética", "myka"],
+    resposta: "Confira nossos projetos em destaque! 🎯\n\n🏙️ **Ricardo Rautenberg** — Portfólio digital premium para corretor de imóveis de luxo em SP. Filtros avançados, modo off-market e painel admin completo.\n→ ricardorautenberg.com.br\n\n💆 **Myka Procópio** — SaaS completo para clínica de estética: agendamento, pagamentos PIX, chatbot IA e dashboard financeiro.\n\nRole até a seção Projetos para ver mais detalhes e screenshots! 👇",
     sugestoes: ["Quanto custa algo assim?", "Quero algo parecido", "Ver tecnologias", "Falar no WhatsApp"],
   },
   prazo: {

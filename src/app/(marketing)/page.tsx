@@ -643,19 +643,19 @@ const techStack = [
 
 const projects = [
   {
-    title: "L2 Versus",
-    subtitle: "Game Platform",
+    title: "Ricardo Rautenberg",
+    subtitle: "Imóveis de Luxo — SP",
     description:
-      "Plataforma completa para Lineage 2 — sistema de ranking, loja virtual com pagamentos, painel admin e integração em tempo real com o game server. Milhares de jogadores ativos.",
-    tags: ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "Docker"],
-    link: "https://www.l2versus.com",
-    image: "/images/project-l2versus.png",
-    color: "#00f0ff",
+      "Portfólio digital premium para corretor de alto padrão em São Paulo e ABC Paulista — listagem de imóveis com filtros avançados, modo off-market (sigiloso), painel admin completo, integração WhatsApp e SEO otimizado para Google.",
+    tags: ["Next.js 16", "TypeScript", "Prisma", "PostgreSQL", "Tailwind"],
+    link: "https://ricardorautenberg.com.br",
+    image: "/images/project-ricardo.png",
+    color: "#d4af37",
     number: "01",
     metrics: [
-      { label: "Usuários", value: "10k+", icon: "👥" },
-      { label: "Uptime", value: "99.9%", icon: "⚡" },
-      { label: "Transações", value: "R$50k+", icon: "💰" },
+      { label: "Alto Padrão", value: "ABC+SP", icon: "🏙️" },
+      { label: "Off-Market", value: "Exclusivo", icon: "🔐" },
+      { label: "Performance", value: "<1s", icon: "⚡" },
     ],
   },
   {
@@ -750,7 +750,7 @@ export default function HomePage() {
       <section
         id="hero"
         ref={heroRef}
-        className="relative min-h-screen flex items-center overflow-hidden pt-24 lg:pt-20"
+        className="relative min-h-screen flex items-center pt-20 lg:pt-20"
       >
         {/* Layered backgrounds */}
         <div className="absolute inset-0 cyber-grid" />
@@ -777,7 +777,7 @@ export default function HomePage() {
           <div className="text-center lg:text-left">
             {/* Status badges */}
             <Reveal delay={0.1}>
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-8">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-6 sm:mb-8">
                 {/* Available badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5">
                   <motion.span
@@ -809,7 +809,7 @@ export default function HomePage() {
 
             {/* Name */}
             <Reveal delay={0.3}>
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight mb-2 leading-[0.95]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-2 leading-[0.95]">
                 <span className="text-white">Emmanuel</span>
                 <br />
                 <span className="gradient-text-cyber">Bezerra</span>
@@ -832,7 +832,7 @@ export default function HomePage() {
 
             {/* Description */}
             <Reveal delay={0.6}>
-              <p className="text-[#6b6b80] max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed text-lg">
+              <p className="text-[#6b6b80] max-w-sm sm:max-w-lg mx-auto lg:mx-0 mb-8 sm:mb-10 leading-relaxed text-base sm:text-lg px-2 sm:px-0">
                 Crio aplicações web de alta performance com código
                 limpo, arquitetura escalável e design que converte.
               </p>
@@ -840,10 +840,10 @@ export default function HomePage() {
 
             {/* CTAs */}
             <Reveal delay={0.7}>
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4">
                 <MagneticButton
                   href="#projetos"
-                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-500"
+                  className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-500 text-sm sm:text-base"
                 >
                   <Sparkles className="h-4 w-4" />
                   Ver Projetos
@@ -852,7 +852,7 @@ export default function HomePage() {
 
                 <Link
                   href="/orcamento"
-                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.5)] transition-all duration-500"
+                  className="group inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.5)] transition-all duration-500 text-sm sm:text-base"
                 >
                   <FileText className="h-4 w-4" />
                   Orçamento
@@ -860,7 +860,7 @@ export default function HomePage() {
 
                 <MagneticButton
                   href="#contato"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold border border-[#1e1e2e] text-white hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/5 hover:shadow-[0_0_20px_rgba(0,240,255,0.1)] transition-all duration-500"
+                  className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-semibold border border-[#1e1e2e] text-white hover:border-[#00f0ff]/40 hover:bg-[#00f0ff]/5 hover:shadow-[0_0_20px_rgba(0,240,255,0.1)] transition-all duration-500 text-sm sm:text-base"
                 >
                   Fale Comigo
                 </MagneticButton>
@@ -869,7 +869,7 @@ export default function HomePage() {
 
             {/* Social icons */}
             <Reveal delay={0.9}>
-              <div className="flex items-center justify-center lg:justify-start gap-5 mt-10">
+              <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-5 mt-6 sm:mt-10">
                 {[
                   { href: "https://github.com/emmanuelbezerradev", icon: Github, color: "#00f0ff", label: "GitHub" },
                   { href: "https://instagram.com/emmanuelbezerra_", icon: Instagram, color: "#ff00ff", label: "Instagram" },
@@ -1059,13 +1059,13 @@ export default function HomePage() {
 
           {/* Video features */}
           <Reveal delay={0.3}>
-            <div className="grid grid-cols-3 gap-4 mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-8">
               {[
                 { icon: "🎯", text: "Minha abordagem" },
                 { icon: "💡", text: "Como resolvo problemas" },
                 { icon: "🚀", text: "Resultados reais" },
               ].map((item, i) => (
-                <div key={i} className="text-center p-4 rounded-xl glass-card">
+                <div key={i} className="text-center p-3 sm:p-4 rounded-xl glass-card">
                   <span className="text-2xl mb-2 block">{item.icon}</span>
                   <span className="text-sm text-[#6b6b80]">{item.text}</span>
                 </div>
@@ -1078,7 +1078,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           CASE STUDY — Featured Project Deep Dive
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="case-study" className="relative py-32 overflow-hidden">
+      <section id="case-study" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
         
@@ -1091,7 +1091,7 @@ export default function HomePage() {
                   Case Study em Destaque
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
                 De conceito a{" "}
                 <span className="neon-text-green">+150% de clientes</span>
               </h2>
@@ -1241,7 +1241,7 @@ export default function HomePage() {
               {
                 title: "App Myka Procópio",
                 desc: "Aplicativo de estética com agendamento e acompanhamento de sessões",
-                src: "/videos/myka-demo.mp4",
+                src: "/videos/video-app.mp4",
                 poster: "/images/project-estetica.png",
                 color: "#ff00ff",
                 tag: "App Mobile",
@@ -1249,7 +1249,7 @@ export default function HomePage() {
               {
                 title: "Myka Procópio — Detalhes",
                 desc: "Fluxo completo de agendamento e galeria de resultados",
-                src: "/videos/myka-detalhes.mp4",
+                src: "/videos/video-app.mp4",
                 poster: "/images/project-estetica.png",
                 color: "#00f0ff",
                 tag: "UX/UI",
@@ -1257,7 +1257,7 @@ export default function HomePage() {
               {
                 title: "Myka Procópio — Admin",
                 desc: "Painel administrativo com gestão de clientes e financeiro",
-                src: "/videos/myka-admin.mp4",
+                src: "/videos/video-app.mp4",
                 poster: "/images/project-estetica.png",
                 color: "#00ff41",
                 tag: "Dashboard",
@@ -1266,7 +1266,7 @@ export default function HomePage() {
               <Reveal key={video.title} delay={i * 0.1}>
                 <div className="group relative rounded-2xl overflow-hidden border border-[#1e1e2e] bg-[#0f0f18] hover:border-[#ff00ff]/30 transition-all duration-500">
                   {/* Video Player */}
-                  <div className="aspect-[9/16] sm:aspect-video relative bg-black">
+                  <div className="aspect-video relative bg-black">
                     <video
                       className="w-full h-full object-cover"
                       src={video.src}
@@ -1429,14 +1429,14 @@ export default function HomePage() {
       <section
         id="sobre"
         ref={aboutRef}
-        className="relative py-32 overflow-hidden"
+        className="relative py-16 sm:py-24 lg:py-32 overflow-hidden"
       >
         {/* Background effects */}
         <div className="absolute inset-0 cyber-grid opacity-20" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Photo with parallax + decorative elements */}
             <Reveal direction="left">
               <div className="relative flex justify-center">
@@ -1634,7 +1634,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           TECH STACK — Interactive 3D Cards
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="stack" className="relative py-32 overflow-hidden">
+      <section id="stack" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.015] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
 
@@ -1666,7 +1666,7 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
           {/* Header */}
           <Reveal>
-            <div className="text-center mb-20">
+            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
               <div className="flex items-center justify-center gap-3 mb-6">
                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-[#00f0ff]" />
                 <span className="text-sm font-mono text-[#00f0ff] uppercase tracking-[0.2em]">
@@ -1682,7 +1682,7 @@ export default function HomePage() {
           </Reveal>
 
           {/* Service pillars */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 sm:mb-16 lg:mb-20">
             {[
               {
                 icon: <Code2 className="h-7 w-7" />,
@@ -1834,7 +1834,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           PROJECTS — Cinematic Showcase
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="projetos" className="relative py-32 overflow-hidden">
+      <section id="projetos" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 cyber-grid opacity-15" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
 
@@ -1857,7 +1857,7 @@ export default function HomePage() {
         <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
           {/* Header */}
           <Reveal>
-            <div className="text-center mb-20">
+            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
               <div className="flex items-center justify-center gap-3 mb-6">
                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-[#ff00ff]" />
                 <span className="text-sm font-mono text-[#ff00ff] uppercase tracking-[0.2em]">
@@ -1873,7 +1873,7 @@ export default function HomePage() {
           </Reveal>
 
           {/* Projects */}
-          <div className="space-y-32">
+          <div className="space-y-16 sm:space-y-24 lg:space-y-32">
             {projects.map((project, i) => (
               <Reveal key={project.title} direction={i % 2 === 0 ? "left" : "right"}>
                 <div className={`grid lg:grid-cols-12 gap-8 items-center`}>
@@ -2061,20 +2061,20 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           TESTIMONIALS — Client Reviews
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="depoimentos" className="relative py-32 overflow-hidden">
+      <section id="depoimentos" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
           {/* Section Header */}
           <Reveal>
-            <div className="text-center mb-20">
+            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
                 <span className="text-sm font-mono text-[#ff00ff]">
                   {"<Testimonials />"}
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
                 O que dizem meus{" "}
                 <span className="gradient-text-cyber">clientes</span>
               </h2>
@@ -2189,7 +2189,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           FAQ — Frequently Asked Questions
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="faq" className="relative py-32 overflow-hidden">
+      <section id="faq" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00ff41]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
         
@@ -2202,7 +2202,7 @@ export default function HomePage() {
                   {"<FAQ />"}
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
                 Perguntas{" "}
                 <span className="gradient-text-cyber">frequentes</span>
               </h2>
@@ -2269,7 +2269,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           CERTIFICATIONS — Skills & Badges
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="certificacoes" className="relative py-32 overflow-hidden">
+      <section id="certificacoes" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
         
@@ -2281,7 +2281,7 @@ export default function HomePage() {
                   {"<Certifications />"}
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
                 Certificações &{" "}
                 <span className="gradient-text-cyber">Skills</span>
               </h2>
@@ -2324,104 +2324,64 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          BLOG — Latest Articles
+          BLOG — Video Showcase
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="blog" className="relative py-32 overflow-hidden">
+      <section id="blog" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
         
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-12">
           <Reveal>
-            <div className="text-center mb-16">
+            <div className="text-center mb-10 sm:mb-16">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#ff00ff]/20 bg-[#ff00ff]/5 mb-6">
                 <span className="text-sm font-mono text-[#ff00ff]">
-                  {"<Blog />"}
+                  {"<Demo />"}
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
-                Artigos &{" "}
-                <span className="gradient-text-cyber">Tutoriais</span>
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
+                Veja em{" "}
+                <span className="gradient-text-cyber">Ação</span>
               </h2>
               <p className="text-[#6b6b80] text-lg max-w-2xl mx-auto">
-                Compartilhando conhecimento sobre desenvolvimento web moderno
+                Uma demonstração real do tipo de aplicação que eu desenvolvo
               </p>
             </div>
           </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Next.js 14: Server Actions na Prática",
-                excerpt: "Descubra como usar Server Actions para mutações de dados sem API routes.",
-                category: "Next.js",
-                readTime: "8 min",
-                color: "#00f0ff",
-                date: "Mar 2026",
-              },
-              {
-                title: "Autenticação com NextAuth.js 5.0",
-                excerpt: "Implementação completa de login social, JWT, sessions e proteção de rotas.",
-                category: "Auth",
-                readTime: "12 min",
-                color: "#ff00ff",
-                date: "Fev 2026",
-              },
-              {
-                title: "Prisma ORM: Do Básico ao Avançado",
-                excerpt: "Migrations, relations, queries complexas e otimização de performance.",
-                category: "Backend",
-                readTime: "15 min",
-                color: "#00ff41",
-                date: "Jan 2026",
-              },
-            ].map((post, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <motion.article
-                  whileHover={{ y: -8 }}
-                  className="glass-card rounded-2xl overflow-hidden border border-[#1e1e2e] hover:border-[color:var(--post-color)]/30 transition-all duration-300 group cursor-pointer"
-                  style={{ "--post-color": post.color } as React.CSSProperties}
+          <Reveal delay={0.15}>
+            <div className="relative group">
+              {/* Glow border */}
+              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#00f0ff]/20 via-[#ff00ff]/20 to-[#00ff41]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <div className="relative glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-[#1e1e2e] group-hover:border-[#ff00ff]/30 transition-all duration-500">
+                <video
+                  className="w-full aspect-video object-cover"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  poster=""
                 >
-                  {/* Thumbnail placeholder */}
-                  <div 
-                    className="h-40 relative overflow-hidden"
-                    style={{ background: `linear-gradient(135deg, ${post.color}20 0%, transparent 100%)` }}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Code2 className="w-16 h-16 opacity-20" style={{ color: post.color }} />
-                    </div>
-                    <div className="absolute top-4 left-4">
-                      <span 
-                        className="px-3 py-1 text-xs font-mono rounded-full"
-                        style={{ background: `${post.color}20`, color: post.color }}
-                      >
-                        {post.category}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 text-xs text-[#6b6b80] mb-3">
-                      <span>{post.date}</span>
-                      <span>•</span>
-                      <span>{post.readTime} leitura</span>
-                    </div>
-                    <h3 className="font-bold text-white mb-2 group-hover:text-[color:var(--post-color)] transition-colors">
-                      {post.title}
-                    </h3>
-                    <p className="text-sm text-[#9999ab] line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                  </div>
-                </motion.article>
-              </Reveal>
-            ))}
-          </div>
+                  <source src="/videos/Next.mp4" type="video/mp4" />
+                  Seu navegador não suporta vídeos HTML5.
+                </video>
+              </div>
+            </div>
+          </Reveal>
 
           <Reveal delay={0.3}>
-            <div className="text-center mt-12">
-              <span className="text-[#6b6b80] text-sm">
-                Em breve mais artigos! Assine a newsletter 👇
-              </span>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-8 sm:mt-12">
+              <div className="flex items-center gap-2 text-sm text-[#6b6b80]">
+                <div className="w-2 h-2 rounded-full bg-[#00f0ff]" />
+                Design Responsivo
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[#6b6b80]">
+                <div className="w-2 h-2 rounded-full bg-[#ff00ff]" />
+                Animações Fluidas
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[#6b6b80]">
+                <div className="w-2 h-2 rounded-full bg-[#00ff41]" />
+                Alta Performance
+              </div>
             </div>
           </Reveal>
         </div>
@@ -2490,19 +2450,19 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           PROCESS — How I Work Timeline
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="processo" className="relative py-32 overflow-hidden">
+      <section id="processo" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00f0ff]/20 to-transparent" />
         
         <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12">
           <Reveal>
-            <div className="text-center mb-20">
+            <div className="text-center mb-10 sm:mb-16 lg:mb-20">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-6">
                 <span className="text-sm font-mono text-[#00f0ff]">
                   {"<Process />"}
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
                 Como{" "}
                 <span className="gradient-text-cyber">trabalho</span>
               </h2>
@@ -2639,7 +2599,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           PACKAGES — Pricing Plans
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="pacotes" className="relative py-32 overflow-hidden">
+      <section id="pacotes" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff00ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#ff00ff]/20 to-transparent" />
         
@@ -2651,7 +2611,7 @@ export default function HomePage() {
                   {"<Packages />"}
                 </span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
                 Pacotes &{" "}
                 <span className="gradient-text-cyber">Investimento</span>
               </h2>
@@ -2965,7 +2925,7 @@ export default function HomePage() {
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <a
-                    href="https://cal.com/emmanuelbezerra/discovery"
+                    href="https://wa.me/5585998500344?text=Ol%C3%A1%20Emmanuel!%20Gostaria%20de%20agendar%20uma%20call%20gratuita%20para%20discutir%20meu%20projeto."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-8 py-4 rounded-xl font-bold border-2 border-[#ff00ff]/50 text-[#ff00ff] hover:bg-[#ff00ff]/10 transition-all duration-300 flex items-center gap-2"
@@ -2987,7 +2947,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════════
           CONTACT — Premium CTA
       ═══════════════════════════════════════════════════════════════════ */}
-      <section id="contato" className="relative py-32 overflow-hidden">
+      <section id="contato" className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00f0ff]/[0.02] to-transparent" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00ff41]/20 to-transparent" />
         <Particles />
