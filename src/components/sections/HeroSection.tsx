@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Sparkles } from "lucide-react";
-import { gsap, isReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, isReducedMotion } from "@/lib/gsap";
 
 const floatingFrames = [
   {
@@ -42,219 +42,231 @@ export function HeroSection() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const isMobile = typeof window !== "undefined" && (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
-
-    // On reduced motion or mobile devices, skip heavy intro animations and hide loader
-    if (isReducedMotion() || isMobile) {
-      root.querySelector<HTMLElement>(".jm-loader")?.style.setProperty("display", "none");
-      root.querySelectorAll<HTMLElement>(".jm-loader-panel").forEach((panel) => {
-        panel.style.setProperty("display", "none");
-      });
-      return;
-    }
 
     let cleanupMove: (() => void) | undefined;
+    let mm: any;
 
     const ctx = gsap.context(() => {
-      gsap.set(root, {
-        "--negative-y": "-28%",
-        "--negative-band": "18%",
-        "--negative-opacity": 0,
-        "--negative-tilt": "-5%",
-      });
-      gsap.set(".jm-loader", {
-        autoAlpha: 1,
-        clipPath: "inset(0% 0% 0% 0%)",
-      });
-      gsap.set(".jm-loader-kicker", { y: 18, opacity: 0 });
-      gsap.set(".jm-loader-word", { yPercent: 118, rotate: 2 });
-      gsap.set(".jm-loader-fracture .fracture-char", {
-        x: (index) => ((index % 5) - 2) * 16,
-        y: (index) => (index % 2 === 0 ? 36 : -28),
-        rotate: (index) => ((index % 7) - 3) * 5,
-        opacity: 0,
-        filter: "blur(8px)",
-      });
-      gsap.set(".jm-loader-panel", { yPercent: 0 });
-      gsap.set(".jm-bg-media", {
-        clipPath: "inset(0% 0% 0% 0% round 0px)",
-        scale: 1.08,
-        opacity: 0.72,
-      });
-      gsap.set(".jm-word", { yPercent: 112, rotate: 2 });
-      gsap.set(".jm-title-top", { xPercent: -8, opacity: 0 });
-      gsap.set(".jm-title-bottom", { xPercent: 8, opacity: 0 });
-      gsap.set(".hero-fracture .fracture-char", {
-        x: (index) => ((index % 5) - 2) * 14,
-        y: (index) => (index % 2 === 0 ? 28 : -22),
-        rotate: (index) => ((index % 7) - 3) * 4,
-        opacity: 0,
-        filter: "blur(8px)",
-      });
-      gsap.set(".jm-kicker > *", { y: 18, opacity: 0 });
-      gsap.set(".jm-copy > *", { y: 28, opacity: 0 });
-      gsap.set(".jm-action", { y: 28, opacity: 0 });
-      gsap.set(".jm-frame", {
-        y: 90,
-        opacity: 0,
-        scale: 0.72,
-        rotate: -8,
-        clipPath: "inset(24% 18% 24% 18% round 12px)",
-      });
-      gsap.set(".jm-marker", { y: 20, opacity: 0, rotate: -4 });
-      gsap.set(".jm-stat", { y: 22, opacity: 0 });
-      gsap.set(".jm-scroll-cue", { opacity: 0, y: -8 });
+      // scope animations per media to avoid mobile breakage
+      mm = ScrollTrigger.matchMedia({
+        "(min-width: 768px)": () => {
+          if (isReducedMotion()) {
+            root.querySelector<HTMLElement>(".jm-loader")?.style.setProperty("display", "none");
+            root.querySelectorAll<HTMLElement>(".jm-loader-panel").forEach((panel) => {
+              panel.style.setProperty("display", "none");
+            });
+            return;
+          }
 
-      const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-      intro
-        .to(".jm-loader-kicker", { y: 0, opacity: 1, duration: 0.72 }, 0.22)
-        .to(".jm-loader-word", { yPercent: 0, rotate: 0, duration: 1.15, stagger: 0.08 }, 0.28)
-        .to(
-          ".jm-loader-fracture .fracture-char",
-          {
-            x: 0,
-            y: 0,
-            rotate: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.9,
-            stagger: { each: 0.014, from: "random" },
-          },
-          0.34,
-        )
-        .to(".jm-loader-name", { scale: 1.025, duration: 2.2, ease: "sine.inOut" }, 0.65)
-        .to(".jm-loader", { clipPath: "inset(0% 0% 100% 0%)", duration: 1.05, ease: "expo.inOut" }, 4.55)
-        .to(".jm-loader", { autoAlpha: 0, duration: 0.01 }, 5.58)
-        .to(".jm-loader-panel", { yPercent: -101, duration: 0.92, stagger: 0.06 }, 4.64)
-        .to(
-          ".jm-bg-media",
-          {
+          gsap.set(root, {
+            "--negative-y": "-28%",
+            "--negative-band": "18%",
+            "--negative-opacity": 0,
+            "--negative-tilt": "-5%",
+          });
+          gsap.set(".jm-loader", {
+            autoAlpha: 1,
+            clipPath: "inset(0% 0% 0% 0%)",
+          });
+          gsap.set(".jm-loader-kicker", { y: 18, opacity: 0 });
+          gsap.set(".jm-loader-word", { yPercent: 118, rotate: 2 });
+          gsap.set(".jm-loader-fracture .fracture-char", {
+            x: (index) => ((index % 5) - 2) * 16,
+            y: (index) => (index % 2 === 0 ? 36 : -28),
+            rotate: (index) => ((index % 7) - 3) * 5,
+            opacity: 0,
+            filter: "blur(8px)",
+          });
+          gsap.set(".jm-loader-panel", { yPercent: 0 });
+          gsap.set(".jm-bg-media", {
             clipPath: "inset(0% 0% 0% 0% round 0px)",
-            scale: 1,
-            opacity: 1,
-            duration: 1.35,
-          },
-          4.74,
-        )
-        .to(".jm-word", { yPercent: 0, rotate: 0, duration: 1.12, stagger: 0.08 }, 4.82)
-        .to(".jm-title-top", { xPercent: 0, opacity: 1, duration: 1.18 }, 4.88)
-        .to(".jm-title-bottom", { xPercent: 0, opacity: 1, duration: 1.18 }, 4.88)
-        .to(
-          ".hero-fracture .fracture-char",
-          {
-            x: 0,
-            y: 0,
-            rotate: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.78,
-            stagger: { each: 0.012, from: "random" },
-          },
-          4.94,
-        )
-        .to(".jm-kicker > *", { y: 0, opacity: 1, duration: 0.72, stagger: 0.06 }, 5.05)
-        .to(
-          ".jm-frame",
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            rotate: 0,
-            clipPath: "inset(0% 0% 0% 0% round 12px)",
-            duration: 1,
-            stagger: 0.08,
-          },
-          5.32,
-        )
-        .to(".jm-marker", { y: 0, opacity: 1, rotate: 0, duration: 0.72, stagger: 0.06 }, 5.5)
-        .to(".jm-copy > *", { y: 0, opacity: 1, duration: 0.76, stagger: 0.07 }, 5.62)
-        .to(".jm-action", { y: 0, opacity: 1, duration: 0.72, stagger: 0.07 }, 5.74)
-        .to(".jm-stat", { y: 0, opacity: 1, duration: 0.7, stagger: 0.055 }, 5.8)
-        .to(".jm-scroll-cue", { opacity: 1, y: 0, duration: 0.6 }, 5.92);
+            scale: 1.08,
+            opacity: 0.72,
+          });
+          gsap.set(".jm-word", { yPercent: 112, rotate: 2 });
+          gsap.set(".jm-title-top", { xPercent: -8, opacity: 0 });
+          gsap.set(".jm-title-bottom", { xPercent: 8, opacity: 0 });
+          gsap.set(".hero-fracture .fracture-char", {
+            x: (index) => ((index % 5) - 2) * 14,
+            y: (index) => (index % 2 === 0 ? 28 : -22),
+            rotate: (index) => ((index % 7) - 3) * 4,
+            opacity: 0,
+            filter: "blur(8px)",
+          });
+          gsap.set(".jm-kicker > *", { y: 18, opacity: 0 });
+          gsap.set(".jm-copy > *", { y: 28, opacity: 0 });
+          gsap.set(".jm-action", { y: 28, opacity: 0 });
+          gsap.set(".jm-frame", {
+            y: 90,
+            opacity: 0,
+            scale: 0.72,
+            rotate: -8,
+            clipPath: "inset(24% 18% 24% 18% round 12px)",
+          });
+          gsap.set(".jm-marker", { y: 20, opacity: 0, rotate: -4 });
+          gsap.set(".jm-stat", { y: 22, opacity: 0 });
+          gsap.set(".jm-scroll-cue", { opacity: 0, y: -8 });
 
-      gsap.to(".jm-bg-media img", {
-        scale: 1.08,
-        ease: "none",
-        scrollTrigger: {
-          trigger: root,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
+          const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+          intro
+            .to(".jm-loader-kicker", { y: 0, opacity: 1, duration: 0.72 }, 0.22)
+            .to(".jm-loader-word", { yPercent: 0, rotate: 0, duration: 1.15, stagger: 0.08 }, 0.28)
+            .to(
+              ".jm-loader-fracture .fracture-char",
+              {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 0.9,
+                stagger: { each: 0.014, from: "random" },
+              },
+              0.34,
+            )
+            .to(".jm-loader-name", { scale: 1.025, duration: 2.2, ease: "sine.inOut" }, 0.65)
+            .to(".jm-loader", { clipPath: "inset(0% 0% 100% 0%)", duration: 1.05, ease: "expo.inOut" }, 4.55)
+            .to(".jm-loader", { autoAlpha: 0, duration: 0.01 }, 5.58)
+            .to(".jm-loader-panel", { yPercent: -101, duration: 0.92, stagger: 0.06 }, 4.64)
+            .to(
+              ".jm-bg-media",
+              {
+                clipPath: "inset(0% 0% 0% 0% round 0px)",
+                scale: 1,
+                opacity: 1,
+                duration: 1.35,
+              },
+              4.74,
+            )
+            .to(".jm-word", { yPercent: 0, rotate: 0, duration: 1.12, stagger: 0.08 }, 4.82)
+            .to(".jm-title-top", { xPercent: 0, opacity: 1, duration: 1.18 }, 4.88)
+            .to(".jm-title-bottom", { xPercent: 0, opacity: 1, duration: 1.18 }, 4.88)
+            .to(
+              ".hero-fracture .fracture-char",
+              {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 0.78,
+                stagger: { each: 0.012, from: "random" },
+              },
+              4.94,
+            )
+            .to(".jm-kicker > *", { y: 0, opacity: 1, duration: 0.72, stagger: 0.06 }, 5.05)
+            .to(
+              ".jm-frame",
+              {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+                clipPath: "inset(0% 0% 0% 0% round 12px)",
+                duration: 1,
+                stagger: 0.08,
+              },
+              5.32,
+            )
+            .to(".jm-marker", { y: 0, opacity: 1, rotate: 0, duration: 0.72, stagger: 0.06 }, 5.5)
+            .to(".jm-copy > *", { y: 0, opacity: 1, duration: 0.76, stagger: 0.07 }, 5.62)
+            .to(".jm-action", { y: 0, opacity: 1, duration: 0.72, stagger: 0.07 }, 5.74)
+            .to(".jm-stat", { y: 0, opacity: 1, duration: 0.7, stagger: 0.055 }, 5.8)
+            .to(".jm-scroll-cue", { opacity: 1, y: 0, duration: 0.6 }, 5.92);
+
+          gsap.to(".jm-bg-media img", {
+            scale: 1.08,
+            ease: "none",
+            scrollTrigger: {
+              trigger: root,
+              start: "top top",
+              end: "bottom top",
+              scrub: true,
+            },
+          });
+
+          gsap.to(".jm-frame", {
+            yPercent: (index) => (index % 2 === 0 ? -6 : 7),
+            rotate: (index) => (index % 2 === 0 ? -2.5 : 2.5),
+            duration: 3.4,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            stagger: 0.18,
+          });
+
+          gsap.to(".jm-marker", {
+            y: (index) => (index % 2 === 0 ? -10 : 9),
+            duration: 2.3,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+            stagger: 0.15,
+          });
+
+          const scrollTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: root,
+              start: "top top",
+              end: "+=1900",
+              pin: true,
+              scrub: 0.9,
+              anticipatePin: 1,
+            },
+          });
+
+          scrollTl
+            .to(".jm-bg-media", { scale: 0.88, xPercent: -14, yPercent: -3, borderRadius: 18 }, 0)
+            .to(".jm-bg-shade", { opacity: 0.78 }, 0)
+            .to(root, { "--negative-y": "76%", "--negative-band": "44%", "--negative-opacity": 1, "--negative-tilt": "6%" }, 0)
+            .to(".jm-title-top", { xPercent: -3, scale: 1.018, opacity: 1 }, 0)
+            .to(".jm-title-bottom", { xPercent: 3, scale: 1.02, opacity: 1 }, 0)
+            .to(".jm-copy", { yPercent: -4, scale: 1.01, opacity: 1 }, 0)
+            .to(".jm-stat", { y: 42, opacity: 0 }, 0)
+            .to(".jm-frame-0", { xPercent: 118, yPercent: -90, rotate: 12, scale: 1.14 }, 0)
+            .to(".jm-frame-1", { xPercent: -92, yPercent: 40, rotate: -14, scale: 1.18 }, 0)
+            .to(".jm-frame-2", { xPercent: 126, yPercent: 56, rotate: 10, scale: 1.13 }, 0)
+            .to(".jm-frame-3", { xPercent: -72, yPercent: -78, rotate: -11, scale: 1.16 }, 0)
+            .to(".jm-marker-copy", { xPercent: 135, yPercent: -110, rotate: -14 }, 0)
+            .to(".jm-marker-click", { xPercent: -118, yPercent: 80, rotate: 16 }, 0)
+            .to(".jm-marker-scroll", { xPercent: 112, yPercent: 92, rotate: -10 }, 0);
+
+          const onMove = (event: MouseEvent) => {
+            const x = (event.clientX / window.innerWidth - 0.5) * 2;
+            const y = (event.clientY / window.innerHeight - 0.5) * 2;
+
+            gsap.to(".jm-bg-media", {
+              x: x * 12,
+              y: y * 10,
+              duration: 0.9,
+              ease: "power3.out",
+            });
+
+            gsap.to(".jm-frame", {
+              x: (index) => x * (index % 2 === 0 ? 24 : -22),
+              y: (index) => y * (index % 2 === 0 ? 18 : -18),
+              duration: 0.9,
+              ease: "power3.out",
+            });
+          };
+
+          window.addEventListener("mousemove", onMove);
+          cleanupMove = () => window.removeEventListener("mousemove", onMove);
+        },
+
+        "(max-width: 767px)": () => {
+          root.querySelector<HTMLElement>(".jm-loader")?.style.setProperty("display", "none");
+          root.querySelectorAll<HTMLElement>(".jm-loader-panel").forEach((panel) => {
+            panel.style.setProperty("display", "none");
+          });
         },
       });
-
-      gsap.to(".jm-frame", {
-        yPercent: (index) => (index % 2 === 0 ? -6 : 7),
-        rotate: (index) => (index % 2 === 0 ? -2.5 : 2.5),
-        duration: 3.4,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.18,
-      });
-
-      gsap.to(".jm-marker", {
-        y: (index) => (index % 2 === 0 ? -10 : 9),
-        duration: 2.3,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.15,
-      });
-
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root,
-          start: "top top",
-          end: "+=1900",
-          pin: true,
-          scrub: 0.9,
-          anticipatePin: 1,
-        },
-      });
-
-      scrollTl
-        .to(".jm-bg-media", { scale: 0.88, xPercent: -14, yPercent: -3, borderRadius: 18 }, 0)
-        .to(".jm-bg-shade", { opacity: 0.78 }, 0)
-        .to(root, { "--negative-y": "76%", "--negative-band": "44%", "--negative-opacity": 1, "--negative-tilt": "6%" }, 0)
-        .to(".jm-title-top", { xPercent: -3, scale: 1.018, opacity: 1 }, 0)
-        .to(".jm-title-bottom", { xPercent: 3, scale: 1.02, opacity: 1 }, 0)
-        .to(".jm-copy", { yPercent: -4, scale: 1.01, opacity: 1 }, 0)
-        .to(".jm-stat", { y: 42, opacity: 0 }, 0)
-        .to(".jm-frame-0", { xPercent: 118, yPercent: -90, rotate: 12, scale: 1.14 }, 0)
-        .to(".jm-frame-1", { xPercent: -92, yPercent: 40, rotate: -14, scale: 1.18 }, 0)
-        .to(".jm-frame-2", { xPercent: 126, yPercent: 56, rotate: 10, scale: 1.13 }, 0)
-        .to(".jm-frame-3", { xPercent: -72, yPercent: -78, rotate: -11, scale: 1.16 }, 0)
-        .to(".jm-marker-copy", { xPercent: 135, yPercent: -110, rotate: -14 }, 0)
-        .to(".jm-marker-click", { xPercent: -118, yPercent: 80, rotate: 16 }, 0)
-        .to(".jm-marker-scroll", { xPercent: 112, yPercent: 92, rotate: -10 }, 0);
-
-      const onMove = (event: MouseEvent) => {
-        const x = (event.clientX / window.innerWidth - 0.5) * 2;
-        const y = (event.clientY / window.innerHeight - 0.5) * 2;
-
-        gsap.to(".jm-bg-media", {
-          x: x * 12,
-          y: y * 10,
-          duration: 0.9,
-          ease: "power3.out",
-        });
-
-        gsap.to(".jm-frame", {
-          x: (index) => x * (index % 2 === 0 ? 24 : -22),
-          y: (index) => y * (index % 2 === 0 ? 18 : -18),
-          duration: 0.9,
-          ease: "power3.out",
-        });
-      };
-
-      window.addEventListener("mousemove", onMove);
-      cleanupMove = () => window.removeEventListener("mousemove", onMove);
     }, root);
 
     return () => {
       cleanupMove?.();
+      try { mm && mm.revert && mm.revert(); } catch (e) {}
       ctx.revert();
     };
   }, []);

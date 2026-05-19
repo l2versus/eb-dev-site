@@ -118,81 +118,91 @@ export function VideoStorySection() {
       images.push(image);
     }
 
+    let mm: any;
     const ctx = gsap.context(() => {
-      const isMobile = typeof window !== "undefined" && (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
-      if (isReducedMotion() || isMobile) {
-        gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0 });
-        return;
-      }
+      // scope by media: keep heavy frame sequence for larger viewports
+      mm = ScrollTrigger.matchMedia({
+        "(min-width: 768px)": () => {
+          if (isReducedMotion()) {
+            gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0 });
+            return;
+          }
 
-      gsap.set(".video-story-beat", { autoAlpha: 0, y: 40, filter: "blur(12px)" });
-      gsap.set(".story-word", { yPercent: 90, autoAlpha: 0, filter: "blur(10px)" });
+          gsap.set(".video-story-beat", { autoAlpha: 0, y: 40, filter: "blur(12px)" });
+          gsap.set(".story-word", { yPercent: 90, autoAlpha: 0, filter: "blur(10px)" });
 
-      const playhead = { frame: 0 };
-      const timeline = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          id: "video-story-frame-sequence",
-          trigger: section,
-          start: "top top",
-          end: () => `+=${SCROLL_DISTANCE}`,
-          pin: true,
-          scrub: 1.8,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      timeline.to(
-        playhead,
-        {
-          frame: FRAME_COUNT - 1,
-          duration: 1,
-          ease: "none",
-          onUpdate: () => drawFrame(Math.round(playhead.frame)),
-        },
-        0,
-      );
-
-      STORY_BEATS.forEach((beat, index) => {
-        const beatEl = section.querySelector(`.video-story-beat-${index}`);
-        if (!beatEl) return;
-
-        const words = beatEl.querySelectorAll(".story-word");
-        const inDuration = 0.035;
-        const outDuration = 0.045;
-
-        timeline
-          .fromTo(
-            beatEl,
-            { autoAlpha: 0, y: 44, filter: "blur(12px)" },
-            { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: inDuration, ease: "power2.out" },
-            beat.start,
-          )
-          .fromTo(
-            words,
-            { yPercent: 90, autoAlpha: 0, filter: "blur(10px)" },
-            {
-              yPercent: 0,
-              autoAlpha: 1,
-              filter: "blur(0px)",
-              duration: inDuration,
-              stagger: 0.004,
-              ease: "power2.out",
+          const playhead = { frame: 0 };
+          const timeline = gsap.timeline({
+            defaults: { ease: "none" },
+            scrollTrigger: {
+              id: "video-story-frame-sequence",
+              trigger: section,
+              start: "top top",
+              end: () => `+=${SCROLL_DISTANCE}`,
+              pin: true,
+              scrub: 1.8,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
             },
-            beat.start + 0.006,
-          )
-          .to(
-            beatEl,
+          });
+
+          timeline.to(
+            playhead,
             {
-              autoAlpha: 0,
-              y: -26,
-              filter: "blur(8px)",
-              duration: outDuration,
-              ease: "power2.in",
+              frame: FRAME_COUNT - 1,
+              duration: 1,
+              ease: "none",
+              onUpdate: () => drawFrame(Math.round(playhead.frame)),
             },
-            beat.end,
+            0,
           );
+
+          STORY_BEATS.forEach((beat, index) => {
+            const beatEl = section.querySelector(`.video-story-beat-${index}`);
+            if (!beatEl) return;
+
+            const words = beatEl.querySelectorAll(".story-word");
+            const inDuration = 0.035;
+            const outDuration = 0.045;
+
+            timeline
+              .fromTo(
+                beatEl,
+                { autoAlpha: 0, y: 44, filter: "blur(12px)" },
+                { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: inDuration, ease: "power2.out" },
+                beat.start,
+              )
+              .fromTo(
+                words,
+                { yPercent: 90, autoAlpha: 0, filter: "blur(10px)" },
+                {
+                  yPercent: 0,
+                  autoAlpha: 1,
+                  filter: "blur(0px)",
+                  duration: inDuration,
+                  stagger: 0.004,
+                  ease: "power2.out",
+                },
+                beat.start + 0.006,
+              )
+              .to(
+                beatEl,
+                {
+                  autoAlpha: 0,
+                  y: -26,
+                  filter: "blur(8px)",
+                  duration: outDuration,
+                  ease: "power2.in",
+                },
+                beat.end,
+              );
+          });
+        },
+
+        // mobile / small screens: simple fallback
+        "(max-width: 767px)": () => {
+          gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0 });
+        },
       });
     }, section);
 
