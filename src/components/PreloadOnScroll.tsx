@@ -29,7 +29,12 @@ export default function PreloadOnScroll({
     const video = videoRef.current;
     if (!section || !video) return;
 
-    if (isReducedMotion()) {
+    const isMobile =
+      typeof window !== "undefined" &&
+      (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+
+    // Fallback: disable scrub/pin on mobile and when user prefers reduced motion.
+    if (isReducedMotion() || isMobile) {
       setIsLoaded(true);
       return;
     }
@@ -42,16 +47,24 @@ export default function PreloadOnScroll({
 
         const maxTime = Math.max(video.duration - 0.04, 0);
         const playhead = { time: 0 };
-        video.pause();
-        video.currentTime = 0;
+        try {
+          video.pause();
+          video.currentTime = 0;
+        } catch (e) {
+          // ignore errors when setting currentTime on restrictive browsers
+        }
         setIsLoaded(true);
 
         gsap.to(playhead, {
           time: maxTime,
           ease: "none",
           onUpdate: () => {
-            if (Math.abs(video.currentTime - playhead.time) > SEEK_EPSILON) {
-              video.currentTime = playhead.time;
+            try {
+              if (Math.abs(video.currentTime - playhead.time) > SEEK_EPSILON) {
+                video.currentTime = playhead.time;
+              }
+            } catch (e) {
+              // ignore seek exceptions on some mobile browsers
             }
           },
           scrollTrigger: {
@@ -76,7 +89,11 @@ export default function PreloadOnScroll({
             },
             onLeaveBack: () => {
               playhead.time = 0;
-              video.currentTime = 0;
+              try {
+                video.currentTime = 0;
+              } catch (e) {
+                // ignore
+              }
               if (progressRef.current) {
                 gsap.set(progressRef.current, { scaleX: 0 });
               }
@@ -116,6 +133,7 @@ export default function PreloadOnScroll({
     >
       <video
         ref={videoRef}
+        autoPlay
         muted
         playsInline
         preload="auto"
