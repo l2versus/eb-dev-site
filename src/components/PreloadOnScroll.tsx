@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { gsap, ScrollTrigger, isReducedMotion } from "@/lib/gsap";
 
@@ -23,6 +24,8 @@ export default function PreloadOnScroll({
   const progressRef = useRef<HTMLSpanElement | null>(null);
   const completedRef = useRef(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [showMobileSplash, setShowMobileSplash] = useState(false);
 
   useEffect(() => {
     const section = rootRef.current;
@@ -33,8 +36,18 @@ export default function PreloadOnScroll({
       typeof window !== "undefined" &&
       (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
 
-    // Fallback: disable scrub/pin on mobile and when user prefers reduced motion.
-    if (isReducedMotion() || isMobile) {
+    setIsMobileDevice(isMobile);
+
+    // Show a simple splash on mobile (short timeout) while keeping the heavy scrub disabled
+    if (isMobile) {
+      setShowMobileSplash(true);
+      const t = setTimeout(() => setShowMobileSplash(false), 900);
+      setIsLoaded(true);
+      return () => clearTimeout(t);
+    }
+
+    // Fallback: disable scrub/pin when user prefers reduced motion.
+    if (isReducedMotion()) {
       setIsLoaded(true);
       return;
     }
@@ -131,6 +144,13 @@ export default function PreloadOnScroll({
       id="intro"
       className="relative min-h-[100svh] overflow-hidden bg-black text-white"
     >
+      {showMobileSplash && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black md:hidden">
+          <div className="mx-auto w-48">
+            <Image src="/images/logo-banner.png" alt="logo" width={340} height={98} className="w-full h-auto object-contain" />
+          </div>
+        </div>
+      )}
       <video
         ref={videoRef}
         autoPlay
