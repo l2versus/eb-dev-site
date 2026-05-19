@@ -42,7 +42,10 @@ export function HeroSection() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    if (isReducedMotion()) {
+    const isMobile = typeof window !== "undefined" && (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+
+    // On reduced motion or mobile devices, skip heavy intro animations and hide loader
+    if (isReducedMotion() || isMobile) {
       root.querySelector<HTMLElement>(".jm-loader")?.style.setProperty("display", "none");
       root.querySelectorAll<HTMLElement>(".jm-loader-panel").forEach((panel) => {
         panel.style.setProperty("display", "none");

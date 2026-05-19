@@ -119,7 +119,8 @@ export function VideoStorySection() {
     }
 
     const ctx = gsap.context(() => {
-      if (isReducedMotion()) {
+      const isMobile = typeof window !== "undefined" && (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+      if (isReducedMotion() || isMobile) {
         gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0 });
         return;
       }
