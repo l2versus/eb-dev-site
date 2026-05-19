@@ -125,8 +125,24 @@ export default function PreloadOnScroll({
       }
     }, section);
 
+    // Ensure ScrollTrigger responds to touch/trackpad/keyboard input too
+    const touchUpdate = () => {
+      try {
+        ScrollTrigger.update();
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    window.addEventListener("touchmove", touchUpdate, { passive: true });
+    window.addEventListener("pointermove", touchUpdate);
+    window.addEventListener("keydown", touchUpdate);
+
     return () => {
       removeMetadataListener?.();
+      window.removeEventListener("touchmove", touchUpdate);
+      window.removeEventListener("pointermove", touchUpdate);
+      window.removeEventListener("keydown", touchUpdate);
       ctx.revert();
     };
   }, [onComplete]);
