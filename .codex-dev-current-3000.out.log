@@ -19,3 +19,58 @@ Creating turbopack project {
  ○ Compiling / ...
  ✓ Compiled / in 4s
  GET / 200 in 5389ms
+ GET / 200 in 630ms
+ GET / 200 in 589ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 626ms
+ GET /api/auth/session 200 in 2635ms
+ GET /api/auth/session 200 in 690ms
+ ✓ Compiled in 360ms
+ ✓ Compiled in 230ms
+ GET / 200 in 853ms
+ GET / 200 in 383ms
+ GET /api/auth/session 200 in 730ms
+ GET /api/auth/session 200 in 376ms
+ GET /api/auth/session 200 in 345ms
+ GET / 200 in 428ms
+ GET /api/auth/session 200 in 640ms
+ GET /api/auth/session 200 in 371ms
+ GET / 200 in 455ms
+ GET /api/auth/session 200 in 690ms
+ GET /api/auth/session 200 in 358ms
+ GET / 200 in 470ms
+ GET /api/auth/session 200 in 643ms
+ GET /api/auth/session 200 in 338ms
+ ✓ Compiled in 253ms
+ ✓ Compiled in 244ms
+ GET / 500 in 867ms
+ ✓ Compiled in 292ms
+ GET / 200 in 1142ms
+ GET /api/auth/session 200 in 855ms
+ GET /api/auth/session 200 in 352ms
+ GET / 200 in 543ms
+ ✓ Compiled in 243ms
+ ✓ Compiled in 166ms
+ GET / 200 in 920ms
+ GET /api/auth/session 200 in 824ms
+ GET /api/auth/session 200 in 343ms
+ ✓ Compiled in 329ms
+ ✓ Compiled in 194ms
+ ✓ Compiled in 262ms
+ ✓ Compiled in 241ms
+ GET / 200 in 777ms
+ GET / 200 in 873ms
+ GET /api/auth/session 200 in 805ms
+ GET /api/auth/session 200 in 320ms
+ ✓ Compiled in 235ms
+ GET / 200 in 779ms
+ GET /api/auth/session 200 in 635ms
+ GET /api/auth/session 200 in 326ms
+ ✓ Compiled in 242ms
+ GET / 200 in 785ms
+ ✓ Compiled in 215ms
+ GET / 200 in 828ms
+ GET /api/auth/session 200 in 917ms
+ GET /api/auth/session 200 in 340ms
+ GET / 200 in 622ms
+ GET /api/auth/session 200 in 743ms

@@ -40,3 +40,290 @@ Import trace:
     ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
 
 
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⨯ ReferenceError: FractureText is not defined
+    at AnimatedFooter (src\components\sections\AnimatedFooter.tsx:441:20)
+  439 |               >
+  440 |                 <span className="footer-title-left block overflow-visible will-change-transform">
+> 441 |                   <FractureText text="Emmanuel" className="footer-word footer-fracture block" />
+      |                    ^
+  442 |                 </span>
+  443 |                 <span
+  444 |                   className="footer-title-right -mt-[15px] block overflow-visible text-right will-change-transform" {
+  digest: '1944295576'
+}
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+

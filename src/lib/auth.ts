@@ -6,9 +6,9 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-// import { PrismaAdapter } from "@auth/prisma-adapter";
-// import { prisma } from "@/lib/prisma";
-// import bcrypt from "bcryptjs";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 type Role = "ADMIN" | "SUPER_ADMIN" | "USER";
 
@@ -67,8 +67,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     // ─── Google OAuth 2.0 ─────────────────────────────────────────────
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID!,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET!,
       authorization: {
         params: {
           prompt: "consent",
@@ -144,6 +144,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
 
+  adapter: PrismaAdapter(prisma) as any,
   callbacks: {
     // ─── Controle de acesso por rota ──────────────────────────────────
     authorized({ auth, request: { nextUrl } }) {
