@@ -1,0 +1,42 @@
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\admin\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\admin\Desktop\Site Emmanuel\Site-Emmanuel\package-lock.json
+
+ ⚠ Next.js can't recognize the exported `runtime` field in "/twitter-image/route", it may be re-exported from another file. The default config will be used instead.
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+
+ ⚠ ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx:2:19
+Invalid page configuration
+[0m [90m 1 |[39m [90m// Reutiliza a mesma imagem do OpenGraph para Twitter Card[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mexport[39m { [36mdefault[39m[33m,[39m runtime[33m,[39m alt[33m,[39m size[33m,[39m contentType } [36mfrom[39m [32m"./opengraph-image"[39m[33m;[39m
+ [90m   |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m[0m
+
+Next.js can't recognize the exported `runtime` field in "Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx" as it was not assigned to a string literal.
+The default runtime will be used instead.
+
+
+Import trace:
+  Server Component:
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image.tsx
+    ./Desktop/Site Emmanuel/Site-Emmanuel/src/app/twitter-image--metadata.js
+
+

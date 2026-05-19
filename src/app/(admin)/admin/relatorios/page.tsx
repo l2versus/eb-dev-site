@@ -123,26 +123,26 @@ const metas = [
 
 export default function RelatoriosPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Relatórios & Analytics</h2>
-          <p className="text-dark-400 mt-1">Análise completa do seu negócio freelancer</p>
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Relatórios & Analytics</h2>
+          <p className="text-dark-400 text-sm mt-1">Análise completa do seu negócio</p>
         </div>
-        <Badge variant="gold">
+        <Badge variant="gold" className="self-start">
           <Calendar className="h-3 w-3 mr-1" /> Ano 2024
         </Badge>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {metricas.map((metrica) => (
-          <Card key={metrica.titulo} variant="glass">
+          <Card key={metrica.titulo} variant="glass" padding="sm">
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-dark-400 mb-1">{metrica.titulo}</p>
-                <p className="text-2xl font-bold text-white">{metrica.valor}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs text-dark-400 mb-1">{metrica.titulo}</p>
+                <p className="text-lg sm:text-2xl font-bold text-white truncate">{metrica.valor}</p>
                 <div
                   className={`flex items-center gap-1 mt-1 text-xs ${
                     metrica.positivo ? "text-emerald-400" : "text-red-400"
@@ -190,7 +190,7 @@ export default function RelatoriosPage() {
       </Card>
 
       {/* Linha 2: Categorias + Origem */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Projetos por Categoria */}
         <Card variant="glass">
           <CardHeader
@@ -218,7 +218,7 @@ export default function RelatoriosPage() {
       </div>
 
       {/* Tempo Médio + Progresso das Metas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Tempo Médio por Tipo */}
         <Card variant="glass">
           <CardHeader

@@ -1,10 +1,10 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 📋 Projetos Kanban — 100% localStorage (sem API)
+// 📋 Projetos Kanban — Drag & Drop + Scroll por arrasto (estilo ClickUp)
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +26,7 @@ import {
   DollarSign,
   User,
   BarChart3,
-  ArrowRight,
-  ArrowLeft,
+  GripVertical,
   Calendar,
   Edit3,
   Trash2,
@@ -58,6 +57,43 @@ export default function ProjetosPage() {
   const [editando, setEditando] = useState<Projeto | null>(null);
   const [viewMode, setViewMode] = useState<"kanban" | "lista">("kanban");
 
+  // ─── Drag & Drop state ────────────────────────────────────────────
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverCol, setDragOverCol] = useState<ProjetoStatus | null>(null);
+
+  // ─── Drag-to-scroll (estilo ClickUp) ──────────────────────────────
+  const boardRef = useRef<HTMLDivElement>(null);
+  const isDraggingBoard = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleBoardPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    // Só ativa scroll por arrasto se clicou no fundo do board (não em um card)
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-card]") || target.closest("button")) return;
+    
+    isDraggingBoard.current = true;
+    startX.current = e.clientX;
+    scrollLeft.current = boardRef.current?.scrollLeft || 0;
+    boardRef.current?.setPointerCapture(e.pointerId);
+    if (boardRef.current) boardRef.current.style.cursor = "grabbing";
+  }, []);
+
+  const handleBoardPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingBoard.current || !boardRef.current) return;
+    e.preventDefault();
+    const dx = e.clientX - startX.current;
+    boardRef.current.scrollLeft = scrollLeft.current - dx;
+  }, []);
+
+  const handleBoardPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    isDraggingBoard.current = false;
+    if (boardRef.current) {
+      boardRef.current.releasePointerCapture(e.pointerId);
+      boardRef.current.style.cursor = "grab";
+    }
+  }, []);
+
   const [form, setForm] = useState({
     titulo: "",
     descricao: "",
@@ -75,7 +111,7 @@ export default function ProjetosPage() {
     setLoaded(true);
   }, []);
 
-  // Mover projeto para coluna
+  // Mover projeto para coluna (via drag ou botão)
   const moverProjeto = (projeto: Projeto, novoStatus: ProjetoStatus) => {
     const progressoMap: Record<ProjetoStatus, number> = {
       briefing: 10, design: 30, desenvolvimento: 60, revisao: 85, entregue: 100,
@@ -86,9 +122,144 @@ export default function ProjetosPage() {
     });
     if (updated) {
       setProjetos(loadProjetos());
-      toast.success(`Movido para ${novoStatus}`);
+      toast.success(`Movido para ${COLUNAS.find(c => c.key === novoStatus)?.label || novoStatus}`);
     }
   };
+
+  // ─── Drag handlers ─────────────────────────────────────────────────
+  const handleDragStart = (e: React.DragEvent, projetoId: string) => {
+    setDraggedId(projetoId);
+    e.dataTransfer.effectAllowed = "move";
+    // Transparência visual no card arrastado
+    const el = e.currentTarget as HTMLElement;
+    setTimeout(() => el.style.opacity = "0.4", 0);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    (e.currentTarget as HTMLElement).style.opacity = "1";
+    setDraggedId(null);
+    setDragOverCol(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, colKey: ProjetoStatus) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverCol(colKey);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverCol(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, colKey: ProjetoStatus) => {
+    e.preventDefault();
+    setDragOverCol(null);
+    if (!draggedId) return;
+    const projeto = projetos.find(p => p.id === draggedId);
+    if (projeto && projeto.status !== colKey) {
+      moverProjeto(projeto, colKey);
+    }
+    setDraggedId(null);
+  };
+
+  // ─── Touch drag (mobile) ──────────────────────────────────────────
+  const touchDragId = useRef<string | null>(null);
+  const touchClone = useRef<HTMLElement | null>(null);
+  const touchStartPos = useRef({ x: 0, y: 0 });
+  const hasMoved = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent, projetoId: string) => {
+    const touch = e.touches[0];
+    touchDragId.current = projetoId;
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    hasMoved.current = false;
+  };
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!touchDragId.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+    
+    // Só ativa drag se moveu mais de 10px
+    if (dx < 10 && dy < 10) return;
+    hasMoved.current = true;
+    e.preventDefault();
+
+    // Criar clone visual
+    if (!touchClone.current) {
+      const card = document.querySelector(`[data-card-id="${touchDragId.current}"]`) as HTMLElement;
+      if (!card) return;
+      const clone = card.cloneNode(true) as HTMLElement;
+      clone.style.position = "fixed";
+      clone.style.zIndex = "9999";
+      clone.style.width = card.offsetWidth + "px";
+      clone.style.opacity = "0.85";
+      clone.style.pointerEvents = "none";
+      clone.style.transform = "rotate(3deg) scale(1.05)";
+      clone.style.boxShadow = "0 20px 40px rgba(0,0,0,0.5)";
+      document.body.appendChild(clone);
+      touchClone.current = clone;
+      card.style.opacity = "0.3";
+    }
+
+    touchClone.current.style.left = touch.clientX - 130 + "px";
+    touchClone.current.style.top = touch.clientY - 40 + "px";
+
+    // Highlight coluna sob o touch
+    const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+    const colEl = elements.find(el => (el as HTMLElement).dataset?.colKey) as HTMLElement | undefined;
+    
+    document.querySelectorAll("[data-col-key]").forEach(el => {
+      (el as HTMLElement).style.background = "";
+    });
+    if (colEl) {
+      colEl.style.background = "rgba(0, 240, 255, 0.05)";
+      setDragOverCol(colEl.dataset.colKey as ProjetoStatus);
+    } else {
+      setDragOverCol(null);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchDragId.current) return;
+    
+    // Limpar clone visual
+    if (touchClone.current) {
+      touchClone.current.remove();
+      touchClone.current = null;
+    }
+
+    // Restaurar opacidade do card original
+    const card = document.querySelector(`[data-card-id="${touchDragId.current}"]`) as HTMLElement;
+    if (card) card.style.opacity = "1";
+
+    // Limpar highlights
+    document.querySelectorAll("[data-col-key]").forEach(el => {
+      (el as HTMLElement).style.background = "";
+    });
+
+    // Drop na coluna
+    if (hasMoved.current && dragOverCol && touchDragId.current) {
+      const projeto = projetos.find(p => p.id === touchDragId.current);
+      if (projeto && projeto.status !== dragOverCol) {
+        moverProjeto(projeto, dragOverCol);
+      }
+    }
+
+    touchDragId.current = null;
+    setDragOverCol(null);
+    hasMoved.current = false;
+  }, [dragOverCol, projetos]);
+
+  useEffect(() => {
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [handleTouchMove, handleTouchEnd]);
 
   // Salvar projeto (criar ou editar)
   const salvarProjeto = () => {
@@ -177,19 +348,19 @@ export default function ProjetosPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <FolderKanban className="h-6 w-6 text-brand-400" />
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+            <FolderKanban className="h-5 w-5 sm:h-6 sm:w-6 text-brand-400" />
             Projetos
           </h1>
           <p className="text-sm text-dark-400 mt-1">
             {projetos.length} projetos · {emAndamento} em andamento
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex bg-dark-800 rounded-lg p-0.5">
             <button
               onClick={() => setViewMode("kanban")}
@@ -204,60 +375,75 @@ export default function ProjetosPage() {
               Lista
             </button>
           </div>
-          <Button onClick={() => abrirModal()} className="gap-2">
-            <Plus className="h-4 w-4" /> Novo Projeto
+          <Button size="sm" onClick={() => abrirModal()} className="gap-2">
+            <Plus className="h-4 w-4" /> Novo
           </Button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 bg-dark-900 border-dark-800">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-brand-500/10">
-              <FolderKanban className="h-5 w-5 text-brand-400" />
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <Card className="p-3 sm:p-4 bg-dark-900 border-dark-800">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-brand-500/10">
+              <FolderKanban className="h-4 w-4 sm:h-5 sm:w-5 text-brand-400" />
             </div>
             <div>
-              <p className="text-xs text-dark-400">Total Projetos</p>
-              <p className="text-xl font-bold text-white">{projetos.length}</p>
+              <p className="text-[10px] sm:text-xs text-dark-400">Total</p>
+              <p className="text-lg sm:text-xl font-bold text-white">{projetos.length}</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4 bg-dark-900 border-dark-800">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-500/10">
-              <DollarSign className="h-5 w-5 text-green-400" />
+        <Card className="p-3 sm:p-4 bg-dark-900 border-dark-800">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10">
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
             </div>
-            <div>
-              <p className="text-xs text-dark-400">Valor Total</p>
-              <p className="text-xl font-bold text-white">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-dark-400">Valor Total</p>
+              <p className="text-sm sm:text-xl font-bold text-white truncate">
                 R$ {totalValor.toLocaleString("pt-BR")}
               </p>
             </div>
           </div>
         </Card>
-        <Card className="p-4 bg-dark-900 border-dark-800">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/10">
-              <BarChart3 className="h-5 w-5 text-purple-400" />
+        <Card className="p-3 sm:p-4 bg-dark-900 border-dark-800">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-xs text-dark-400">Progresso Médio</p>
-              <p className="text-xl font-bold text-white">{mediaProgresso}%</p>
+              <p className="text-[10px] sm:text-xs text-dark-400">Progresso</p>
+              <p className="text-lg sm:text-xl font-bold text-white">{mediaProgresso}%</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* KANBAN VIEW */}
+      {/* KANBAN VIEW — Drag & Drop + Scroll por arrasto */}
       {viewMode === "kanban" ? (
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+        <div
+          ref={boardRef}
+          className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 -mx-1 px-1 select-none"
+          style={{ cursor: "grab", scrollBehavior: "auto" }}
+          onPointerDown={handleBoardPointerDown}
+          onPointerMove={handleBoardPointerMove}
+          onPointerUp={handleBoardPointerUp}
+          onPointerCancel={handleBoardPointerUp}
+        >
           {COLUNAS.map((coluna) => {
             const projetosColuna = projetos.filter((p) => p.status === coluna.key);
-            const colunaIdx = COLUNAS.findIndex((c) => c.key === coluna.key);
+            const isOver = dragOverCol === coluna.key;
 
             return (
-              <div key={coluna.key} className="flex-shrink-0 w-72">
+              <div
+                key={coluna.key}
+                className="shrink-0 w-64 sm:w-72"
+                data-col-key={coluna.key}
+                onDragOver={(e) => handleDragOver(e, coluna.key)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, coluna.key)}
+              >
                 <div className={`rounded-t-xl p-3 bg-gradient-to-b ${coluna.color} border ${coluna.border} border-b-0`}>
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-white">{coluna.label}</h3>
@@ -267,39 +453,38 @@ export default function ProjetosPage() {
                   </div>
                 </div>
 
-                <div className={`space-y-2 p-2 bg-dark-900/50 border ${coluna.border} border-t-0 rounded-b-xl min-h-[200px]`}>
+                <div
+                  className={`space-y-2 p-2 border ${coluna.border} border-t-0 rounded-b-xl min-h-[200px] transition-colors duration-200 ${
+                    isOver
+                      ? "bg-brand-500/10 border-brand-500/40 ring-2 ring-brand-500/20"
+                      : "bg-dark-900/50"
+                  }`}
+                >
                   {projetosColuna.map((projeto) => {
                     const prazoInfo = diasRestantes(projeto.prazo);
+                    const isDragged = draggedId === projeto.id;
                     return (
                       <div
                         key={projeto.id}
-                        className="bg-dark-900 border border-dark-800 rounded-xl p-3 hover:border-dark-700 transition-all group cursor-pointer"
-                        onClick={() => setDetalheProjeto(projeto)}
+                        data-card
+                        data-card-id={projeto.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, projeto.id)}
+                        onDragEnd={handleDragEnd}
+                        onTouchStart={(e) => handleTouchStart(e, projeto.id)}
+                        onClick={() => {
+                          if (!hasMoved.current) setDetalheProjeto(projeto);
+                        }}
+                        className={`bg-dark-900 border border-dark-800 rounded-xl p-3 hover:border-dark-700 transition-all group cursor-grab active:cursor-grabbing ${
+                          isDragged ? "opacity-40 scale-95" : ""
+                        }`}
                       >
+                        {/* Drag handle indicator */}
                         <div className="flex items-center justify-between mb-2">
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${PRIORIDADES[projeto.prioridade].color}`}>
                             {PRIORIDADES[projeto.prioridade].label}
                           </span>
-                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {colunaIdx > 0 && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); moverProjeto(projeto, COLUNAS[colunaIdx - 1].key); }}
-                                className="p-1 text-dark-500 hover:text-white rounded"
-                                title={`Mover para ${COLUNAS[colunaIdx - 1].label}`}
-                              >
-                                <ArrowLeft className="h-3 w-3" />
-                              </button>
-                            )}
-                            {colunaIdx < COLUNAS.length - 1 && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); moverProjeto(projeto, COLUNAS[colunaIdx + 1].key); }}
-                                className="p-1 text-dark-500 hover:text-white rounded"
-                                title={`Mover para ${COLUNAS[colunaIdx + 1].label}`}
-                              >
-                                <ArrowRight className="h-3 w-3" />
-                              </button>
-                            )}
-                          </div>
+                          <GripVertical className="h-3.5 w-3.5 text-dark-600 group-hover:text-dark-400 transition-colors" />
                         </div>
 
                         <h4 className="text-sm font-medium text-white mb-1 line-clamp-2">{projeto.titulo}</h4>
@@ -340,8 +525,12 @@ export default function ProjetosPage() {
                   })}
 
                   {projetosColuna.length === 0 && (
-                    <div className="py-8 text-center">
-                      <p className="text-xs text-dark-600">Nenhum projeto</p>
+                    <div className={`py-8 text-center border-2 border-dashed rounded-xl transition-colors ${
+                      isOver ? "border-brand-500/40 bg-brand-500/5" : "border-dark-800/50"
+                    }`}>
+                      <p className="text-xs text-dark-600">
+                        {isOver ? "Soltar aqui" : "Arraste um card aqui"}
+                      </p>
                     </div>
                   )}
                 </div>

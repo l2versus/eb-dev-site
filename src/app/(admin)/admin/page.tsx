@@ -192,14 +192,14 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Dashboard</h2>
-          <p className="text-dark-400 mt-1 capitalize">Visão geral — {hoje}</p>
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Dashboard</h2>
+          <p className="text-dark-400 text-sm mt-1 capitalize">Visão geral — {hoje}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => { refresh(); toast.success("Dashboard atualizado!"); }}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-dark-400 hover:text-white bg-dark-800/50 hover:bg-dark-700/50 border border-dark-700/50 rounded-lg transition-all"
@@ -215,17 +215,17 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {kpis.map((kpi) => (
-          <Card key={kpi.titulo} variant="glass">
+          <Card key={kpi.titulo} variant="glass" padding="sm">
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-dark-400 mb-1">{kpi.titulo}</p>
-                <p className="text-2xl font-bold text-white">{kpi.valor}</p>
-                <p className="text-xs text-dark-500 mt-1">{kpi.extra}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs text-dark-400 mb-1">{kpi.titulo}</p>
+                <p className="text-lg sm:text-2xl font-bold text-white truncate">{kpi.valor}</p>
+                <p className="text-[10px] sm:text-xs text-dark-500 mt-1 truncate">{kpi.extra}</p>
               </div>
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl shrink-0 ${
                   kpi.cor === "emerald"
                     ? "bg-emerald-500/10 text-emerald-400"
                     : kpi.cor === "brand"
@@ -235,7 +235,7 @@ export default function AdminDashboardPage() {
                     : "bg-gold-500/10 text-gold-400"
                 }`}
               >
-                <kpi.icon className="h-5 w-5" />
+                <kpi.icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
             </div>
           </Card>
@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Gráficos principais */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Faturamento (2/3) */}
         <Card variant="gradient" className="lg:col-span-2">
           <CardHeader
@@ -282,7 +282,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Linha 2: Prioridades + Projetos Ativos */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Projetos por prioridade */}
         <Card variant="glass">
           <CardHeader
@@ -382,7 +382,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Chat + Compromissos */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Conversas recentes */}
         <Card variant="glass" className="lg:col-span-2">
           <CardHeader
@@ -472,7 +472,7 @@ export default function AdminDashboardPage() {
             subtitle="Atenção aos prazos"
             icon={<Timer className="h-5 w-5" />}
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4">
             {proximosEntregas.slice(0, 4).map((proj) => {
               const diasRestantes = Math.ceil(
                 (new Date(proj.prazo).getTime() - Date.now()) / (1000 * 60 * 60 * 24)

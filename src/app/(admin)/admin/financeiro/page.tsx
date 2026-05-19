@@ -328,18 +328,18 @@ export default function FinanceiroPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Financeiro</h2>
-          <p className="text-dark-400 mt-1">
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Financeiro</h2>
+          <p className="text-dark-400 text-sm mt-1">
             Gestão de receitas, despesas e fluxo de caixa
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" icon={<Download className="h-4 w-4" />} onClick={exportarCSV}>
-            Exportar CSV
+            Exportar
           </Button>
           <Button variant="gold" size="sm" icon={<Plus className="h-4 w-4" />} onClick={abrirNova}>
             Nova Transação
@@ -348,12 +348,12 @@ export default function FinanceiroPage() {
       </div>
 
       {/* KPIs Financeiros */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card variant="glass">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-dark-400 mb-1">Receita do Mês</p>
-              <p className="text-2xl font-bold text-white">{fmt(receitaMes)}</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{fmt(receitaMes)}</p>
               <p className="text-xs text-dark-500 mt-1 capitalize">{mesLabel}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
@@ -366,7 +366,7 @@ export default function FinanceiroPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-dark-400 mb-1">Lucro Líquido</p>
-              <p className="text-2xl font-bold text-white">{fmt(lucroMes)}</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{fmt(lucroMes)}</p>
               <div className="flex items-center gap-1 mt-1 text-xs text-emerald-400">
                 <ArrowUp className="h-3 w-3" /> Margem: {margemMes}%
               </div>
@@ -381,7 +381,7 @@ export default function FinanceiroPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-dark-400 mb-1">A Receber</p>
-              <p className="text-2xl font-bold text-white">{fmt(pendente)}</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{fmt(pendente)}</p>
               <p className="text-xs text-amber-400 mt-1">Parcelas futuras</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
@@ -394,7 +394,7 @@ export default function FinanceiroPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-dark-400 mb-1">Pipeline Total</p>
-              <p className="text-2xl font-bold text-white">{fmt(pipelineTotal)}</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{fmt(pipelineTotal)}</p>
               <p className="text-xs text-dark-500 mt-1">{projetos.length} projetos</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400">
@@ -405,7 +405,7 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <Card variant="gradient" className="lg:col-span-2">
           <CardHeader
             title="Receita vs Despesas"
@@ -445,7 +445,7 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Despesas por categoria + Tabela */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <Card variant="glass">
           <CardHeader
             title="Despesas por Categoria"
@@ -551,7 +551,7 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Resumo rápido */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <Card variant="glass">
           <div className="text-center">
             <p className="text-3xl font-bold text-emerald-400">{fmt(receitaTotal)}</p>

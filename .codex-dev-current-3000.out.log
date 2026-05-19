@@ -1,0 +1,21 @@
+
+> eb-emmanuel-bezerra-portfolio@1.0.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.5.12 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.234:3000
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\admin\\Desktop\\Site Emmanuel\\Site-Emmanuel',
+  testMode: true
+}
+ ✓ Compiled middleware in 342ms
+ ✓ Ready in 2.5s
+ ○ Compiling / ...
+ ✓ Compiled / in 4s
+ GET / 200 in 5389ms

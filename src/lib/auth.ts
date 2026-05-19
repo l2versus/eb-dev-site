@@ -37,6 +37,7 @@ declare module "next-auth" {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // adapter: PrismaAdapter(prisma) as any,
+  trustHost: true,
   secret: process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
@@ -93,8 +94,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials.password as string;
 
         // Admin hardcoded (sem necessidade de DB)
-        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@emmanuelbezerra.dev";
-        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "@Luna1992_";
+        const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "admin@emmanuelbezerra.dev").trim();
+        const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "@Luna1992_").trim();
 
         if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
           return {
@@ -116,16 +117,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
 
           if (!user || !user.passwordHash) {
-            throw new Error("Credenciais inválidas");
+            return null;
           }
 
           if (!user.active) {
-            throw new Error("Conta desativada.");
+            return null;
           }
 
           const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
           if (!isPasswordValid) {
-            throw new Error("Credenciais inválidas");
+            return null;
           }
 
           return {
@@ -136,7 +137,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: user.role as Role,
           };
         } catch {
-          throw new Error("Credenciais inválidas");
+          // DB offline — admin hardcoded já foi verificado
+          return null;
         }
       },
     }),

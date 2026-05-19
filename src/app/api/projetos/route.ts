@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api-auth";
 
 interface Projeto {
   id: string;
@@ -131,12 +132,18 @@ function seedIfEmpty() {
 
 // ─── GET — Listar projetos ───────────────────────────────────────────────────
 export async function GET() {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   seedIfEmpty();
   return NextResponse.json(projetos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
 }
 
 // ─── POST — Criar projeto ────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   seedIfEmpty();
   const body = await req.json();
 
@@ -162,6 +169,9 @@ export async function POST(req: NextRequest) {
 
 // ─── PATCH — Atualizar projeto (inclui mover no kanban) ──────────────────────
 export async function PATCH(req: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   seedIfEmpty();
   const body = await req.json();
   const idx = projetos.findIndex((p) => p.id === body.id);
@@ -183,6 +193,9 @@ export async function PATCH(req: NextRequest) {
 
 // ─── DELETE — Remover projeto ────────────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   seedIfEmpty();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");

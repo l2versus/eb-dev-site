@@ -106,7 +106,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex rounded-2xl overflow-hidden border border-dark-800 bg-dark-900">
+    <div className="h-[calc(100vh-6rem)] sm:h-[calc(100vh-8rem)] flex rounded-2xl overflow-hidden border border-dark-800 bg-dark-900">
       {/* LISTA DE CONVERSAS */}
       <div
         className={`${

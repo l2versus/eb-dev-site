@@ -192,12 +192,12 @@ export default function LogAtividadesPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Log de Atividades</h2>
-          <p className="text-dark-400 mt-1">Histórico completo de ações e eventos do sistema</p>
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Log de Atividades</h2>
+          <p className="text-dark-400 text-sm mt-1">Histórico de ações e eventos</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" icon={<Download className="h-4 w-4" />} onClick={() => {
@@ -217,19 +217,19 @@ export default function LogAtividadesPage() {
       </div>
 
       {/* Stats rápidos */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
         {[
-          { label: "Total de registros", value: stats.total, icon: <Activity className="h-5 w-5" />, color: "text-brand-400" },
-          { label: "Ações hoje", value: stats.hoje, icon: <Clock className="h-5 w-5" />, color: "text-blue-400" },
-          { label: "Warnings", value: stats.warnings, icon: <AlertTriangle className="h-5 w-5" />, color: "text-yellow-400" },
-          { label: "Erros", value: stats.erros, icon: <AlertTriangle className="h-5 w-5" />, color: "text-red-400" },
+          { label: "Total", value: stats.total, icon: <Activity className="h-4 w-4 sm:h-5 sm:w-5" />, color: "text-brand-400" },
+          { label: "Hoje", value: stats.hoje, icon: <Clock className="h-4 w-4 sm:h-5 sm:w-5" />, color: "text-blue-400" },
+          { label: "Warnings", value: stats.warnings, icon: <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />, color: "text-yellow-400" },
+          { label: "Erros", value: stats.erros, icon: <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />, color: "text-red-400" },
         ].map((s, i) => (
-          <Card key={i} variant="glass" className="!p-4">
-            <div className="flex items-center gap-3">
+          <Card key={i} variant="glass" className="!p-3 sm:!p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className={`${s.color}`}>{s.icon}</div>
               <div>
-                <p className="text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-[11px] text-dark-500">{s.label}</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{s.value}</p>
+                <p className="text-[10px] sm:text-[11px] text-dark-500">{s.label}</p>
               </div>
             </div>
           </Card>

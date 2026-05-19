@@ -389,16 +389,17 @@ export default function ClientesPage() {
 
   /* ═══ Render ══════════════════════════════════════════════════════════════ */
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Clientes & Leads</h2>
-          <p className="text-dark-400 mt-1">Gerencie seu funil de vendas e clientes</p>
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Clientes & Leads</h2>
+          <p className="text-dark-400 text-sm mt-1">Gerencie seu funil de vendas e clientes</p>
         </div>
         <Button
           variant="gold"
           size="sm"
+          className="w-full sm:w-auto sm:self-start"
           onClick={() => {
             resetForm();
             setEditingCliente(null);
@@ -459,9 +460,9 @@ export default function ClientesPage() {
       </div>
 
       {/* Filters */}
-      <Card variant="glass">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
+      <Card variant="glass" padding="sm">
+        <div className="space-y-3">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-dark-500" />
             <Input
               placeholder="Buscar por nome, email ou empresa..."
@@ -470,12 +471,12 @@ export default function ClientesPage() {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             {(["TODOS", "ATIVO", "LEAD", "PROSPECT", "NEGOCIANDO"] as const).map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
                   statusFilter === st
                     ? "bg-brand-500 text-white"
                     : "bg-dark-800 text-dark-400 hover:bg-dark-700"
@@ -511,42 +512,45 @@ export default function ClientesPage() {
             <Card
               key={cliente.id}
               variant="glass"
+              padding="sm"
               className="hover:border-brand-500/30 transition-all"
             >
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                {/* Avatar + Info */}
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
+              <div className="space-y-3">
+                {/* Avatar + Info + Status */}
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-linear-to-br from-brand-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm sm:text-lg shrink-0">
                     {cliente.nome.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-white font-semibold truncate">{cliente.nome}</h3>
+                      <h3 className="text-sm sm:text-base text-white font-semibold truncate">{cliente.nome}</h3>
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${
                           statusConfig[cliente.status]?.color || "text-dark-400 bg-dark-700/30"
                         }`}
                       >
                         {statusConfig[cliente.status]?.label || cliente.status}
                       </span>
-                      {cliente.tipo === "PJ" && (
-                        <Badge variant="default" className="text-xs">
+                    </div>
+                    {cliente.tipo === "PJ" && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Badge variant="default" className="text-[10px]">
                           <Building className="h-3 w-3 mr-1" />
                           Empresa
                         </Badge>
-                      )}
-                    </div>
-                    {cliente.empresa && (
-                      <p className="text-sm text-dark-400 truncate">{cliente.empresa}</p>
+                      </div>
                     )}
-                    <div className="flex items-center gap-4 mt-1 text-xs text-dark-500 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {cliente.email}
+                    {cliente.empresa && (
+                      <p className="text-xs sm:text-sm text-dark-400 truncate">{cliente.empresa}</p>
+                    )}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-xs text-dark-500">
+                      <span className="flex items-center gap-1 truncate">
+                        <Mail className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{cliente.email}</span>
                       </span>
                       {cliente.telefone && (
                         <span className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
+                          <Phone className="h-3 w-3 shrink-0" />
                           {cliente.telefone}
                         </span>
                       )}
@@ -554,47 +558,32 @@ export default function ClientesPage() {
                   </div>
                 </div>
 
-                {/* Métricas */}
-                <div className="flex items-center gap-6 lg:gap-8">
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-white">{cliente.totalProjetos ?? 0}</p>
-                    <p className="text-xs text-dark-500">Projetos</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-brand-400">
-                      {formatarValor(Number(cliente.faturamentoTotal) || 0)}
-                    </p>
-                    <p className="text-xs text-dark-500">Faturado</p>
-                  </div>
-                  {cliente.rating > 0 && (
-                    <div className="text-center">
-                      <p className="text-lg font-bold text-gold-400 flex items-center">
-                        {cliente.rating}
-                        <Star className="h-4 w-4 ml-1 fill-gold-400" />
-                      </p>
-                      <p className="text-xs text-dark-500">Rating</p>
+                {/* Métricas + Ações - mobile-first row */}
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-dark-800/50">
+                  <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto">
+                    <div className="text-center shrink-0">
+                      <p className="text-sm sm:text-lg font-bold text-white">{cliente.totalProjetos ?? 0}</p>
+                      <p className="text-[10px] text-dark-500">Projetos</p>
                     </div>
-                  )}
-                  {cliente.ultimoContato && (
-                    <div className="text-center hidden sm:block">
-                      <p className="text-sm text-dark-300">
-                        {new Date(cliente.ultimoContato).toLocaleDateString("pt-BR")}
+                    <div className="text-center shrink-0">
+                      <p className="text-sm sm:text-lg font-bold text-brand-400">
+                        {formatarValor(Number(cliente.faturamentoTotal) || 0)}
                       </p>
-                      <p className="text-xs text-dark-500">Último contato</p>
+                      <p className="text-[10px] text-dark-500">Faturado</p>
                     </div>
-                  )}
-                </div>
+                    {cliente.rating > 0 && (
+                      <div className="text-center shrink-0">
+                        <p className="text-sm sm:text-lg font-bold text-gold-400 flex items-center">
+                          {cliente.rating}
+                          <Star className="h-3 w-3 sm:h-4 sm:w-4 ml-1 fill-gold-400" />
+                        </p>
+                        <p className="text-[10px] text-dark-500">Rating</p>
+                      </div>
+                    )}
+                  </div>
 
-                {/* Tags e Ações */}
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-wrap gap-1">
-                    {cliente.tags?.map((tag) => (
-                      <Badge key={tag} variant="default" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-1">
+                  {/* Ações */}
+                  <div className="flex items-center gap-0.5 shrink-0">
                     <button
                       onClick={() => abrirBriefing(cliente)}
                       className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-400 transition-colors"
@@ -634,13 +623,13 @@ export default function ClientesPage() {
       )}
 
       {/* Pipeline Visual */}
-      <Card variant="gradient">
+      <Card variant="gradient" padding="sm">
         <CardHeader
           title="Pipeline de Vendas"
           subtitle="Visão do funil"
           icon={<TrendingUp className="h-5 w-5" />}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
           {[
             { label: "Leads", count: stats.leads, color: "brand" },
             { label: "Prospects", count: stats.prospects, color: "purple" },

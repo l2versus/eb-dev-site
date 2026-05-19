@@ -4,9 +4,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/api-auth";
 
 // GET /api/compromissos - Listar
 export async function GET(request: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { searchParams } = new URL(request.url);
     const data = searchParams.get("data"); // YYYY-MM-DD
@@ -59,6 +63,9 @@ export async function GET(request: NextRequest) {
 
 // POST /api/compromissos - Criar novo
 export async function POST(request: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const body = await request.json();
 

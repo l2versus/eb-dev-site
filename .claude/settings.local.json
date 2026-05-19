@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/^model Proposta /,/^}/' prisma/schema.prisma)",
+      "Bash(powershell.exe \"Get-Service -Name postgresql* -ErrorAction SilentlyContinue | Format-Table Name, Status\")",
+      "Bash(command -v psql)",
+      "Bash(docker --version)"
+    ]
+  }
+}

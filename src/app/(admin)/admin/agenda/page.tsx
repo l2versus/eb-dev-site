@@ -326,16 +326,17 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Minha Agenda</h2>
-          <p className="text-dark-400 mt-1">Calls, reuniões e entregas programadas</p>
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Minha Agenda</h2>
+          <p className="text-dark-400 text-sm mt-1">Calls, reuniões e entregas programadas</p>
         </div>
         <Button
           variant="gold"
           size="sm"
+          className="w-full sm:w-auto sm:self-start"
           onClick={() => abrirNovoCompromisso()}
           icon={<Plus className="h-4 w-4" />}
         >
@@ -344,7 +345,7 @@ export default function AgendaPage() {
       </div>
 
       {/* Stats por tipo */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
         {Object.entries(tipoConfig).map(([tipo, cfg]) => {
           const count = compromissosDoDia.filter((c) => c.tipo === tipo).length;
           const TipoIcon = cfg.icon;
@@ -542,7 +543,7 @@ export default function AgendaPage() {
           subtitle="Clique em um horário para agendar"
           icon={<CalendarDays className="h-5 w-5" />}
         />
-        <div className="grid grid-cols-5 sm:grid-cols-9 gap-2 mt-4">
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2 mt-4">
           {todosHorarios.map((h) => {
             const ocupado = horariosOcupados.includes(h);
             return (

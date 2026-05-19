@@ -5,10 +5,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   DollarSign,
@@ -26,6 +26,7 @@ import {
   FolderKanban,
   FileText,
   Activity,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
@@ -49,8 +50,67 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // ─── Proteção de rota: redireciona se não autenticado ────────────────
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login?callbackUrl=" + encodeURIComponent(pathname));
+    }
+  }, [status, router, pathname]);
+
+  // Verifica se é admin
+  const isAdmin =
+    session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
+
+  // Se carregando, mostra loading
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-dark-950">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-brand-500 mx-auto mb-4" />
+          <p className="text-dark-400 text-sm">Verificando acesso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não autenticado, não renderiza nada (redirect acontece no useEffect)
+  if (status === "unauthenticated" || !session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-dark-950">
+        <div className="text-center">
+          <Shield className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <p className="text-dark-400 text-sm">Acesso não autorizado</p>
+          <p className="text-dark-500 text-xs mt-1">Redirecionando para login...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não é admin, bloqueia
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-dark-950">
+        <div className="text-center max-w-md">
+          <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-white mb-2">Acesso Negado</h1>
+          <p className="text-dark-400 text-sm mb-6">
+            Você não tem permissão para acessar o painel administrativo.
+          </p>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="px-6 py-2 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 transition-colors"
+          >
+            Voltar ao site
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-dark-950">
@@ -196,29 +256,27 @@ export default function AdminLayout({
       </AnimatePresence>
 
       {/* ═══ CONTEÚDO PRINCIPAL ═════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full">
         {/* Top bar */}
-        <header className="flex items-center justify-between h-16 px-4 lg:px-8 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-8 border-b border-dark-800 bg-dark-900/80 backdrop-blur-md">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 text-dark-400 hover:text-white"
+              className="lg:hidden p-2 -ml-1 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors"
+              aria-label="Abrir menu"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <h1 className="text-sm font-medium text-white">
+            <h1 className="text-sm font-medium text-white truncate">
               Painel Administrativo
             </h1>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Notificações em tempo real */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <NotificationCenter />
             <div className="flex items-center gap-2">
-              <img
-                src="/images/foto-perfil.png"
-                alt="Emmanuel"
-                className="h-8 w-8 rounded-full object-cover border border-dark-700"
-              />
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                E
+              </div>
               <span className="hidden sm:block text-sm text-white font-medium">
                 Emmanuel
               </span>
@@ -226,7 +284,9 @@ export default function AdminLayout({
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">{children}</main>
+        <main className="flex-1 p-3 sm:p-4 lg:p-8 overflow-y-auto">
+          <div className="w-full max-w-full">{children}</div>
+        </main>
       </div>
     </div>
   );
