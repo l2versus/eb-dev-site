@@ -429,6 +429,148 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Luxury pre-footer typography overlap */
+.footer-luxe-prefooter {
+  background: #050505;
+}
+
+.footer-luxe-aura,
+.footer-luxe-grid,
+.footer-luxe-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.footer-luxe-aura {
+  background:
+    radial-gradient(circle at var(--spot-x) var(--spot-y), rgba(216, 185, 163, 0.16), transparent 24%),
+    radial-gradient(circle at 18% 72%, rgba(78, 118, 130, 0.18), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(255, 192, 144, 0.11), transparent 28%),
+    linear-gradient(180deg, #050505 0%, #080706 46%, #050505 100%);
+  filter: blur(2px);
+  opacity: 0.9;
+}
+
+.footer-luxe-grid {
+  background-image:
+    linear-gradient(rgba(216, 185, 163, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(216, 185, 163, 0.04) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(circle at 50% 54%, #000 0%, transparent 72%);
+  opacity: 0.18;
+}
+
+.footer-luxe-grain {
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.42'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  opacity: 0.13;
+}
+
+.footer-type-stage {
+  --champagne: #d8b9a3;
+  /* Offset source color: difference over #050505 resolves to #d8b9a3, overlap resolves to #050505. */
+  --blend-source: #ddbea8;
+  --blend-x: clamp(14px, 2vw, 44px);
+  --blend-y: clamp(-18px, -0.8vw, -8px);
+  position: relative;
+  min-height: clamp(340px, 52vw, 710px);
+  overflow: hidden;
+  isolation: isolate;
+  contain: paint;
+  border-top: 1px solid rgba(216, 185, 163, 0.16);
+  border-bottom: 1px solid rgba(216, 185, 163, 0.16);
+  background: #050505;
+}
+
+.footer-type-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.78), transparent 18%, transparent 82%, rgba(5, 5, 5, 0.78)),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.86), transparent 24%, transparent 72%, rgba(5, 5, 5, 0.88));
+}
+
+.footer-type-stage .base-text,
+.footer-type-stage .blend-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(1420px, 92vw);
+  margin: 0;
+  color: var(--champagne);
+  font-family: var(--font-display);
+  font-feature-settings: "kern", "liga", "dlig";
+  font-kerning: normal;
+  font-size: clamp(4rem, 16.4vw, 17.2rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 0.72;
+  text-align: center;
+  text-rendering: geometricPrecision;
+  text-wrap: balance;
+  transform: translate3d(-50%, -50%, 0);
+  user-select: none;
+}
+
+.footer-type-stage .blend-text {
+  z-index: 2;
+  color: var(--blend-source);
+  mix-blend-mode: difference;
+  transform: translate3d(
+    calc(-50% + var(--blend-x)),
+    calc(-50% + var(--blend-y)),
+    0
+  );
+  will-change: transform;
+}
+
+.footer-type-stage .base-text {
+  will-change: transform;
+}
+
+.footer-luxe-tools .footer-tool {
+  transition:
+    color 0.45s ease,
+    transform 0.45s var(--ease-out-quint);
+}
+
+.footer-luxe-tools .footer-tool:hover {
+  color: #f5f0e6;
+  transform: translateY(-2px);
+}
+
+.footer-marquee-track {
+  animation: footerMarquee 24s linear infinite;
+}
+
+@keyframes footerMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-type-stage {
+    min-height: clamp(310px, 92vw, 430px);
+  }
+
+  .footer-type-stage .base-text,
+  .footer-type-stage .blend-text {
+    width: 96vw;
+    font-size: clamp(3.35rem, 20vw, 6rem);
+    line-height: 0.78;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    REDUCED MOTION
    ═══════════════════════════════════════════════════════════════════════════ */

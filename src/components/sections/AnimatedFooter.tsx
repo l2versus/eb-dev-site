@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUp, Github, Instagram, Mail, MapPin, Phone } from "lucide-react";
-import { gsap, isReducedMotion } from "@/lib/gsap";
 
 const tools = ["Next.js", "React", "Node", "GSAP", "Lenis", "Prisma"];
+const FOOTER_TITLE = "Emmanuel Bezerra";
 
 const services = [
   "Rebranding digital",
@@ -28,150 +28,94 @@ const navLinks = [
 
 export function AnimatedFooter() {
   const rootRef = useRef<HTMLElement>(null);
-  const primaryVideoRef = useRef<HTMLVideoElement>(null);
+  const typeStageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    const stage = typeStageRef.current;
+    if (!root || !stage) return;
 
-    let cleanupMove: (() => void) | undefined;
-    let cleanupVideoLoop: (() => void) | undefined;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduceMotion.matches) {
+      stage.style.setProperty("--blend-x", "22px");
+      stage.style.setProperty("--blend-y", "-10px");
+      return;
+    }
 
-    const ctx = gsap.context(() => {
-      const primaryVideo = primaryVideoRef.current;
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(Math.max(value, min), max);
 
-      if (primaryVideo) {
-        primaryVideo.muted = true;
-        primaryVideo.loop = true;
-        primaryVideo.playsInline = true;
-        primaryVideo.playbackRate = 1;
+    let frame = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+    let currentX = 22;
+    let currentY = -10;
+    const start = performance.now();
 
-        const playVideo = () => {
-          void primaryVideo.play().catch(() => undefined);
-        };
+    const onPointerMove = (event: PointerEvent) => {
+      const stageRect = stage.getBoundingClientRect();
+      const rootRect = root.getBoundingClientRect();
 
-        const restartLoop = () => {
-          primaryVideo.currentTime = 0;
-          playVideo();
-        };
+      pointerX = clamp(
+        (event.clientX - stageRect.left - stageRect.width / 2) / (stageRect.width / 2),
+        -1,
+        1,
+      );
+      pointerY = clamp(
+        (event.clientY - stageRect.top - stageRect.height / 2) / (stageRect.height / 2),
+        -1,
+        1,
+      );
 
-        const resumeWhenVisible = () => {
-          if (!document.hidden) playVideo();
-        };
+      root.style.setProperty(
+        "--spot-x",
+        `${clamp(((event.clientX - rootRect.left) / rootRect.width) * 100, 0, 100).toFixed(2)}%`,
+      );
+      root.style.setProperty(
+        "--spot-y",
+        `${clamp(((event.clientY - rootRect.top) / rootRect.height) * 100, 0, 100).toFixed(2)}%`,
+      );
+    };
 
-        gsap.set(primaryVideo, { autoAlpha: 1 });
-        primaryVideo.addEventListener("ended", restartLoop);
-        document.addEventListener("visibilitychange", resumeWhenVisible);
-        playVideo();
+    const onPointerLeave = () => {
+      pointerX = 0;
+      pointerY = 0;
+      root.style.setProperty("--spot-x", "68%");
+      root.style.setProperty("--spot-y", "42%");
+    };
 
-        cleanupVideoLoop = () => {
-          primaryVideo.removeEventListener("ended", restartLoop);
-          document.removeEventListener("visibilitychange", resumeWhenVisible);
-          primaryVideo.pause();
-        };
-      }
+    const tick = (time: number) => {
+      const elapsed = time - start;
+      const rect = stage.getBoundingClientRect();
+      const spread = clamp(rect.width * 0.026, 16, 58);
+      const lift = clamp(rect.height * 0.042, 8, 26);
 
-      if (isReducedMotion()) return;
+      const targetX =
+        spread * 0.72 +
+        Math.sin(elapsed * 0.00034) * spread * 0.45 +
+        pointerX * spread * 0.62;
+      const targetY =
+        -lift * 0.42 +
+        Math.cos(elapsed * 0.00028) * lift * 0.36 +
+        pointerY * lift * 0.54;
 
-      gsap.set(".footer-bg", { scale: 1.16, opacity: 0.55 });
-      gsap.set(".footer-word", { yPercent: 108, rotate: 2 });
-      gsap.set(".footer-title-left", { xPercent: 48, opacity: 0 });
-      gsap.set(".footer-title-right", { xPercent: -48, opacity: 0 });
-      gsap.set(".footer-title-stack", { y: 0 });
-      gsap.set(".footer-cross-mask", {
-        autoAlpha: 0,
-        clipPath: "inset(50% 0% 50% 0%)",
-      });
-      gsap.set(".footer-meta > *", { y: 24, opacity: 0 });
-      gsap.set(".footer-panel", { y: 42, opacity: 0 });
-      gsap.set(".footer-tool", { x: 24, opacity: 0 });
-      gsap.set(".footer-logo-ghost", { opacity: 0, scale: 0.9, rotate: -4 });
+      currentX += (targetX - currentX) * 0.075;
+      currentY += (targetY - currentY) * 0.075;
 
-      const enter = gsap.timeline({
-        defaults: { ease: "expo.out" },
-        scrollTrigger: {
-          trigger: root,
-          start: "top 82%",
-          toggleActions: "play reverse play reverse",
-        },
-      });
+      stage.style.setProperty("--blend-x", `${currentX.toFixed(2)}px`);
+      stage.style.setProperty("--blend-y", `${currentY.toFixed(2)}px`);
 
-      enter
-        .to(".footer-bg", { scale: 1.04, opacity: 1, duration: 1.25 }, 0)
-        .to(".footer-title-left", { xPercent: 0, opacity: 1, duration: 1.05 }, 0.14)
-        .to(".footer-title-right", { xPercent: 0, opacity: 1, duration: 1.05 }, 0.14)
-        .to(".footer-word", { yPercent: 0, rotate: 0, duration: 0.95, stagger: 0.04 }, 0.18)
-        .to(".footer-title-stack", { y: -10, duration: 0.75, ease: "expo.out" }, 0.36)
-        .to(".footer-cross-mask", { autoAlpha: 1, clipPath: "inset(36% 0% 30% 0%)", duration: 0.75 }, 0.36)
-        .to(".footer-logo-ghost", { opacity: 0.08, scale: 1, rotate: 0, duration: 1 }, 0.28)
-        .to(".footer-meta > *", { y: 0, opacity: 1, duration: 0.76, stagger: 0.06 }, 0.34)
-        .to(".footer-tool", { x: 0, opacity: 1, duration: 0.7, stagger: 0.06 }, 0.48)
-        .to(".footer-panel", { y: 0, opacity: 1, duration: 0.82, stagger: 0.07 }, 0.58);
+      frame = window.requestAnimationFrame(tick);
+    };
 
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: root,
-          start: "top bottom",
-          end: "bottom bottom",
-          scrub: 0.8,
-        },
-      })
-        .to(".footer-bg", { yPercent: -8, scale: 1 }, 0)
-        .to(".footer-title-left", { xPercent: -6 }, 0)
-        .to(".footer-title-right", { xPercent: 6 }, 0)
-        .to(".footer-title-stack", { y: -10 }, 0)
-        .to(".footer-cross-mask", { autoAlpha: 1, clipPath: "inset(31% 0% 25% 0%)" }, 0)
-        .to(".footer-logo-ghost", { yPercent: -18, rotate: 3 }, 0)
-        .to(".footer-tools", { yPercent: -18 }, 0);
-
-      gsap.to(".footer-tool", {
-        y: (index) => (index % 2 === 0 ? -7 : 7),
-        duration: 2.6,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.12,
-      });
-
-      gsap.to(".footer-marquee-track", {
-        xPercent: -50,
-        duration: 24,
-        ease: "none",
-        repeat: -1,
-      });
-
-      const onMove = (event: MouseEvent) => {
-        const x = (event.clientX / window.innerWidth - 0.5) * 2;
-        const y = (event.clientY / window.innerHeight - 0.5) * 2;
-
-        gsap.to(".footer-bg", {
-          x: x * 14,
-          y: y * 12,
-          duration: 0.9,
-          ease: "power3.out",
-        });
-        gsap.to(".footer-logo-ghost", {
-          x: x * -24,
-          y: y * -16,
-          duration: 0.9,
-          ease: "power3.out",
-        });
-        gsap.to(".footer-title", {
-          x: x * 8,
-          y: y * 4,
-          duration: 0.9,
-          ease: "power3.out",
-        });
-      };
-
-      window.addEventListener("mousemove", onMove);
-      cleanupMove = () => window.removeEventListener("mousemove", onMove);
-    }, root);
+    root.addEventListener("pointermove", onPointerMove);
+    root.addEventListener("pointerleave", onPointerLeave);
+    frame = window.requestAnimationFrame(tick);
 
     return () => {
-      cleanupMove?.();
-      cleanupVideoLoop?.();
-      ctx.revert();
+      root.removeEventListener("pointermove", onPointerMove);
+      root.removeEventListener("pointerleave", onPointerLeave);
+      window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -179,38 +123,12 @@ export function AnimatedFooter() {
     <footer
       ref={rootRef}
       id="site-footer"
-      className="relative overflow-hidden bg-[#0d0d0b] text-[#f5f0e6]"
+      className="relative overflow-hidden bg-[#050505] text-[#f5f0e6] [--spot-x:68%] [--spot-y:42%]"
     >
-      <section className="relative min-h-[100svh] overflow-hidden border-t border-[#ffc090]/14">
-        <div className="footer-bg absolute inset-0 overflow-hidden will-change-transform">
-          <video
-            ref={primaryVideoRef}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            poster="/images/gsap-profile-code.png"
-            aria-label="Emmanuel em loop animado no ambiente de trabalho"
-          >
-            <source src="/videos/magnific_anime-com-danca-so-mexend_2997206424.mp4" type="video/mp4" />
-          </video>
-        </div>
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(13,13,11,0.86)_0%,rgba(13,13,11,0.28)_46%,rgba(13,13,11,0.82)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,13,11,0.95)_0%,rgba(13,13,11,0.12)_34%,rgba(13,13,11,0.88)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(255,192,144,0.22),transparent_34%),radial-gradient(circle_at_26%_78%,rgba(0,77,117,0.32),transparent_34%)]" />
-
-        <div className="footer-logo-ghost pointer-events-none absolute right-[-5vw] top-[13vh] hidden lg:block">
-          <Image
-            src="/images/logo-banner.png"
-            alt=""
-            width={820}
-            height={240}
-            className="h-auto w-[54vw] max-w-[820px] object-contain"
-          />
-        </div>
-
+      <section className="footer-luxe-prefooter relative min-h-[100svh] overflow-hidden border-t border-[#d8b9a3]/14">
+        <div className="footer-luxe-aura" aria-hidden="true" />
+        <div className="footer-luxe-grid" aria-hidden="true" />
+        <div className="footer-luxe-grain" aria-hidden="true" />
         <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1500px] flex-col px-5 pb-7 pt-24 sm:px-8 lg:px-12">
           <div className="footer-meta flex items-start justify-between gap-6">
             <Link href="/" aria-label="Emmanuel Bezerra" className="flex items-center gap-3">
@@ -263,46 +181,44 @@ export function AnimatedFooter() {
             </div>
           </div>
 
-          <div className="relative flex flex-1 items-end">
-            <div className="footer-tools absolute right-0 top-[25%] hidden w-52 text-right lg:block">
-              <p className="mb-7 text-sm text-[#ffc090]/78">Website made using:</p>
-              <div className="space-y-3">
-                {tools.map((tool) => (
-                  <p key={tool} className="footer-tool text-sm font-semibold text-[#ffc090]">
-                    {tool}
-                  </p>
-                ))}
-              </div>
+          <div className="relative flex flex-1 flex-col justify-end gap-8 py-12 sm:py-16 lg:py-20">
+            <div className="grid gap-5 text-[#d8b9a3]/74 sm:grid-cols-[1fr_auto] sm:items-end">
+              <p className="max-w-md font-mono text-[10px] uppercase tracking-[0.24em]">
+                Portfolio / Digital Studio
+              </p>
+              <p className="max-w-md text-left text-sm font-semibold leading-6 text-[#f5f0e6]/58 sm:text-right">
+                Interfaces editoriais, sistemas web e experiencias digitais com
+                movimento preciso.
+              </p>
             </div>
 
-            <div className="footer-title footer-title-stack pointer-events-none relative w-full overflow-visible pb-12 will-change-transform">
-              <h2 className="font-display text-[clamp(4.2rem,17vw,18rem)] leading-[0.72] text-[#ffc090]">
-                <span className="footer-title-left block overflow-hidden will-change-transform">
-                  <span className="footer-word block will-change-transform">Emmanuel</span>
-                </span>
-                <span className="footer-title-right -mt-[15px] block overflow-hidden text-right will-change-transform">
-                  <span className="footer-word block will-change-transform">Bezerra</span>
-                </span>
-              </h2>
+            <div
+              ref={typeStageRef}
+              className="wrapper footer-type-stage"
+              aria-label={FOOTER_TITLE}
+            >
+              <h1 className="base-text">{FOOTER_TITLE}</h1>
+              <h1 className="blend-text" aria-hidden="true">
+                {FOOTER_TITLE}
+              </h1>
+            </div>
 
-              <div
-                className="footer-cross-mask absolute inset-x-0 bottom-12 top-0 overflow-hidden text-[#f5f0e6] will-change-[clip-path,opacity]"
-                aria-hidden="true"
-              >
-                <h2 className="font-display text-[clamp(4.2rem,17vw,18rem)] leading-[0.72]">
-                  <span className="footer-title-left block overflow-hidden will-change-transform">
-                    <span className="footer-word block will-change-transform">Emmanuel</span>
+            <div className="footer-luxe-tools grid gap-4 border-y border-[#d8b9a3]/12 py-5 md:grid-cols-[auto_1fr] md:items-center">
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#d8b9a3]/58">
+                Built with
+              </p>
+              <div className="flex flex-wrap gap-x-5 gap-y-2 md:justify-end">
+                {tools.map((tool) => (
+                  <span key={tool} className="footer-tool text-sm font-semibold text-[#d8b9a3]">
+                    {tool}
                   </span>
-                  <span className="footer-title-right -mt-[15px] block overflow-hidden text-right will-change-transform">
-                    <span className="footer-word block will-change-transform">Bezerra</span>
-                  </span>
-                </h2>
+                ))}
               </div>
             </div>
           </div>
 
           <div className="footer-meta grid gap-6 border-t border-[#f5f0e6]/12 pt-5 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-            <p className="max-w-sm text-sm font-semibold text-[#ffc090]">
+            <p className="max-w-sm text-sm font-semibold text-[#d8b9a3]">
               Full-stack Developer <span className="text-[#f5f0e6]/56">2026</span>
             </p>
             <a
@@ -310,18 +226,18 @@ export function AnimatedFooter() {
               href="https://wa.me/5585998500344?text=Ola%20Emmanuel!%20Quero%20falar%20sobre%20um%20projeto%20digital."
               target="_blank"
               rel="noopener noreferrer"
-              className="footer-panel inline-flex h-12 items-center justify-center rounded-full bg-[#ffc090] px-5 text-sm font-semibold text-[#14110e] transition-colors hover:bg-[#f5f0e6]"
+              className="footer-panel inline-flex h-12 items-center justify-center rounded-full bg-[#d8b9a3] px-5 text-sm font-semibold text-[#050505] transition-colors hover:bg-[#f5f0e6]"
             >
               Comecar conversa
             </a>
-            <p className="text-left text-sm font-semibold text-[#ffc090] sm:text-right">
+            <p className="text-left text-sm font-semibold text-[#d8b9a3] sm:text-right">
               EB Digital Studio <span className="text-[#f5f0e6]/56">[Now Booking]</span>
             </p>
           </div>
         </div>
       </section>
 
-      <section className="relative border-t border-[#f5f0e6]/10 bg-[#0d0d0b]">
+      <section className="relative border-t border-[#f5f0e6]/10 bg-[#050505]">
         <div className="overflow-hidden border-b border-[#f5f0e6]/10 py-4">
           <div className="footer-marquee-track flex whitespace-nowrap will-change-transform">
             {Array.from({ length: 2 }).map((_, index) => (
