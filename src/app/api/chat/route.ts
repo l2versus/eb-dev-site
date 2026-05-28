@@ -1,275 +1,185 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 💬 API Chat — Mensagens entre Admin e Clientes
-// ══════════════════════════════════════════════════════════════════════════════
-
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/api-auth";
 
-// Em memória por enquanto (quando tiver banco, migra pra Prisma)
-interface Mensagem {
-  id: string;
-  conversaId: string;
-  remetente: "admin" | "cliente";
-  remetenteNome: string;
-  conteudo: string;
-  tipo: "texto" | "arquivo" | "imagem" | "link";
-  lida: boolean;
-  createdAt: string;
+function readString(value: unknown, fallback = "") {
+  return typeof value === "string" ? value.trim() : fallback;
 }
 
-interface Conversa {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  clienteEmail: string;
-  ultimaMensagem: string;
-  ultimaHora: string;
-  naoLidas: number;
-  status: "ativo" | "arquivado";
-}
-
-// Storage em memória
-const conversas: Map<string, Conversa> = new Map();
-const mensagens: Map<string, Mensagem[]> = new Map();
-
-// Seed inicial com dados demo
-function seedDataIfEmpty() {
-  if (conversas.size > 0) return;
-
-  const demoConversas: Conversa[] = [
-    {
-      id: "conv-1",
-      clienteId: "1",
-      clienteNome: "Myka Procópio",
-      clienteEmail: "contato@mykaprocopio.com.br",
-      ultimaMensagem: "Oi Emmanuel, tudo bem? Gostei do design!",
-      ultimaHora: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-      naoLidas: 2,
-      status: "ativo",
-    },
-    {
-      id: "conv-2",
-      clienteId: "3",
-      clienteNome: "Tech Solutions",
-      clienteEmail: "projetos@techsolutions.io",
-      ultimaMensagem: "Quando teremos a versão beta do dashboard?",
-      ultimaHora: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-      naoLidas: 1,
-      status: "ativo",
-    },
-    {
-      id: "conv-3",
-      clienteId: "2",
-      clienteNome: "João Silva",
-      clienteEmail: "joao@advocaciasilva.com.br",
-      ultimaMensagem: "Perfeito, aprovado! Pode seguir com o deploy.",
-      ultimaHora: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-      naoLidas: 0,
-      status: "ativo",
-    },
-    {
-      id: "conv-4",
-      clienteId: "4",
-      clienteNome: "Café Aroma",
-      clienteEmail: "contato@cafearoma.com.br",
-      ultimaMensagem: "Preciso de ajuda com o e-commerce",
-      ultimaHora: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-      naoLidas: 0,
-      status: "ativo",
-    },
-  ];
-
-  const demoMensagens: Record<string, Mensagem[]> = {
-    "conv-1": [
-      {
-        id: "msg-1",
-        conversaId: "conv-1",
-        remetente: "admin",
-        remetenteNome: "Emmanuel",
-        conteudo: "Oi Myka! Acabei de finalizar o design da home. Vou te enviar o link de preview.",
-        tipo: "texto",
-        lida: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-      },
-      {
-        id: "msg-2",
-        conversaId: "conv-1",
-        remetente: "admin",
-        remetenteNome: "Emmanuel",
-        conteudo: "https://preview.emmanuelbezerra.dev/myka-procopio",
-        tipo: "link",
-        lida: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
-      },
-      {
-        id: "msg-3",
-        conversaId: "conv-1",
-        remetente: "cliente",
-        remetenteNome: "Myka Procópio",
-        conteudo: "Oi Emmanuel, tudo bem? Gostei muito do design! As cores ficaram lindas 💜",
-        tipo: "texto",
-        lida: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-      },
-      {
-        id: "msg-4",
-        conversaId: "conv-1",
-        remetente: "cliente",
-        remetenteNome: "Myka Procópio",
-        conteudo: "Só queria pedir pra trocar a foto do banner por essa aqui que mandei no WhatsApp",
-        tipo: "texto",
-        lida: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-      },
-    ],
-    "conv-2": [
-      {
-        id: "msg-5",
-        conversaId: "conv-2",
-        remetente: "cliente",
-        remetenteNome: "Tech Solutions",
-        conteudo: "Quando teremos a versão beta do dashboard?",
-        tipo: "texto",
-        lida: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-      },
-    ],
-    "conv-3": [
-      {
-        id: "msg-6",
-        conversaId: "conv-3",
-        remetente: "admin",
-        remetenteNome: "Emmanuel",
-        conteudo: "João, a landing page está pronta! Dá uma olhada: https://preview.site/joao-advocacia",
-        tipo: "texto",
-        lida: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-      },
-      {
-        id: "msg-7",
-        conversaId: "conv-3",
-        remetente: "cliente",
-        remetenteNome: "João Silva",
-        conteudo: "Perfeito, aprovado! Pode seguir com o deploy.",
-        tipo: "texto",
-        lida: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-      },
-    ],
-    "conv-4": [
-      {
-        id: "msg-8",
-        conversaId: "conv-4",
-        remetente: "cliente",
-        remetenteNome: "Café Aroma",
-        conteudo: "Preciso de ajuda com o e-commerce, estou com dúvidas sobre a integração com o PagSeguro",
-        tipo: "texto",
-        lida: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-      },
-    ],
+function mapMensagem(mensagem: any) {
+  return {
+    id: mensagem.id,
+    conversaId: mensagem.conversaId,
+    remetente: mensagem.remetente,
+    remetenteNome: mensagem.remetenteNome,
+    conteudo: mensagem.conteudo,
+    tipo: mensagem.tipo,
+    lida: mensagem.lida,
+    createdAt: mensagem.createdAt.toISOString(),
   };
-
-  demoConversas.forEach((c) => conversas.set(c.id, c));
-  Object.entries(demoMensagens).forEach(([id, msgs]) => mensagens.set(id, msgs));
 }
 
-// GET — Listar conversas ou mensagens de uma conversa
+function mapConversa(conversa: any) {
+  const latest = conversa.mensagens?.[0];
+  const mensagens = conversa.todasMensagens || conversa.mensagens || [];
+
+  return {
+    id: conversa.id,
+    clienteId: conversa.clienteId || "",
+    clienteNome: conversa.cliente?.nome || conversa.clienteNome,
+    clienteEmail: conversa.cliente?.email || conversa.clienteEmail,
+    ultimaMensagem: latest?.conteudo || "",
+    ultimaHora: latest?.createdAt?.toISOString?.() || conversa.updatedAt.toISOString(),
+    naoLidas: mensagens.filter((m: any) => m.remetente === "cliente" && !m.lida).length,
+    status: conversa.status || "ativo",
+  };
+}
+
 export async function GET(request: NextRequest) {
-  seedDataIfEmpty();
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
 
-  const { searchParams } = new URL(request.url);
-  const conversaId = searchParams.get("conversaId");
-
-  if (conversaId) {
-    // Retornar mensagens de uma conversa
-    const msgs = mensagens.get(conversaId) || [];
-    return NextResponse.json(msgs);
-  }
-
-  // Retornar lista de conversas
-  const lista = Array.from(conversas.values()).sort(
-    (a, b) => new Date(b.ultimaHora).getTime() - new Date(a.ultimaHora).getTime()
-  );
-  return NextResponse.json(lista);
-}
-
-// POST — Enviar mensagem
-export async function POST(request: NextRequest) {
-  seedDataIfEmpty();
-
-  const body = await request.json();
-  const { conversaId, conteudo, remetente = "admin", remetenteNome = "Emmanuel", tipo = "texto" } = body;
-
-  if (!conversaId || !conteudo) {
-    return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
-  }
-
-  const novaMensagem: Mensagem = {
-    id: `msg-${Date.now()}`,
-    conversaId,
-    remetente,
-    remetenteNome,
-    conteudo,
-    tipo,
-    lida: remetente === "admin",
-    createdAt: new Date().toISOString(),
-  };
-
-  // Adicionar mensagem
-  const msgs = mensagens.get(conversaId) || [];
-  msgs.push(novaMensagem);
-  mensagens.set(conversaId, msgs);
-
-  // Atualizar conversa
-  const conversa = conversas.get(conversaId);
-  if (conversa) {
-    conversa.ultimaMensagem = conteudo;
-    conversa.ultimaHora = novaMensagem.createdAt;
-    if (remetente === "cliente") {
-      conversa.naoLidas += 1;
-    }
-  }
-
-  // Emitir evento SSE
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    await fetch(`${baseUrl}/api/events`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "mensagem_chat",
-        data: {
-          conversaId,
-          mensagem: novaMensagem,
-          clienteNome: conversa?.clienteNome,
-        },
-      }),
-    });
-  } catch {}
+    const { searchParams } = new URL(request.url);
+    const conversaId = searchParams.get("conversaId");
 
-  return NextResponse.json(novaMensagem, { status: 201 });
+    if (conversaId) {
+      const mensagens = await prisma.chatMensagem.findMany({
+        where: { conversaId },
+        orderBy: { createdAt: "asc" },
+      });
+
+      return NextResponse.json(mensagens.map(mapMensagem));
+    }
+
+    const conversas = await prisma.chatConversa.findMany({
+      include: {
+        cliente: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+          },
+        },
+        mensagens: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    const unreadByConversation = await prisma.chatMensagem.findMany({
+      where: {
+        remetente: "cliente",
+        lida: false,
+      },
+      select: {
+        conversaId: true,
+      },
+    });
+    const unreadMap = unreadByConversation.reduce<Record<string, number>>((acc, msg) => {
+      acc[msg.conversaId] = (acc[msg.conversaId] || 0) + 1;
+      return acc;
+    }, {});
+
+    return NextResponse.json(
+      conversas.map((conversa) => ({
+        ...mapConversa(conversa),
+        naoLidas: unreadMap[conversa.id] || 0,
+      })),
+    );
+  } catch (error) {
+    console.error("[API Chat GET]", error);
+    return NextResponse.json({ error: "Erro ao buscar chat" }, { status: 500 });
+  }
 }
 
-// PATCH — Marcar mensagens como lidas
+export async function POST(request: NextRequest) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    let conversaId = readString(body.conversaId);
+    const clienteId = readString(body.clienteId);
+    const conteudo = readString(body.conteudo);
+    const remetente = readString(body.remetente, "admin");
+    const remetenteNome = readString(body.remetenteNome, "Emmanuel");
+    const tipo = readString(body.tipo, "texto");
+
+    if (!conteudo) {
+      return NextResponse.json({ error: "Mensagem vazia" }, { status: 400 });
+    }
+
+    if (!conversaId && clienteId) {
+      const cliente = await prisma.cliente.findUnique({ where: { id: clienteId } });
+      if (!cliente) return NextResponse.json({ error: "Cliente nao encontrado" }, { status: 404 });
+
+      const conversaExistente = await prisma.chatConversa.findFirst({
+        where: { clienteId, status: "ativo" },
+      });
+      const conversa = conversaExistente || await prisma.chatConversa.create({
+        data: {
+          id: `cliente-${clienteId}`,
+          clienteId,
+          clienteNome: cliente.nome,
+          clienteEmail: cliente.email,
+        },
+      });
+      conversaId = conversa.id;
+    }
+
+    if (!conversaId) {
+      return NextResponse.json({ error: "Conversa obrigatoria" }, { status: 400 });
+    }
+
+    const mensagem = await prisma.chatMensagem.create({
+      data: {
+        conversaId,
+        remetente,
+        remetenteNome,
+        conteudo,
+        tipo,
+        lida: remetente === "admin",
+      },
+    });
+
+    await prisma.chatConversa.update({
+      where: { id: conversaId },
+      data: { updatedAt: new Date() },
+    });
+
+    return NextResponse.json(mapMensagem(mensagem), { status: 201 });
+  } catch (error) {
+    console.error("[API Chat POST]", error);
+    return NextResponse.json({ error: "Erro ao enviar mensagem" }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: NextRequest) {
-  seedDataIfEmpty();
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
 
-  const body = await request.json();
-  const { conversaId } = body;
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    const conversaId = readString(body.conversaId);
 
-  if (!conversaId) {
-    return NextResponse.json({ error: "conversaId obrigatório" }, { status: 400 });
+    if (!conversaId) {
+      return NextResponse.json({ error: "conversaId obrigatorio" }, { status: 400 });
+    }
+
+    await prisma.chatMensagem.updateMany({
+      where: {
+        conversaId,
+        remetente: "cliente",
+      },
+      data: { lida: true },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[API Chat PATCH]", error);
+    return NextResponse.json({ error: "Erro ao marcar mensagens" }, { status: 500 });
   }
-
-  const msgs = mensagens.get(conversaId) || [];
-  msgs.forEach((m) => {
-    if (m.remetente === "cliente") m.lida = true;
-  });
-
-  const conversa = conversas.get(conversaId);
-  if (conversa) {
-    conversa.naoLidas = 0;
-  }
-
-  return NextResponse.json({ ok: true });
 }

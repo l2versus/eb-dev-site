@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/api-auth";
 
 const tipoMap: Record<string, string> = { receita: "RECEITA", despesa: "DESPESA" };
 const statusMap: Record<string, string> = { pago: "PAGO", pendente: "PENDENTE", atrasado: "ATRASADO", cancelado: "CANCELADO" };
@@ -16,6 +17,9 @@ interface RouteParams {
 
 // GET /api/financeiro/[id]
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
     const t = await prisma.transacao.findUnique({ where: { id } });
@@ -43,6 +47,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/financeiro/[id]
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -83,6 +90,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/financeiro/[id]
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
     await prisma.transacao.delete({ where: { id } });

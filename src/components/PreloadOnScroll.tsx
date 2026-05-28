@@ -1,153 +1,201 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { gsap, ScrollTrigger, isReducedMotion } from "@/lib/gsap";
 
 type Props = {
-  src?: string;
-  poster?: string;
   onComplete?: () => void;
 };
 
-const INTRO_SCROLL_DISTANCE = 6400;
-const SEEK_EPSILON = 0.015;
+const DESKTOP_INTRO_SCROLL_DISTANCE = 7600;
+const MOBILE_INTRO_SCROLL_DISTANCE = 5600;
+const PRELOAD_FRAME_COUNT = 121;
 
-export default function PreloadOnScroll({
-  src = "/videos/preload-scroll.mp4",
-  poster = "/images/gsap-profile-code.png",
-  onComplete,
-}: Props) {
+function preloadFrameSrc(index: number) {
+  return `/videos/preload-frames/frame_${String(index).padStart(4, "0")}.jpg`;
+}
+
+export default function PreloadOnScroll({ onComplete }: Props) {
   const rootRef = useRef<HTMLElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const progressRef = useRef<HTMLSpanElement | null>(null);
   const completedRef = useRef(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [showMobileSplash, setShowMobileSplash] = useState(false);
 
   useEffect(() => {
     const section = rootRef.current;
-    const video = videoRef.current;
-    if (!section || !video) return;
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!section || !canvas || !context) return;
 
-    const isMobile =
-      typeof window !== "undefined" &&
-      (window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
-
-    setIsMobileDevice(isMobile);
-
-    // Show a simple splash on mobile (short timeout) while keeping the heavy scrub disabled
-    if (isMobile) {
-      setShowMobileSplash(true);
-      const t = setTimeout(() => setShowMobileSplash(false), 900);
-      setIsLoaded(true);
-      return () => clearTimeout(t);
-    }
-
-    // Fallback: disable scrub/pin when user prefers reduced motion.
     if (isReducedMotion()) {
       setIsLoaded(true);
       return;
     }
 
-    let removeMetadataListener: (() => void) | undefined;
+    let resizeObserver: ResizeObserver | undefined;
+    let cancelled = false;
 
     const ctx = gsap.context(() => {
-      const setupScrub = () => {
-        if (!video.duration || !Number.isFinite(video.duration)) return;
+      const playhead = { frame: 0 };
+      const frameImages: HTMLImageElement[] = new Array(PRELOAD_FRAME_COUNT);
+      let lastFrameIndex = 0;
+      let loadedFrames = 0;
 
-        const maxTime = Math.max(video.duration - 0.04, 0);
-        const playhead = { time: 0 };
-        try {
-          video.pause();
-          video.currentTime = 0;
-        } catch (e) {
-          // ignore errors when setting currentTime on restrictive browsers
+      const nearestLoadedFrame = (targetIndex: number) => {
+        const fallback = frameImages[lastFrameIndex] ?? frameImages[0];
+
+        for (let offset = 0; offset < PRELOAD_FRAME_COUNT; offset += 1) {
+          const back = targetIndex - offset;
+          const forward = targetIndex + offset;
+          const backImage = frameImages[back];
+          const forwardImage = frameImages[forward];
+
+          if (backImage?.complete && backImage.naturalWidth) return backImage;
+          if (forwardImage?.complete && forwardImage.naturalWidth) return forwardImage;
         }
-        setIsLoaded(true);
 
-        gsap.to(playhead, {
-          time: maxTime,
-          ease: "none",
-          onUpdate: () => {
-            try {
-              if (Math.abs(video.currentTime - playhead.time) > SEEK_EPSILON) {
-                video.currentTime = playhead.time;
-              }
-            } catch (e) {
-              // ignore seek exceptions on some mobile browsers
-            }
-          },
-          scrollTrigger: {
-            id: "intro-video-scrub",
-            trigger: section,
-            start: "top top",
-            end: () => `+=${INTRO_SCROLL_DISTANCE}`,
-            pin: true,
-            scrub: 1.2,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-            fastScrollEnd: false,
-            onUpdate: (self) => {
-              if (progressRef.current) {
-                gsap.set(progressRef.current, { scaleX: self.progress });
-              }
-
-              if (self.progress > 0.985 && !completedRef.current) {
-                completedRef.current = true;
-                onComplete?.();
-              }
-            },
-            onLeaveBack: () => {
-              playhead.time = 0;
-              try {
-                video.currentTime = 0;
-              } catch (e) {
-                // ignore
-              }
-              if (progressRef.current) {
-                gsap.set(progressRef.current, { scaleX: 0 });
-              }
-            },
-          },
-        });
-
-        ScrollTrigger.refresh();
+        return fallback;
       };
 
-      if (video.readyState >= 1) {
-        setupScrub();
-      } else {
-        video.addEventListener("loadedmetadata", setupScrub, { once: true });
-        removeMetadataListener = () => video.removeEventListener("loadedmetadata", setupScrub);
+      const sizeCanvas = () => {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.max(1, Math.floor(rect.width * dpr));
+        const height = Math.max(1, Math.floor(rect.height * dpr));
+
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+
+        return { width, height };
+      };
+
+      const drawFrame = (rawFrameIndex: number) => {
+        const frameIndex = Math.max(0, Math.min(PRELOAD_FRAME_COUNT - 1, rawFrameIndex));
+        const image = nearestLoadedFrame(frameIndex);
+        if (!image?.complete || !image.naturalWidth || !image.naturalHeight) return;
+
+        lastFrameIndex = frameIndex;
+
+        const { width, height } = sizeCanvas();
+
+        const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+        const drawWidth = image.naturalWidth * scale;
+        const drawHeight = image.naturalHeight * scale;
+        const x = (width - drawWidth) / 2;
+        const y = (height - drawHeight) / 2;
+
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+        context.clearRect(0, 0, width, height);
+        context.drawImage(image, x, y, drawWidth, drawHeight);
+      };
+
+      for (let index = 1; index <= PRELOAD_FRAME_COUNT; index += 1) {
+        const frameIndex = index - 1;
+        const image = new window.Image();
+        image.decoding = "async";
+        image.onload = () => {
+          if (cancelled) return;
+          loadedFrames += 1;
+
+          if (frameIndex === 0 || loadedFrames === 1) {
+            setIsLoaded(true);
+            drawFrame(Math.round(playhead.frame));
+          }
+
+          if (loadedFrames === PRELOAD_FRAME_COUNT) {
+            ScrollTrigger.refresh();
+          }
+        };
+        image.src = preloadFrameSrc(index);
+        frameImages[frameIndex] = image;
       }
+
+      const computeEnd = () => {
+        const isMobile = window.matchMedia("(max-width: 767px)").matches;
+        const distance = isMobile ? MOBILE_INTRO_SCROLL_DISTANCE : DESKTOP_INTRO_SCROLL_DISTANCE;
+        return Math.max(distance, window.innerHeight * (isMobile ? 5.4 : 6.8));
+      };
+
+      gsap.to(playhead, {
+        frame: PRELOAD_FRAME_COUNT - 1,
+        ease: "none",
+        onUpdate: () => {
+          drawFrame(Math.round(playhead.frame));
+        },
+        scrollTrigger: {
+          id: "intro-video-scrub",
+          trigger: section,
+          start: "top top",
+          end: () => `+=${computeEnd()}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: window.matchMedia("(max-width: 767px)").matches ? 0.55 : 0.95,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          refreshPriority: 300,
+          onRefresh: (self) => {
+            playhead.frame = self.progress * (PRELOAD_FRAME_COUNT - 1);
+            drawFrame(Math.round(playhead.frame));
+            if (progressRef.current) gsap.set(progressRef.current, { scaleX: self.progress });
+          },
+          onUpdate: (self) => {
+            if (progressRef.current) gsap.set(progressRef.current, { scaleX: self.progress });
+
+            if (self.progress > 0.985 && !completedRef.current) {
+              completedRef.current = true;
+              onComplete?.();
+            }
+
+            if (self.progress < 0.985) {
+              completedRef.current = false;
+            }
+          },
+          onLeaveBack: () => {
+            playhead.frame = 0;
+            drawFrame(0);
+            if (progressRef.current) gsap.set(progressRef.current, { scaleX: 0 });
+          },
+        },
+      });
+
+      resizeObserver = new ResizeObserver(() => {
+        drawFrame(lastFrameIndex);
+      });
+      resizeObserver.observe(canvas);
     }, section);
 
-    // Ensure ScrollTrigger responds to touch/trackpad/keyboard input too
-    const touchUpdate = () => {
-      try {
-        ScrollTrigger.update();
-      } catch (e) {
-        // ignore
-      }
+    const syncScrollTrigger = () => {
+      ScrollTrigger.update();
     };
 
-    window.addEventListener("touchmove", touchUpdate, { passive: true });
-    window.addEventListener("pointermove", touchUpdate);
-    window.addEventListener("keydown", touchUpdate);
+    window.addEventListener("touchmove", syncScrollTrigger, { passive: true });
+    window.addEventListener("keydown", syncScrollTrigger);
 
     return () => {
-      removeMetadataListener?.();
-      window.removeEventListener("touchmove", touchUpdate);
-      window.removeEventListener("pointermove", touchUpdate);
-      window.removeEventListener("keydown", touchUpdate);
+      cancelled = true;
+      resizeObserver?.disconnect();
+      window.removeEventListener("touchmove", syncScrollTrigger);
+      window.removeEventListener("keydown", syncScrollTrigger);
       ctx.revert();
     };
   }, [onComplete]);
 
   const goToSite = () => {
+    const introTrigger = ScrollTrigger.getById("intro-video-scrub");
+
+    if (introTrigger) {
+      window.scrollTo({
+        top: introTrigger.end + 2,
+        behavior: "smooth",
+      });
+      return;
+    }
+
     document.getElementById("hero")?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -160,36 +208,23 @@ export default function PreloadOnScroll({
       id="intro"
       className="relative min-h-[100svh] overflow-hidden bg-black text-white"
     >
-      {showMobileSplash && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black md:hidden">
-          <div className="mx-auto w-48">
-            <Image src="/images/logo-banner.png" alt="logo" width={340} height={98} className="w-full h-auto object-contain" />
-          </div>
-        </div>
-      )}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        preload="auto"
-        poster={poster}
-        className="absolute inset-0 h-full w-full object-contain"
-      >
-        <source src={src} type="video/mp4" />
-      </video>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 h-full w-full"
+        aria-label="Logo EB controlada pelo scroll"
+      />
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(0,0,0,0.04),rgba(0,0,0,0.72)_78%)]" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black via-black/72 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center p-5 sm:p-8">
+      <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-8">
         <div className="grid w-full max-w-[980px] gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#ffc090]">
               Role para controlar
             </p>
             <h3 className="mt-2 font-display text-[clamp(2rem,4vw,3.25rem)] leading-none">
-              Bem-vindo — role para começar
+              Bem-vindo - role para comecar
             </h3>
             <div className="mt-5 h-px w-full max-w-xs overflow-hidden bg-white/18">
               <span

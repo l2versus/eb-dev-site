@@ -1,0 +1,31 @@
+# Local dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Secrets and local environment
+.env
+.env.*
+
+# Local tool artifacts
+.claude/
+.playwright-mcp/
+.codex-*.log
+.codex-dev-*.log
+*local-check*.png
+*.tsbuildinfo
+cookies.txt
+
+# Local backup snapshots
+backup-before-*/
+backup-site-*/
+recovery-before-*/
+codex-recovery-screens/
+
+# Editor/system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

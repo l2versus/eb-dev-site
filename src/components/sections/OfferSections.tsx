@@ -59,23 +59,31 @@ const faqs = [
 
 function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
   const [open, setOpen] = useState(index === 0);
+  const answerId = `faq-answer-${index}`;
 
   return (
     <div className="faq-row border-b border-[#f5f0e6]/12">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="group flex w-full items-center justify-between gap-6 py-7 text-left"
+        className="group flex w-full items-center justify-between gap-5 py-6 text-left sm:gap-6 sm:py-7"
+        aria-expanded={open}
+        aria-controls={answerId}
       >
-        <span className="max-w-2xl text-xl font-semibold text-[#f5f0e6]">{q}</span>
+        <span className="max-w-2xl text-lg font-semibold leading-snug text-[#f5f0e6] sm:text-xl">
+          {q}
+        </span>
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#f5f0e6]/16 text-[#ffc090] transition-colors group-hover:bg-[#ffc090] group-hover:text-[#14110e]">
           {open ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
         </span>
       </button>
-      <div className={`grid transition-all duration-300 ${open ? "grid-rows-[1fr] pb-7" : "grid-rows-[0fr]"}`}>
-        <div className="overflow-hidden">
-          <p className="max-w-2xl text-base leading-7 text-[#cfc0af]">{a}</p>
-        </div>
+      <div
+        id={answerId}
+        className={`overflow-hidden transition-[max-height,opacity,padding] duration-300 ease-out ${
+          open ? "max-h-56 pb-7 opacity-100" : "max-h-0 pb-0 opacity-0"
+        }`}
+      >
+        <p className="max-w-2xl text-sm leading-7 text-[#cfc0af] sm:text-base">{a}</p>
       </div>
     </div>
   );

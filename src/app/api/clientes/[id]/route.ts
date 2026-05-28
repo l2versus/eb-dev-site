@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/api-auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -11,6 +12,9 @@ interface RouteParams {
 
 // GET /api/clientes/[id] - Buscar por ID
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
 
@@ -51,6 +55,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/clientes/[id] - Atualizar
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -67,6 +74,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         status: body.status,
         tags: body.tags,
         notas: body.notas,
+        origemLead: body.origemLead,
         rating: body.rating,
         ultimoContato: new Date(),
       },
@@ -92,12 +100,38 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/clientes/[id] - Remover
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
 
-    await prisma.cliente.delete({
-      where: { id },
-    });
+    await prisma.$transaction([
+      prisma.chatConversa.updateMany({
+        where: { clienteId: id },
+        data: { clienteId: null },
+      }),
+      prisma.compromisso.updateMany({
+        where: { clienteId: id },
+        data: { clienteId: null },
+      }),
+      prisma.pedido.updateMany({
+        where: { clienteId: id },
+        data: { clienteId: null },
+      }),
+      prisma.proposta.deleteMany({
+        where: { clienteId: id },
+      }),
+      prisma.projeto.deleteMany({
+        where: { clienteId: id },
+      }),
+      prisma.acessoCliente.deleteMany({
+        where: { clienteId: id },
+      }),
+      prisma.cliente.delete({
+        where: { id },
+      }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

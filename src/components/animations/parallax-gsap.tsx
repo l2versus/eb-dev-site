@@ -1,15 +1,11 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 🚀 Componente: ParallaxGSAP — Parallax com GSAP + ScrollTrigger (PREMIUM)
+// ParallaxGSAP - GSAP ScrollTrigger parallax helpers
+// Timeline based effects
 // Alta performance, timeline-based, suporta morphing e efeitos avançados
-// ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 interface ParallaxGSAPProps {
   children: React.ReactNode;
@@ -63,7 +59,8 @@ export function ParallaxGSAP({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [speed, direction, triggerElement, scrub, markers]);
 
@@ -74,7 +71,7 @@ export function ParallaxGSAP({
   );
 }
 
-// ─── Parallax com Opacity + Y (Fade + Movement) ────────────────────────────
+// Parallax with opacity and Y movement
 
 interface ParallaxFadeGSAPProps {
   children: React.ReactNode;
@@ -113,7 +110,8 @@ export function ParallaxFadeGSAP({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [intensity, markers]);
 
@@ -124,7 +122,7 @@ export function ParallaxFadeGSAP({
   );
 }
 
-// ─── Parallax com Rotação (3D Feel) ────────────────────────────────────────
+// 3D rotation parallax
 
 interface ParallaxRotateGSAPProps {
   children: React.ReactNode;
@@ -164,7 +162,8 @@ export function ParallaxRotateGSAP({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [rotationIntensity, markers]);
 
@@ -175,7 +174,7 @@ export function ParallaxRotateGSAP({
   );
 }
 
-// ─── Multi-Layer Parallax (Para backgrounds/imagens) ──────────────────────
+// Multi-layer parallax
 
 interface MultiLayerParallaxProps {
   layers: {
@@ -194,34 +193,42 @@ export function MultiLayerParallax({
 }: MultiLayerParallaxProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
 
-    layers.forEach((layer) => {
-      const element = container.querySelector(`[data-layer="${layer.id}"]`);
-      if (!element) return;
+      const tls: gsap.core.Timeline[] = [];
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top center",
-          end: "bottom center",
-          scrub: 0.6,
-          markers,
-        },
+      layers.forEach((layer) => {
+        const element = container.querySelector(`[data-layer="${layer.id}"]`);
+        if (!element) return;
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top center",
+            end: "bottom center",
+            scrub: 0.6,
+            markers,
+          },
+        });
+
+        tl.to(element, {
+          y: layer.speed * 100,
+          ease: "none",
+        });
+
+        tls.push(tl);
       });
 
-      tl.to(element, {
-        y: layer.speed * 100,
-        ease: "none",
-      });
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [layers, markers]);
+      return () => {
+        tls.forEach((t) => {
+          t.kill();
+          // @ts-ignore
+          t.scrollTrigger?.kill?.();
+        });
+      };
+    }, [layers, markers]);
 
   return (
     <div ref={containerRef} className={className}>

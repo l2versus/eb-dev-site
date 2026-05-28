@@ -2,11 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { gsap, isReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, isReducedMotion } from "@/lib/gsap";
 
-const chapters = [
+const VIDEO_STORY_SCROLL_DISTANCE = 9200;
+
+type Chapter = {
+  id: string;
+  label: string;
+  word: string;
+  tone: string;
+  pinnedDistance?: number;
+};
+
+const chapters: Chapter[] = [
   { id: "hero", label: "Inicio", word: "Start", tone: "#ffc090" },
-  { id: "videos", label: "Video", word: "Motion", tone: "#8bb7d6" },
+  {
+    id: "videos",
+    label: "Video",
+    word: "Motion",
+    tone: "#8bb7d6",
+    pinnedDistance: VIDEO_STORY_SCROLL_DISTANCE,
+  },
   { id: "sobre", label: "Sobre", word: "Identity", tone: "#9fcaab" },
   { id: "projetos", label: "Projetos", word: "Work", tone: "#ffc090" },
   { id: "depoimentos", label: "Prova", word: "Trust", tone: "#8bb7d6" },
@@ -47,8 +63,11 @@ export function ScrollStorySystem() {
         gsap.timeline({
           scrollTrigger: {
             trigger: section,
-            start: "top center",
-            end: "bottom center",
+            start: chapter.pinnedDistance ? "top top" : "top center",
+            end: chapter.pinnedDistance
+              ? () => `+=${chapter.pinnedDistance}`
+              : "bottom center",
+            invalidateOnRefresh: true,
             onEnter: () => setActiveIndex(index),
             onEnterBack: () => setActiveIndex(index),
           },
@@ -56,7 +75,12 @@ export function ScrollStorySystem() {
       });
     }, root);
 
-    return () => ctx.revert();
+    const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    return () => {
+      window.cancelAnimationFrame(refreshFrame);
+      ctx.revert();
+    };
   }, []);
 
   useEffect(() => {
@@ -106,6 +130,7 @@ export function ScrollStorySystem() {
   return (
     <div
       ref={rootRef}
+      data-active-chapter={chapters[activeIndex].id}
       className="pointer-events-none fixed inset-0 z-[38] [--story-tone:#ffc090]"
       aria-hidden="true"
     >

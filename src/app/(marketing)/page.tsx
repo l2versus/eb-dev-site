@@ -14,12 +14,12 @@ export default function HomePage() {
       <PreloadOnScroll />
       <ScrollProgressBar />
       <HeroSection />
-      <ScrollStorySystem />
       <VideoStorySection />
       <AboutServicesSection />
       <ProjectsSection />
       <TrustProcessSections />
       <OfferSections />
+      <ScrollStorySystem />
     </>
   );
 }

@@ -55,6 +55,8 @@ export async function GET(request: NextRequest) {
       faturamentoTotal: c.faturamentoTotal.toString(),
       rating: c.rating,
       tags: c.tags,
+      notas: c.notas,
+      origemLead: c.origemLead,
       ultimoContato: c.ultimoContato,
       createdAt: c.createdAt,
     }));

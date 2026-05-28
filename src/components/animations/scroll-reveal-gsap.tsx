@@ -1,15 +1,11 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// ✨ Componente: ScrollRevealGSAP — Reveal animations com GSAP + ScrollTrigger
+// ScrollRevealGSAP - reveal animations with GSAP and ScrollTrigger
+// Supports stagger, timelines, and advanced effects
 // Suporta stagger, timelines, e efeitos avançados
-// ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 type RevealAnimation =
   | "fade-up"
@@ -111,7 +107,8 @@ export function ScrollRevealGSAP({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [animation, delay, duration, triggerStart, triggerEnd, once, scrub, markers]);
 
@@ -122,7 +119,7 @@ export function ScrollRevealGSAP({
   );
 }
 
-// ─── Stagger Reveal (Múltiplos elementos com delay) ──────────────────────
+// Stagger reveal
 
 interface StaggerRevealProps {
   children: React.ReactElement<any>[];
@@ -184,7 +181,8 @@ export function StaggerReveal({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [animation, duration, staggerDelay, markers]);
 
@@ -206,7 +204,7 @@ export function StaggerReveal({
   );
 }
 
-// ─── Text Reveal Letter by Letter (Premium Effect) ────────────────────────
+// Text reveal letter by letter
 
 interface TextRevealProps {
   text: string;
@@ -256,14 +254,15 @@ export function TextRevealGSAP({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [text, duration, staggerChar, markers]);
 
   return <div ref={ref} className={className} />;
 }
 
-// ─── Counters com GSAP (KPIs) ────────────────────────────────────────────
+// GSAP counters
 
 interface CounterGSAPProps {
   from?: number;
@@ -314,7 +313,8 @@ export function CounterGSAP({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [from, to, duration, prefix, suffix, decimals, markers]);
 

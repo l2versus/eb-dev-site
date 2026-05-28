@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/api-auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -84,6 +85,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT - Atualizar proposta
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -97,13 +101,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Recalcular valor final se necessário
-    let updateData = { ...body };
+    const updateData = { ...body };
     if (body.valor || body.desconto !== undefined) {
       const novoValor = body.valor ? parseFloat(body.valor) : Number(proposta.valor);
       const novoDesconto = body.desconto !== undefined ? parseFloat(body.desconto) : Number(proposta.desconto || 0);
       updateData.valor = novoValor;
       updateData.desconto = novoDesconto;
       updateData.valorFinal = novoValor - novoDesconto;
+    }
+
+    if (updateData.status === "ENVIADA") {
+      updateData.enviadaEm = proposta.enviadaEm ?? new Date();
+    }
+
+    if (["APROVADA", "RECUSADA"].includes(updateData.status)) {
+      updateData.respondidaEm = proposta.respondidaEm ?? new Date();
     }
 
     const updated = await prisma.proposta.update({
@@ -124,6 +136,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE - Excluir proposta
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const authCheck = await requireAdmin();
+  if (!authCheck.authorized) return authCheck.response;
+
   try {
     const { id } = await params;
 

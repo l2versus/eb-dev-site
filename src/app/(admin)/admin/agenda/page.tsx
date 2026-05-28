@@ -87,8 +87,6 @@ interface CompromissoAPI {
   cliente?: { id: string; nome: string; email?: string; telefone?: string } | null;
 }
 
-// Compromisso type é importado de shared-agenda.ts
-
 export default function AgendaPage() {
   // Estados — carrega da API Prisma
   const [compromissos, setCompromissos] = useState<CompromissoAPI[]>([]);

@@ -10,6 +10,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
+  ArrowRight,
   Code2,
   Server,
   Layers,
@@ -188,6 +189,8 @@ export default function OrcamentoPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [portalCode, setPortalCode] = useState("");
 
   const toggleType = (id: string) => {
     setSelectedTypes((prev) =>
@@ -218,9 +221,7 @@ export default function OrcamentoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Simula envio (substituir por integração real)
-    await new Promise((r) => setTimeout(r, 2000));
+    setSubmitError("");
 
     // Monta mensagem para WhatsApp
     const selectedProjectNames = selectedTypes
@@ -231,6 +232,36 @@ export default function OrcamentoPage() {
       .map((id) => addons.find((a) => a.id === id)?.title)
       .filter(Boolean)
       .join(", ");
+
+    try {
+      const response = await fetch("/api/orcamentos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formData,
+          selectedTypes,
+          selectedAddons,
+          estimatedTotal,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || "Nao foi possivel salvar seu orcamento.");
+      }
+
+      if (data.cliente) {
+        localStorage.setItem("clientePortal", JSON.stringify(data.cliente));
+      }
+
+      if (data.acesso?.codigoAcesso) {
+        setPortalCode(data.acesso.codigoAcesso);
+      }
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Erro ao enviar orcamento.");
+      setIsSubmitting(false);
+      return;
+    }
 
     const message = encodeURIComponent(
       `🚀 *Novo Orçamento*\n\n` +
@@ -642,6 +673,12 @@ export default function OrcamentoPage() {
                       </motion.div>
                     )}
 
+                    {submitError && (
+                      <p className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                        {submitError}
+                      </p>
+                    )}
+
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                       <motion.button
                         type="submit"
@@ -722,6 +759,27 @@ export default function OrcamentoPage() {
                   Recebi sua solicitação e responderei em até 24 horas pelo
                   WhatsApp ou email. Fique de olho!
                 </p>
+
+                {portalCode && (
+                  <div className="mb-8 rounded-2xl border border-[#00f0ff]/20 bg-[#00f0ff]/5 p-5 text-left">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#00f0ff]">
+                      Portal do cliente
+                    </p>
+                    <p className="mt-3 text-sm text-[#9999ab]">
+                      Seu codigo de acesso ja foi gerado. Use no login do cliente ou entre direto neste navegador.
+                    </p>
+                    <div className="mt-4 rounded-xl border border-[#00f0ff]/20 bg-black/30 px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.32em] text-[#00f0ff]">
+                      {portalCode}
+                    </div>
+                    <Link
+                      href="/cliente/painel"
+                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#00f0ff] px-5 py-3 text-sm font-bold text-black transition hover:shadow-[0_0_34px_rgba(0,240,255,0.25)]"
+                    >
+                      Acessar painel do cliente
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                )}
 
                 <Link
                   href="/"

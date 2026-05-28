@@ -305,6 +305,7 @@ model ConfiguracaoSistema {
   instagramUrl      String?
   facebookUrl       String?
   whatsappNumero    String?
+  metadata           Json?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -412,6 +413,7 @@ model Cliente {
   compromissos  Compromisso[]
   pedidos       Pedido[]
   acessoCliente AcessoCliente?
+  conversasChat ChatConversa[]
 
   @@map("clientes")
 }
@@ -757,4 +759,39 @@ enum StatusTransacao {
   PENDENTE
   ATRASADO
   CANCELADO
+}
+
+// ─── 24. CHAT COMERCIAL / CLIENTES ───────────────────────────────────────────
+model ChatConversa {
+  id           String         @id @default(cuid())
+  clienteId    String?
+  clienteNome  String
+  clienteEmail String
+  status       String         @default("ativo")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  cliente   Cliente?       @relation(fields: [clienteId], references: [id], onDelete: SetNull)
+  mensagens ChatMensagem[]
+
+  @@index([clienteId])
+  @@index([updatedAt])
+  @@map("chat_conversas")
+}
+
+model ChatMensagem {
+  id            String       @id @default(cuid())
+  conversaId    String
+  remetente     String
+  remetenteNome String
+  conteudo      String       @db.Text
+  tipo          String       @default("texto")
+  lida          Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+
+  conversa ChatConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  @@index([conversaId])
+  @@index([createdAt])
+  @@map("chat_mensagens")
 }

@@ -4,9 +4,12 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUp, Github, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { FractureText } from "@/components/FractureText";
+import { gsap, isReducedMotion } from "@/lib/gsap";
 
 const tools = ["Next.js", "React", "Node", "GSAP", "Lenis", "Prisma"];
-const FOOTER_TITLE = "Emmanuel Bezerra";
+const footerPrimaryVideo = "/videos/magnific_anime-com-danca-so-mexend_2997206424.mp4";
+const footerMotionStudyVideo = "/videos/showcase-1.mp4";
 
 const services = [
   "Rebranding digital",
@@ -28,94 +31,101 @@ const navLinks = [
 
 export function AnimatedFooter() {
   const rootRef = useRef<HTMLElement>(null);
-  const typeStageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (isReducedMotion()) return;
     const root = rootRef.current;
-    const stage = typeStageRef.current;
-    if (!root || !stage) return;
+    if (!root) return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reduceMotion.matches) {
-      stage.style.setProperty("--blend-x", "22px");
-      stage.style.setProperty("--blend-y", "-10px");
-      return;
-    }
+    let cleanupMove: (() => void) | undefined;
 
-    const clamp = (value: number, min: number, max: number) =>
-      Math.min(Math.max(value, min), max);
+    const ctx = gsap.context(() => {
+      gsap.set(".footer-bg", { scale: 1.16, opacity: 0.58 });
+      gsap.set(".footer-meta > *", { y: 24, opacity: 0 });
+      gsap.set(".footer-panel", { y: 42, opacity: 0 });
+      gsap.set(".footer-tool", { x: 24, opacity: 0 });
+      gsap.set(".footer-reel-card", { y: 32, opacity: 0, scale: 0.96 });
+      gsap.set(".footer-logo-ghost", { opacity: 0, scale: 0.9, rotate: -4 });
 
-    let frame = 0;
-    let pointerX = 0;
-    let pointerY = 0;
-    let currentX = 22;
-    let currentY = -10;
-    const start = performance.now();
+      const enter = gsap.timeline({
+        defaults: { ease: "expo.out" },
+        scrollTrigger: {
+          trigger: root,
+          start: "top 82%",
+        },
+      });
 
-    const onPointerMove = (event: PointerEvent) => {
-      const stageRect = stage.getBoundingClientRect();
-      const rootRect = root.getBoundingClientRect();
+      enter
+        .to(".footer-bg", { scale: 1.04, opacity: 1, duration: 1.25 }, 0)
+        .to(".footer-logo-ghost", { opacity: 0.08, scale: 1, rotate: 0, duration: 1 }, 0.28)
+        .to(".footer-meta > *", { y: 0, opacity: 1, duration: 0.76, stagger: 0.06 }, 0.34)
+        .to(".footer-tool", { x: 0, opacity: 1, duration: 0.7, stagger: 0.06 }, 0.48)
+        .to(".footer-reel-card", { y: 0, opacity: 1, scale: 1, duration: 0.8 }, 0.54)
+        .to(".footer-panel", { y: 0, opacity: 1, duration: 0.82, stagger: 0.07 }, 0.58);
 
-      pointerX = clamp(
-        (event.clientX - stageRect.left - stageRect.width / 2) / (stageRect.width / 2),
-        -1,
-        1,
-      );
-      pointerY = clamp(
-        (event.clientY - stageRect.top - stageRect.height / 2) / (stageRect.height / 2),
-        -1,
-        1,
-      );
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: "top bottom",
+          end: "bottom bottom",
+          scrub: 0.8,
+        },
+      })
+        .to(".footer-bg", { yPercent: -8, scale: 1 }, 0)
+        .to(".footer-reel-card", { yPercent: -12 }, 0)
+        .to(".footer-title", { yPercent: -8 }, 0)
+        .to(".footer-title-left", { xPercent: -1.8 }, 0)
+        .to(".footer-title-right", { xPercent: 1.8 }, 0)
+        .to(".footer-logo-ghost", { yPercent: -18, rotate: 3 }, 0)
+        .to(".footer-tools", { yPercent: -18 }, 0);
 
-      root.style.setProperty(
-        "--spot-x",
-        `${clamp(((event.clientX - rootRect.left) / rootRect.width) * 100, 0, 100).toFixed(2)}%`,
-      );
-      root.style.setProperty(
-        "--spot-y",
-        `${clamp(((event.clientY - rootRect.top) / rootRect.height) * 100, 0, 100).toFixed(2)}%`,
-      );
-    };
+      gsap.to(".footer-tool", {
+        y: (index) => (index % 2 === 0 ? -7 : 7),
+        duration: 2.6,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        stagger: 0.12,
+      });
 
-    const onPointerLeave = () => {
-      pointerX = 0;
-      pointerY = 0;
-      root.style.setProperty("--spot-x", "68%");
-      root.style.setProperty("--spot-y", "42%");
-    };
+      gsap.to(".footer-marquee-track", {
+        xPercent: -50,
+        duration: 24,
+        ease: "none",
+        repeat: -1,
+      });
 
-    const tick = (time: number) => {
-      const elapsed = time - start;
-      const rect = stage.getBoundingClientRect();
-      const spread = clamp(rect.width * 0.026, 16, 58);
-      const lift = clamp(rect.height * 0.042, 8, 26);
+      const onMove = (event: MouseEvent) => {
+        const x = (event.clientX / window.innerWidth - 0.5) * 2;
+        const y = (event.clientY / window.innerHeight - 0.5) * 2;
 
-      const targetX =
-        spread * 0.72 +
-        Math.sin(elapsed * 0.00034) * spread * 0.45 +
-        pointerX * spread * 0.62;
-      const targetY =
-        -lift * 0.42 +
-        Math.cos(elapsed * 0.00028) * lift * 0.36 +
-        pointerY * lift * 0.54;
+        gsap.to(".footer-bg", {
+          x: x * 14,
+          y: y * 12,
+          duration: 0.9,
+          ease: "power3.out",
+        });
+        gsap.to(".footer-logo-ghost", {
+          x: x * -24,
+          y: y * -16,
+          duration: 0.9,
+          ease: "power3.out",
+        });
+        gsap.to(".footer-title", {
+          x: x * 2,
+          y: y * 2,
+          duration: 0.9,
+          ease: "power3.out",
+        });
+      };
 
-      currentX += (targetX - currentX) * 0.075;
-      currentY += (targetY - currentY) * 0.075;
-
-      stage.style.setProperty("--blend-x", `${currentX.toFixed(2)}px`);
-      stage.style.setProperty("--blend-y", `${currentY.toFixed(2)}px`);
-
-      frame = window.requestAnimationFrame(tick);
-    };
-
-    root.addEventListener("pointermove", onPointerMove);
-    root.addEventListener("pointerleave", onPointerLeave);
-    frame = window.requestAnimationFrame(tick);
+      window.addEventListener("mousemove", onMove);
+      cleanupMove = () => window.removeEventListener("mousemove", onMove);
+    }, root);
 
     return () => {
-      root.removeEventListener("pointermove", onPointerMove);
-      root.removeEventListener("pointerleave", onPointerLeave);
-      window.cancelAnimationFrame(frame);
+      cleanupMove?.();
+      ctx.revert();
     };
   }, []);
 
@@ -123,13 +133,38 @@ export function AnimatedFooter() {
     <footer
       ref={rootRef}
       id="site-footer"
-      className="relative overflow-hidden bg-[#050505] text-[#f5f0e6] [--spot-x:68%] [--spot-y:42%]"
+      className="relative overflow-hidden bg-[#050505] text-[#f5f0e6]"
     >
-      <section className="footer-luxe-prefooter relative min-h-[100svh] overflow-hidden border-t border-[#d8b9a3]/14">
-        <div className="footer-luxe-aura" aria-hidden="true" />
-        <div className="footer-luxe-grid" aria-hidden="true" />
-        <div className="footer-luxe-grain" aria-hidden="true" />
-        <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1500px] flex-col px-5 pb-7 pt-24 sm:px-8 lg:px-12">
+      <section className="footer-luxe-prefooter relative isolate min-h-screen overflow-hidden border-t border-[#ffc090]/14">
+        <div className="footer-bg absolute inset-0 will-change-transform">
+          <video
+            className="h-full w-full object-cover object-center"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/images/gsap-profile-code.png"
+            aria-hidden="true"
+          >
+            <source src={footerPrimaryVideo} type="video/mp4" />
+          </video>
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,0.88)_0%,rgba(5,5,5,0.24)_46%,rgba(5,5,5,0.78)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.74)_0%,rgba(5,5,5,0.08)_38%,rgba(5,5,5,0.88)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(255,192,144,0.2),transparent_34%),radial-gradient(circle_at_20%_76%,rgba(0,77,117,0.22),transparent_34%)]" />
+
+        <div className="footer-logo-ghost pointer-events-none absolute right-[-5vw] top-[13vh] hidden lg:block">
+          <Image
+            src="/images/logo-banner.png"
+            alt=""
+            width={820}
+            height={240}
+            className="h-auto w-[54vw] max-w-[820px] object-contain"
+          />
+        </div>
+
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-[1500px] flex-col px-5 pb-7 pt-24 sm:px-8 lg:px-12">
           <div className="footer-meta flex items-start justify-between gap-6">
             <Link href="/" aria-label="Emmanuel Bezerra" className="flex items-center gap-3">
               <span className="relative h-12 w-[4.8rem] shrink-0 overflow-hidden">
@@ -181,39 +216,53 @@ export function AnimatedFooter() {
             </div>
           </div>
 
-          <div className="relative flex flex-1 flex-col justify-end gap-8 py-12 sm:py-16 lg:py-20">
-            <div className="grid gap-5 text-[#d8b9a3]/74 sm:grid-cols-[1fr_auto] sm:items-end">
-              <p className="max-w-md font-mono text-[10px] uppercase tracking-[0.24em]">
-                Portfolio / Digital Studio
-              </p>
-              <p className="max-w-md text-left text-sm font-semibold leading-6 text-[#f5f0e6]/58 sm:text-right">
-                Interfaces editoriais, sistemas web e experiencias digitais com
-                movimento preciso.
-              </p>
+          <div className="relative flex flex-1 items-end">
+            <div className="footer-reel-card absolute left-0 top-[18%] z-10 hidden w-[min(24vw,360px)] overflow-hidden border border-[#ffc090]/18 bg-[#050505]/52 shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl lg:block">
+              <div className="relative aspect-video overflow-hidden">
+                <video
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  onMouseEnter={(event) => {
+                    void event.currentTarget.play();
+                  }}
+                  onMouseLeave={(event) => {
+                    event.currentTarget.pause();
+                    event.currentTarget.currentTime = 0;
+                  }}
+                >
+                  <source src={footerMotionStudyVideo} type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.08)_0%,rgba(5,5,5,0.62)_100%)]" />
+                <p className="absolute bottom-4 left-4 font-mono text-[9px] uppercase tracking-[0.2em] text-[#ffc090]">
+                  Motion study
+                </p>
+              </div>
             </div>
 
-            <div
-              ref={typeStageRef}
-              className="wrapper footer-type-stage"
-              aria-label={FOOTER_TITLE}
-            >
-              <h1 className="base-text">{FOOTER_TITLE}</h1>
-              <h1 className="blend-text" aria-hidden="true">
-                {FOOTER_TITLE}
-              </h1>
-            </div>
-
-            <div className="footer-luxe-tools grid gap-4 border-y border-[#d8b9a3]/12 py-5 md:grid-cols-[auto_1fr] md:items-center">
-              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#d8b9a3]/58">
-                Built with
-              </p>
-              <div className="flex flex-wrap gap-x-5 gap-y-2 md:justify-end">
+            <div className="footer-tools absolute right-0 top-[25%] hidden w-52 text-right lg:block">
+              <p className="mb-7 text-sm text-[#ffc090]/78">Website made using:</p>
+              <div className="space-y-3">
                 {tools.map((tool) => (
-                  <span key={tool} className="footer-tool text-sm font-semibold text-[#d8b9a3]">
+                  <p key={tool} className="footer-tool text-sm font-semibold text-[#ffc090]">
                     {tool}
-                  </span>
+                  </p>
                 ))}
               </div>
+            </div>
+
+            <div className="footer-title pointer-events-none relative z-20 w-full pb-12">
+              <h2 className="relative z-10 font-display text-[clamp(5rem,14.5vw,17rem)] leading-[0.72] text-[#ffc090] mix-blend-difference">
+                <span className="footer-title-left block overflow-hidden">
+                  <FractureText text="Emmanuel" className="footer-word footer-fracture block" />
+                </span>
+                <span className="footer-title-right block overflow-hidden text-right">
+                  <FractureText text="Bezerra" className="footer-word footer-fracture block" />
+                </span>
+              </h2>
             </div>
           </div>
 

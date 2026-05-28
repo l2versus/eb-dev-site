@@ -1,15 +1,11 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 🎯 Hook: useGSAPAnimation — Hook customizado para GSAP
+// useGSAPAnimation - custom GSAP hooks
+// Utilities for reusable animations
 // Simplifica criação de animações personalizadas
-// ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 interface AnimationConfig {
   from?: gsap.TweenVars;
@@ -64,7 +60,10 @@ export function useGSAPAnimation(config: AnimationConfig) {
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // Apenas finalize o ScrollTrigger associado a essa timeline (se existir).
+      // Evita matar todos os triggers globalmente, o que causa conflitos de ordem.
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [config]);
 
@@ -129,7 +128,8 @@ export function useGSAPStagger(
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [selector, config]);
 
@@ -179,7 +179,7 @@ export function useParallaxVelocity(
     const element = ref.current;
     if (!element) return;
 
-    ScrollTrigger.create({
+    const velocityTrigger = ScrollTrigger.create({
       onUpdate: (self) => {
         gsap.to(element, {
           y: self.getVelocity() * speed,
@@ -190,7 +190,8 @@ export function useParallaxVelocity(
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // mate apenas o trigger criado por este hook
+      velocityTrigger?.kill?.();
     };
   }, [speed, ...dependencies]);
 

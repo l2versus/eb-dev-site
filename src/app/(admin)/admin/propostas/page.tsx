@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -45,6 +45,8 @@ interface ItemProposta {
 
 interface Proposta {
   id: string;
+  clienteId?: string;
+  persisted?: boolean;
   clienteNome: string;
   clienteEmail: string;
   clienteTelefone: string;
@@ -95,31 +97,150 @@ const templateItens: Record<string, ItemProposta[]> = {
 // ─── Gerador de ID ────────────────────────────────────────────────────────────
 const genId = () => Math.random().toString(36).slice(2, 9);
 
-// ─── Propostas salvas (in-memory + localStorage) ─────────────────────────────
-const STORAGE_KEY = "eb-propostas";
-
-function loadPropostas(): Proposta[] {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
+interface PropostaApi {
+  id: string;
+  clienteId?: string;
+  titulo: string;
+  descricao?: string | null;
+  valor?: string | number | null;
+  desconto?: string | number | null;
+  prazoEstimado?: string | null;
+  validade?: string | Date | null;
+  observacoes?: string | null;
+  status?: string | null;
+  itensInclusos?: string[];
+  escopoDetalhado?: unknown;
+  createdAt?: string | Date | null;
+  cliente?: {
+    id?: string;
+    nome?: string | null;
+    email?: string | null;
+    telefone?: string | null;
+    empresa?: string | null;
+  } | null;
 }
 
-function savePropostas(propostas: Proposta[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(propostas));
+const apiStatusToLocal: Record<string, Proposta["status"]> = {
+  RASCUNHO: "rascunho",
+  PENDENTE: "rascunho",
+  ENVIADA: "enviada",
+  VISUALIZADA: "enviada",
+  NEGOCIANDO: "enviada",
+  APROVADA: "aprovada",
+  RECUSADA: "recusada",
+  EXPIRADA: "recusada",
+};
+
+const localStatusToApi: Record<Proposta["status"], string> = {
+  rascunho: "RASCUNHO",
+  enviada: "ENVIADA",
+  aprovada: "APROVADA",
+  recusada: "RECUSADA",
+};
+
+function asNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function toDateInput(value: string | Date | null | undefined) {
+  if (!value) return new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  return date.toISOString().split("T")[0];
+}
+
+function readText(value: unknown, fallback = "") {
+  return typeof value === "string" ? value : fallback;
+}
+
+function mapEscopoToItens(raw: unknown, itensInclusos: string[] = []): ItemProposta[] {
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.map((item, index) => {
+      if (typeof item === "string") {
+        return { id: genId(), descricao: item, detalhes: "", valor: 0 };
+      }
+
+      const record = (item ?? {}) as Record<string, unknown>;
+      return {
+        id: readText(record.id, genId()),
+        descricao: readText(record.descricao, readText(record.titulo, itensInclusos[index] || `Item ${index + 1}`)),
+        detalhes: readText(record.detalhes, readText(record.descricaoDetalhada)),
+        valor: asNumber(record.valor),
+      };
+    });
+  }
+
+  return itensInclusos.length > 0
+    ? itensInclusos.map((descricao) => ({ id: genId(), descricao, detalhes: "", valor: 0 }))
+    : [{ id: genId(), descricao: "", detalhes: "", valor: 0 }];
+}
+
+function inferTipoProjeto(titulo: string, descricao: string) {
+  const text = `${titulo} ${descricao}`.toLowerCase();
+  if (text.includes("landing")) return "LANDING_PAGE";
+  if (text.includes("e-commerce") || text.includes("ecommerce") || text.includes("loja")) return "ECOMMERCE";
+  if (text.includes("dashboard")) return "DASHBOARD";
+  if (text.includes("api")) return "API";
+  if (text.includes("consultoria")) return "CONSULTORIA";
+  if (text.includes("manutencao") || text.includes("manutenção")) return "MANUTENCAO";
+  if (text.includes("app") || text.includes("sistema") || text.includes("saas")) return "WEBAPP";
+  return "SITE_INSTITUCIONAL";
+}
+
+function mapApiProposta(p: PropostaApi): Proposta {
+  const subtotal = asNumber(p.valor);
+  const descontoMoeda = asNumber(p.desconto);
+  const descontoPercentual = subtotal > 0 ? Number(((descontoMoeda / subtotal) * 100).toFixed(2)) : 0;
+  const itens = mapEscopoToItens(p.escopoDetalhado, p.itensInclusos || []);
+
+  if (subtotal > 0 && itens.reduce((sum, item) => sum + (item.valor || 0), 0) === 0) {
+    itens[0] = { ...itens[0], valor: subtotal };
+  }
+
+  return {
+    id: p.id,
+    clienteId: p.clienteId || p.cliente?.id,
+    persisted: true,
+    clienteNome: p.cliente?.nome || "",
+    clienteEmail: p.cliente?.email || "",
+    clienteTelefone: p.cliente?.telefone || "",
+    clienteEmpresa: p.cliente?.empresa || "",
+    titulo: p.titulo || "",
+    descricao: p.descricao || "",
+    itens,
+    desconto: descontoPercentual,
+    prazoEstimado: p.prazoEstimado || "2-4 semanas",
+    validade: toDateInput(p.validade),
+    observacoes: p.observacoes || "",
+    criadaEm: p.createdAt ? new Date(p.createdAt).toISOString() : new Date().toISOString(),
+    status: apiStatusToLocal[p.status || "RASCUNHO"] || "rascunho",
+  };
+}
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(readText((data as { error?: unknown }).error, "Erro ao comunicar com o servidor"));
+  }
+
+  return data as T;
 }
 
 export default function PropostasPage() {
-  const [propostas, setPropostas] = useState<Proposta[]>(() => loadPropostas());
+  const [propostas, setPropostas] = useState<Proposta[]>([]);
   const [editando, setEditando] = useState<Proposta | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
   const [previewAberto, setPreviewAberto] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   // ─── Nova Proposta ──────────────────────────────────────────────────────
   const novaProposta = useCallback((): Proposta => ({
-    id: genId(),
+    id: `draft-${genId()}`,
+    persisted: false,
     clienteNome: "",
     clienteEmail: "",
     clienteTelefone: "",
@@ -134,6 +255,29 @@ export default function PropostasPage() {
     criadaEm: new Date().toISOString(),
     status: "rascunho",
   }), []);
+
+  const carregarPropostas = useCallback(async () => {
+    setCarregando(true);
+
+    try {
+      const data = await fetchJson<PropostaApi[]>("/api/propostas");
+      const normalizadas = data.map(mapApiProposta);
+      setPropostas(normalizadas);
+      setEditando((atual) => {
+        if (!atual?.persisted) return atual;
+        return normalizadas.find((p) => p.id === atual.id) ?? atual;
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Nao foi possivel carregar as propostas";
+      toast.error(message);
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void carregarPropostas();
+  }, [carregarPropostas]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────
   const update = (key: keyof Proposta, value: unknown) => {
@@ -169,36 +313,131 @@ export default function PropostasPage() {
     toast.success(`Template "${tipo}" aplicado!`);
   };
 
-  const salvarProposta = () => {
-    if (!editando) return;
-    const idx = propostas.findIndex((p) => p.id === editando.id);
-    let novas: Proposta[];
-    if (idx >= 0) {
-      novas = [...propostas];
-      novas[idx] = editando;
-    } else {
-      novas = [editando, ...propostas];
+  const garantirCliente = async (proposta: Proposta) => {
+    const clientePayload = {
+      nome: proposta.clienteNome.trim(),
+      email: proposta.clienteEmail.trim(),
+      telefone: proposta.clienteTelefone.trim() || null,
+      empresa: proposta.clienteEmpresa.trim() || null,
+      tipo: proposta.clienteEmpresa.trim() ? "PJ" : "PF",
+      status: "NEGOCIANDO",
+      origemLead: "admin-propostas",
+    };
+
+    if (!clientePayload.nome || !clientePayload.email) {
+      throw new Error("Preencha nome e email do cliente antes de salvar.");
     }
-    setPropostas(novas);
-    savePropostas(novas);
-    toast.success("Proposta salva!");
+
+    if (proposta.clienteId) {
+      return fetchJson<{ id: string }>(`/api/clientes/${proposta.clienteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clientePayload),
+      });
+    }
+
+    try {
+      return await fetchJson<{ id: string }>("/api/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clientePayload),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (!message.toLowerCase().includes("email")) throw error;
+
+      const clientes = await fetchJson<Array<{ id: string; email?: string }>>(
+        `/api/clientes?search=${encodeURIComponent(clientePayload.email)}`
+      );
+      const clienteExistente = clientes.find((cliente) => cliente.email?.toLowerCase() === clientePayload.email.toLowerCase());
+      if (!clienteExistente) throw error;
+      return clienteExistente;
+    }
   };
 
-  const deletarProposta = (id: string) => {
-    const novas = propostas.filter((p) => p.id !== id);
-    setPropostas(novas);
-    savePropostas(novas);
+  const payloadProposta = (proposta: Proposta, clienteId: string) => {
+    const propostaSubtotal = proposta.itens.reduce((s, i) => s + (i.valor || 0), 0);
+    const propostaDesconto = (propostaSubtotal * (proposta.desconto || 0)) / 100;
+
+    return {
+      clienteId,
+      titulo: proposta.titulo || "Proposta comercial",
+      descricao: proposta.descricao || null,
+      valor: propostaSubtotal,
+      desconto: propostaDesconto,
+      moeda: "BRL",
+      tipoProjeto: inferTipoProjeto(proposta.titulo, proposta.descricao),
+      prazoEstimado: proposta.prazoEstimado || null,
+      itensInclusos: proposta.itens.map((item) => item.descricao).filter(Boolean),
+      escopoDetalhado: proposta.itens,
+      observacoes: proposta.observacoes || null,
+      validade: proposta.validade,
+      status: localStatusToApi[proposta.status],
+    };
+  };
+
+  const salvarProposta = async (propostaBase = editando) => {
+    if (!propostaBase) return null;
+
+    setSalvando(true);
+    try {
+      const cliente = await garantirCliente(propostaBase);
+      const payload = payloadProposta(propostaBase, cliente.id);
+      const savedApi = propostaBase.persisted
+        ? await fetchJson<PropostaApi>(`/api/propostas/${propostaBase.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetchJson<PropostaApi>("/api/propostas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+      const saved = mapApiProposta(savedApi);
+
+      setEditando(saved);
+      await carregarPropostas();
+      toast.success("Proposta salva no banco.");
+      return saved;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao salvar proposta";
+      toast.error(message);
+      return null;
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const deletarProposta = async (id: string) => {
+    const alvo = propostas.find((p) => p.id === id);
+
+    if (alvo?.persisted) {
+      try {
+        await fetchJson(`/api/propostas/${id}`, { method: "DELETE" });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Erro ao remover proposta";
+        toast.error(message);
+        return;
+      }
+    }
+
+    setPropostas((atuais) => atuais.filter((p) => p.id !== id));
     if (editando?.id === id) setEditando(null);
     toast.success("Proposta removida.");
   };
 
   const duplicarProposta = (p: Proposta) => {
-    const nova = { ...p, id: genId(), criadaEm: new Date().toISOString(), status: "rascunho" as const };
-    const novas = [nova, ...propostas];
-    setPropostas(novas);
-    savePropostas(novas);
+    const nova = {
+      ...p,
+      id: `draft-${genId()}`,
+      persisted: false,
+      criadaEm: new Date().toISOString(),
+      status: "rascunho" as const,
+      titulo: p.titulo ? `${p.titulo} (copia)` : "",
+    };
     setEditando(nova);
-    toast.success("Proposta duplicada!");
+    toast.success("Copia pronta para salvar no banco.");
   };
 
   // ─── Cálculos ──────────────────────────────────────────────────────────
@@ -297,7 +536,14 @@ export default function PropostasPage() {
           <p className="text-xs text-dark-400 font-medium uppercase tracking-wider">
             Propostas ({propostas.length})
           </p>
-          {propostas.length === 0 ? (
+          {carregando ? (
+            <Card variant="glass">
+              <div className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-brand-400 mx-auto mb-3" />
+                <p className="text-sm text-dark-400">Carregando propostas do banco...</p>
+              </div>
+            </Card>
+          ) : propostas.length === 0 ? (
             <Card variant="glass">
               <div className="text-center py-8">
                 <FileText className="h-8 w-8 text-dark-600 mx-auto mb-3" />
@@ -557,33 +803,34 @@ export default function PropostasPage() {
                 <Button
                   variant="gold"
                   size="sm"
+                  loading={salvando}
                   icon={<Save className="h-4 w-4" />}
-                  onClick={salvarProposta}
+                  onClick={() => void salvarProposta()}
                 >
                   Salvar
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
+                  loading={salvando}
                   icon={<Eye className="h-4 w-4" />}
-                  onClick={() => { salvarProposta(); setPreviewAberto(true); }}
+                  onClick={async () => {
+                    const salva = await salvarProposta();
+                    if (salva) setPreviewAberto(true);
+                  }}
                 >
                   Preview & PDF
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
+                  loading={salvando}
                   icon={<Send className="h-4 w-4" />}
                   onClick={() => {
                     if (!editando) return;
                     const updated = { ...editando, status: "enviada" as const };
                     setEditando(updated);
-                    const idx = propostas.findIndex((p) => p.id === updated.id);
-                    const novas = [...propostas];
-                    if (idx >= 0) { novas[idx] = updated; } else { novas.unshift(updated); }
-                    setPropostas(novas);
-                    savePropostas(novas);
-                    toast.success("Status alterado para 'Enviada'");
+                    void salvarProposta(updated);
                   }}
                 >
                   Marcar Enviada

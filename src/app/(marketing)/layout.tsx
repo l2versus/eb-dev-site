@@ -147,7 +147,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden border-b border-[#ffc090]/14 bg-[#0d0d0b]/96 backdrop-blur-xl lg:hidden"
+              className="fixed left-0 right-0 top-[68px] z-[60] max-h-[calc(100svh-68px)] overflow-y-auto border-y border-[#ffc090]/14 bg-[#0d0d0b]/98 shadow-[0_22px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:hidden"
             >
               <div className="space-y-2 px-5 py-5">
                 {navLinks.map((link) => (

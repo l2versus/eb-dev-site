@@ -1,163 +1,401 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 📈 Admin — Relatórios e Analytics
-// ══════════════════════════════════════════════════════════════════════════════
-
+import { prisma } from "@/lib/prisma";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DonutChart, BarChartCustom, LineChartCustom } from "@/components/charts/charts";
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Calendar,
-  FolderKanban,
-  Users,
-  Clock,
-  Target,
-  Award,
-  Zap,
-  ArrowUp,
-  ArrowDown,
-  BarChart3,
-  PieChart,
   Activity,
+  ArrowDown,
+  ArrowUp,
+  Award,
+  BarChart3,
+  Calendar,
+  CircleDollarSign,
+  Clock,
+  Database,
   FileText,
+  FolderKanban,
+  PieChart,
+  Target,
+  TrendingUp,
+  Users,
+  Wallet,
+  Zap,
 } from "lucide-react";
 
-export const metadata = { title: "Admin — Relatórios" };
+export const metadata = { title: "Admin - Relatorios" };
+export const dynamic = "force-dynamic";
 
-// Faturamento Anual
-const faturamentoAnual = [
-  { label: "Jan", valor: 14000 },
-  { label: "Fev", valor: 18500 },
-  { label: "Mar", valor: 12000 },
-  { label: "Abr", valor: 22000 },
-  { label: "Mai", valor: 19500 },
-  { label: "Jun", valor: 25000 },
-  { label: "Jul", valor: 21000 },
-  { label: "Ago", valor: 28000 },
-  { label: "Set", valor: 24000 },
-  { label: "Out", valor: 31000 },
-  { label: "Nov", valor: 27500 },
-  { label: "Dez", valor: 35000 },
-];
+const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const COLORS = ["#00f0ff", "#ff00ff", "#10b981", "#f59e0b", "#6366f1", "#ef4444", "#84cc16"];
 
-// Projetos por categoria
-const projetosPorCategoria = [
-  { name: "Landing Pages", value: 45, color: "#00f0ff" },
-  { name: "Sites Institucionais", value: 28, color: "#ff00ff" },
-  { name: "E-commerce", value: 15, color: "#10b981" },
-  { name: "Web Apps", value: 8, color: "#f59e0b" },
-  { name: "Outros", value: 4, color: "#6366f1" },
-];
+function toNumber(value: unknown) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Number(value) || 0;
+  if (value && typeof value === "object" && "toNumber" in value) {
+    return (value as { toNumber: () => number }).toNumber();
+  }
+  return Number(value || 0) || 0;
+}
 
-// Origem dos clientes
-const origemClientes = [
-  { name: "Indicação", valor: 42 },
-  { name: "Google", valor: 28 },
-  { name: "Instagram", valor: 18 },
-  { name: "LinkedIn", valor: 8 },
-  { name: "Outros", valor: 4 },
-];
+function money(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
+}
 
-// Tempo médio por projeto
-const tempoPorTipo = [
-  { name: "Landing", valor: 7 },
-  { name: "Institucional", valor: 14 },
-  { name: "E-commerce", valor: 21 },
-  { name: "WebApp", valor: 30 },
-];
+function compactMoney(value: number) {
+  if (value >= 1000) return `R$ ${(value / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}k`;
+  return money(value);
+}
 
-// Métricas de Performance
-const metricas = [
-  {
-    titulo: "Faturamento YTD",
-    valor: "R$ 278.500",
-    variacao: "+32%",
-    positivo: true,
-    icon: DollarSign,
-    cor: "emerald",
-  },
-  {
-    titulo: "Projetos Entregues",
-    valor: "42",
-    variacao: "+18 vs ano anterior",
-    positivo: true,
-    icon: FolderKanban,
-    cor: "brand",
-  },
-  {
-    titulo: "Ticket Médio",
-    valor: "R$ 6.630",
-    variacao: "+15%",
-    positivo: true,
-    icon: Target,
-    cor: "purple",
-  },
-  {
-    titulo: "Taxa Conversão",
-    valor: "62%",
-    variacao: "+8%",
-    positivo: true,
-    icon: TrendingUp,
-    cor: "gold",
-  },
-];
+function percent(part: number, total: number) {
+  if (!total) return 0;
+  return Math.round((part / total) * 100);
+}
 
-// Top Clientes por faturamento
-const topClientes = [
-  { nome: "Tech Solutions", projetos: 5, faturamento: "R$ 52.000", percentual: 18.7 },
-  { nome: "Grupo Empresarial XYZ", projetos: 3, faturamento: "R$ 38.500", percentual: 13.8 },
-  { nome: "Myka Procópio", projetos: 4, faturamento: "R$ 24.000", percentual: 8.6 },
-  { nome: "Café Aroma", projetos: 2, faturamento: "R$ 18.000", percentual: 6.5 },
-  { nome: "João Silva Advocacia", projetos: 3, faturamento: "R$ 15.500", percentual: 5.6 },
-];
+function deltaLabel(current: number, previous: number) {
+  if (!previous) return current > 0 ? "Novo no periodo" : "0%";
+  const delta = Math.round(((current - previous) / previous) * 100);
+  return `${delta >= 0 ? "+" : ""}${delta}%`;
+}
 
-// Metas anuais
-const metas = [
-  { meta: "Faturamento", atual: 278500, objetivo: 350000 },
-  { meta: "Projetos", atual: 42, objetivo: 50 },
-  { meta: "Clientes Novos", atual: 18, objetivo: 25 },
-  { meta: "Taxa Conversão", atual: 62, objetivo: 70 },
-];
+function typeLabel(value: string) {
+  const labels: Record<string, string> = {
+    LANDING_PAGE: "Landing",
+    SITE_INSTITUCIONAL: "Site institucional",
+    ECOMMERCE: "E-commerce",
+    WEBAPP: "Web app",
+    DASHBOARD: "Dashboard",
+    API: "API",
+    CONSULTORIA: "Consultoria",
+    MANUTENCAO: "Manutencao",
+    OUTRO: "Outro",
+  };
 
-export default function RelatoriosPage() {
+  return labels[value] || value || "Sem tipo";
+}
+
+function sourceName(value: string | null) {
+  const source = (value || "Sem origem").toLowerCase();
+  const labels: Record<string, string> = {
+    "orcamento-site": "Orcamento site",
+    "cadastro-site": "Cadastro site",
+    "admin-propostas": "Admin propostas",
+    instagram: "Instagram",
+    whatsapp: "WhatsApp",
+    google: "Google",
+    site: "Site",
+    website: "Website",
+    manual: "Manual",
+  };
+
+  return labels[source] || value || "Sem origem";
+}
+
+function sumBy<T>(items: T[], picker: (item: T) => number) {
+  return items.reduce((total, item) => total + picker(item), 0);
+}
+
+function monthlyRevenue(rows: Array<{ date: Date; value: number }>) {
+  const values = Array.from({ length: 12 }, () => 0);
+
+  rows.forEach((row) => {
+    const date = new Date(row.date);
+    values[date.getMonth()] += row.value;
+  });
+
+  return MONTHS.map((label, index) => ({ label, valor: values[index] }));
+}
+
+function revenueSource(
+  transacoes: Array<{ valor: unknown; data: Date }>,
+  pedidos: Array<{ valorFinal: unknown; createdAt: Date }>,
+  projetos: Array<{ valorPago: unknown; createdAt: Date; dataEntrega: Date | null }>
+) {
+  const transacoesTotal = sumBy(transacoes, (item) => toNumber(item.valor));
+  const pedidosTotal = sumBy(pedidos, (item) => toNumber(item.valorFinal));
+  const projetosTotal = sumBy(projetos, (item) => toNumber(item.valorPago));
+
+  if (transacoesTotal > 0) {
+    return {
+      total: transacoesTotal,
+      count: transacoes.length,
+      label: "transacoes pagas",
+      rows: transacoes.map((item) => ({ date: item.data, value: toNumber(item.valor) })),
+    };
+  }
+
+  if (pedidosTotal > 0) {
+    return {
+      total: pedidosTotal,
+      count: pedidos.length,
+      label: "pedidos pagos",
+      rows: pedidos.map((item) => ({ date: item.createdAt, value: toNumber(item.valorFinal) })),
+    };
+  }
+
+  return {
+    total: projetosTotal,
+    count: projetos.filter((item) => toNumber(item.valorPago) > 0).length,
+    label: "projetos pagos",
+    rows: projetos.map((item) => ({
+      date: item.dataEntrega || item.createdAt,
+      value: toNumber(item.valorPago),
+    })),
+  };
+}
+
+export default async function RelatoriosPage() {
+  const year = new Date().getFullYear();
+  const yearStart = new Date(year, 0, 1);
+  const yearEnd = new Date(year + 1, 0, 1);
+  const previousStart = new Date(year - 1, 0, 1);
+
+  const [
+    transacoesAno,
+    transacoesAnterior,
+    pedidosAno,
+    pedidosAnterior,
+    projetosAno,
+    projetosAnterior,
+    propostasAno,
+    clientes,
+  ] = await prisma.$transaction([
+    prisma.transacao.findMany({
+      where: { tipo: "RECEITA", status: "PAGO", data: { gte: yearStart, lt: yearEnd } },
+      select: { valor: true, data: true, categoria: true, cliente: true },
+      orderBy: { data: "asc" },
+    }),
+    prisma.transacao.findMany({
+      where: { tipo: "RECEITA", status: "PAGO", data: { gte: previousStart, lt: yearStart } },
+      select: { valor: true, data: true },
+    }),
+    prisma.pedido.findMany({
+      where: { status: { in: ["PAGO", "APROVADO"] }, createdAt: { gte: yearStart, lt: yearEnd } },
+      select: { valorFinal: true, createdAt: true, clienteId: true, nomeCliente: true },
+    }),
+    prisma.pedido.findMany({
+      where: { status: { in: ["PAGO", "APROVADO"] }, createdAt: { gte: previousStart, lt: yearStart } },
+      select: { valorFinal: true, createdAt: true },
+    }),
+    prisma.projeto.findMany({
+      where: { createdAt: { gte: yearStart, lt: yearEnd } },
+      select: {
+        id: true,
+        clienteId: true,
+        tipo: true,
+        status: true,
+        valor: true,
+        valorPago: true,
+        createdAt: true,
+        dataInicio: true,
+        dataEntrega: true,
+      },
+    }),
+    prisma.projeto.findMany({
+      where: { createdAt: { gte: previousStart, lt: yearStart } },
+      select: { status: true, valorPago: true, createdAt: true, dataEntrega: true },
+    }),
+    prisma.proposta.findMany({
+      where: { createdAt: { gte: yearStart, lt: yearEnd } },
+      select: { id: true, clienteId: true, tipoProjeto: true, status: true, valorFinal: true, createdAt: true },
+    }),
+    prisma.cliente.findMany({
+      include: {
+        _count: { select: { projetos: true, propostas: true } },
+        pedidos: {
+          where: { status: { in: ["PAGO", "APROVADO"] }, createdAt: { gte: yearStart, lt: yearEnd } },
+          select: { valorFinal: true },
+        },
+        projetos: {
+          where: { createdAt: { gte: yearStart, lt: yearEnd } },
+          select: { valorPago: true, valor: true, status: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
+
+  const receita = revenueSource(transacoesAno, pedidosAno, projetosAno);
+  const receitaAnterior = revenueSource(transacoesAnterior, pedidosAnterior, projetosAnterior);
+  const faturamentoAnual = monthlyRevenue(receita.rows);
+
+  const openStatuses = new Set(["RASCUNHO", "PENDENTE", "ENVIADA", "VISUALIZADA", "NEGOCIANDO"]);
+  const propostasAbertas = propostasAno.filter((item) => openStatuses.has(item.status));
+  const propostasAprovadas = propostasAno.filter((item) => item.status === "APROVADA").length;
+  const pipelineAberto = sumBy(propostasAbertas, (item) => toNumber(item.valorFinal));
+  const projetosEntregues = projetosAno.filter((item) => item.status === "ENTREGUE").length;
+  const projetosEntreguesAnterior = projetosAnterior.filter((item) => item.status === "ENTREGUE").length;
+  const clientesNovos = clientes.filter((item) => item.createdAt >= yearStart && item.createdAt < yearEnd).length;
+  const clientesNovosAnterior = clientes.filter((item) => item.createdAt >= previousStart && item.createdAt < yearStart).length;
+  const clientesAtivos = clientes.filter((item) => item.status === "ATIVO").length;
+  const taxaConversao = propostasAno.length
+    ? percent(propostasAprovadas, propostasAno.length)
+    : percent(clientesAtivos, clientes.length);
+  const ticketMedio = receita.count ? receita.total / receita.count : 0;
+
+  const metricas = [
+    {
+      titulo: "Faturamento pago",
+      valor: money(receita.total),
+      variacao: deltaLabel(receita.total, receitaAnterior.total),
+      positivo: receita.total >= receitaAnterior.total,
+      icon: Wallet,
+      cor: "emerald",
+      detalhe: receita.label,
+    },
+    {
+      titulo: "Pipeline aberto",
+      valor: money(pipelineAberto),
+      variacao: `${propostasAbertas.length} propostas`,
+      positivo: true,
+      icon: CircleDollarSign,
+      cor: "gold",
+      detalhe: "status aberto no CRM",
+    },
+    {
+      titulo: "Projetos entregues",
+      valor: String(projetosEntregues),
+      variacao: deltaLabel(projetosEntregues, projetosEntreguesAnterior),
+      positivo: projetosEntregues >= projetosEntreguesAnterior,
+      icon: FolderKanban,
+      cor: "brand",
+      detalhe: `${projetosAno.length} projetos no ano`,
+    },
+    {
+      titulo: "Taxa conversao",
+      valor: `${taxaConversao}%`,
+      variacao: propostasAno.length ? `${propostasAprovadas}/${propostasAno.length} propostas` : `${clientesAtivos}/${clientes.length} clientes`,
+      positivo: taxaConversao >= 50,
+      icon: Target,
+      cor: "purple",
+      detalhe: propostasAno.length ? "propostas aprovadas" : "clientes ativos",
+    },
+  ];
+
+  const categoryCounts = new Map<string, number>();
+  const categoryBase = projetosAno.length
+    ? projetosAno.map((item) => item.tipo)
+    : propostasAno.map((item) => item.tipoProjeto);
+  categoryBase.forEach((tipo) => categoryCounts.set(typeLabel(tipo), (categoryCounts.get(typeLabel(tipo)) || 0) + 1));
+  const projetosPorCategoria = Array.from(categoryCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value], index) => ({ name, value, color: COLORS[index % COLORS.length] }));
+  const totalCategorias = projetosPorCategoria.reduce((total, item) => total + item.value, 0);
+
+  const origemCounts = new Map<string, number>();
+  clientes.forEach((cliente) => {
+    const origem = sourceName(cliente.origemLead);
+    origemCounts.set(origem, (origemCounts.get(origem) || 0) + 1);
+  });
+  const origemClientes = Array.from(origemCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, valor]) => ({ name, valor }));
+
+  const tempoMap = new Map<string, { total: number; count: number }>();
+  projetosAno
+    .filter((projeto) => projeto.dataEntrega)
+    .forEach((projeto) => {
+      const start = projeto.dataInicio || projeto.createdAt;
+      const end = projeto.dataEntrega || projeto.createdAt;
+      const days = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000));
+      const label = typeLabel(projeto.tipo);
+      const current = tempoMap.get(label) || { total: 0, count: 0 };
+      tempoMap.set(label, { total: current.total + days, count: current.count + 1 });
+    });
+  const tempoPorTipo = Array.from(tempoMap.entries()).map(([name, data]) => ({
+    name,
+    valor: Math.round(data.total / data.count),
+  }));
+
+  const topClientes = clientes
+    .map((cliente) => {
+      const pedidosPagos = sumBy(cliente.pedidos, (item) => toNumber(item.valorFinal));
+      const projetosPagos = sumBy(cliente.projetos, (item) => toNumber(item.valorPago));
+      const faturamento = pedidosPagos || projetosPagos || toNumber(cliente.faturamentoTotal);
+
+      return {
+        nome: cliente.nome,
+        projetos: cliente._count.projetos,
+        propostas: cliente._count.propostas,
+        faturamento,
+        percentual: receita.total ? Number(((faturamento / receita.total) * 100).toFixed(1)) : 0,
+      };
+    })
+    .sort((a, b) => b.faturamento - a.faturamento || b.projetos - a.projetos || b.propostas - a.propostas)
+    .slice(0, 5);
+
+  const bestMonth = faturamentoAnual.reduce((best, item) => (item.valor > best.valor ? item : best), faturamentoAnual[0]);
+  const topService = projetosPorCategoria[0];
+  const topOrigin = origemClientes[0];
+
+  const comparativo = [
+    {
+      label: "Faturamento",
+      atual: compactMoney(receita.total),
+      anterior: compactMoney(receitaAnterior.total),
+      variacao: deltaLabel(receita.total, receitaAnterior.total),
+      positivo: receita.total >= receitaAnterior.total,
+    },
+    {
+      label: "Projetos",
+      atual: String(projetosEntregues),
+      anterior: String(projetosEntreguesAnterior),
+      variacao: deltaLabel(projetosEntregues, projetosEntreguesAnterior),
+      positivo: projetosEntregues >= projetosEntreguesAnterior,
+    },
+    {
+      label: "Clientes novos",
+      atual: String(clientesNovos),
+      anterior: String(clientesNovosAnterior),
+      variacao: deltaLabel(clientesNovos, clientesNovosAnterior),
+      positivo: clientesNovos >= clientesNovosAnterior,
+    },
+    {
+      label: "Ticket medio",
+      atual: compactMoney(ticketMedio),
+      anterior: compactMoney(receitaAnterior.count ? receitaAnterior.total / receitaAnterior.count : 0),
+      variacao: deltaLabel(ticketMedio, receitaAnterior.count ? receitaAnterior.total / receitaAnterior.count : 0),
+      positivo: ticketMedio >= (receitaAnterior.count ? receitaAnterior.total / receitaAnterior.count : 0),
+    },
+  ];
+
+  const baseDados = [
+    { label: "Clientes", value: clientes.length, icon: Users },
+    { label: "Propostas no ano", value: propostasAno.length, icon: FileText },
+    { label: "Projetos no ano", value: projetosAno.length, icon: FolderKanban },
+    { label: "Transacoes pagas", value: transacoesAno.length, icon: Database },
+  ];
+
   return (
     <div className="space-y-4 sm:space-y-8">
-      {/* Header */}
       <div className="flex flex-col gap-3">
         <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">Relatórios & Analytics</h2>
-          <p className="text-dark-400 text-sm mt-1">Análise completa do seu negócio</p>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Relatorios & Analytics</h2>
+          <p className="mt-1 text-sm text-dark-400">Dados reais do PostgreSQL, sem seed fake na tela.</p>
         </div>
         <Badge variant="gold" className="self-start">
-          <Calendar className="h-3 w-3 mr-1" /> Ano 2024
+          <Calendar className="mr-1 h-3 w-3" /> Ano {year}
         </Badge>
       </div>
 
-      {/* KPIs */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {metricas.map((metrica) => (
           <Card key={metrica.titulo} variant="glass" padding="sm">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs text-dark-400 mb-1">{metrica.titulo}</p>
-                <p className="text-lg sm:text-2xl font-bold text-white truncate">{metrica.valor}</p>
-                <div
-                  className={`flex items-center gap-1 mt-1 text-xs ${
-                    metrica.positivo ? "text-emerald-400" : "text-red-400"
-                  }`}
-                >
-                  {metrica.positivo ? (
-                    <ArrowUp className="h-3 w-3" />
-                  ) : (
-                    <ArrowDown className="h-3 w-3" />
-                  )}
+                <p className="mb-1 text-[10px] uppercase tracking-wider text-dark-500 sm:text-xs">{metrica.titulo}</p>
+                <p className="truncate text-lg font-bold text-white sm:text-2xl">{metrica.valor}</p>
+                <div className={`mt-1 flex items-center gap-1 text-xs ${metrica.positivo ? "text-emerald-400" : "text-red-400"}`}>
+                  {metrica.positivo ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
                   {metrica.variacao}
                 </div>
+                <p className="mt-1 truncate text-[11px] text-dark-500">{metrica.detalhe}</p>
               </div>
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                   metrica.cor === "emerald"
                     ? "bg-emerald-500/10 text-emerald-400"
                     : metrica.cor === "brand"
@@ -174,11 +412,10 @@ export default function RelatoriosPage() {
         ))}
       </div>
 
-      {/* Gráfico de Faturamento Anual */}
       <Card variant="gradient">
         <CardHeader
-          title="Evolução do Faturamento"
-          subtitle="Comparativo mensal — 2024"
+          title="Evolucao do faturamento pago"
+          subtitle={`Origem atual: ${receita.label}`}
           icon={<BarChart3 className="h-5 w-5" />}
         />
         <LineChartCustom
@@ -189,212 +426,184 @@ export default function RelatoriosPage() {
         />
       </Card>
 
-      {/* Linha 2: Categorias + Origem */}
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-        {/* Projetos por Categoria */}
         <Card variant="glass">
           <CardHeader
-            title="Projetos por Categoria"
-            subtitle="Distribuição do portfólio"
+            title="Projetos por categoria"
+            subtitle={projetosAno.length ? "Distribuicao por projetos cadastrados" : "Sem projetos: usando propostas do ano"}
             icon={<PieChart className="h-5 w-5" />}
           />
           <DonutChart
-            data={projetosPorCategoria}
+            data={projetosPorCategoria.length ? projetosPorCategoria : [{ name: "Sem dados", value: 1, color: "#3e3f47" }]}
             height={280}
-            centerValue="100%"
-            centerLabel="do total"
+            centerValue={String(totalCategorias)}
+            centerLabel="registros"
+            format="number"
           />
         </Card>
 
-        {/* Origem dos Clientes */}
         <Card variant="glass">
           <CardHeader
-            title="Origem dos Clientes"
-            subtitle="De onde vêm seus leads"
+            title="Origem dos clientes"
+            subtitle="Agrupado pelo campo origemLead"
             icon={<Users className="h-5 w-5" />}
           />
-          <BarChartCustom data={origemClientes} barColor="#ff00ff" height={280} />
+          <BarChartCustom
+            data={origemClientes.length ? origemClientes : [{ name: "Sem dados", valor: 0 }]}
+            barColor="#ff00ff"
+            height={280}
+            format="number"
+          />
         </Card>
       </div>
 
-      {/* Tempo Médio + Progresso das Metas */}
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
-        {/* Tempo Médio por Tipo */}
         <Card variant="glass">
           <CardHeader
-            title="Tempo Médio de Entrega"
-            subtitle="Dias por tipo de projeto"
+            title="Tempo medio de entrega"
+            subtitle="Calculado por dataInicio/dataEntrega"
             icon={<Clock className="h-5 w-5" />}
           />
-          <BarChartCustom data={tempoPorTipo} barColor="#00f0ff" height={250} />
+          <BarChartCustom
+            data={tempoPorTipo.length ? tempoPorTipo : [{ name: "Sem entregas", valor: 0 }]}
+            barColor="#00f0ff"
+            height={250}
+            format="days"
+          />
         </Card>
 
-        {/* Progresso das Metas */}
         <Card variant="glass">
           <CardHeader
-            title="Metas Anuais"
-            subtitle="Progresso em 2024"
-            icon={<Target className="h-5 w-5" />}
+            title="Base do banco"
+            subtitle="Contadores reais que alimentam este painel"
+            icon={<Database className="h-5 w-5" />}
           />
-          <div className="space-y-4 mt-4">
-            {metas.map((meta) => {
-              const percentual = Math.round((meta.atual / meta.objetivo) * 100);
-              const isValueMeta = meta.meta === "Faturamento";
-              return (
-                <div key={meta.meta}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-dark-300">{meta.meta}</span>
-                    <span className="text-sm font-medium text-white">
-                      {isValueMeta
-                        ? `R$ ${meta.atual.toLocaleString("pt-BR")} / R$ ${meta.objetivo.toLocaleString("pt-BR")}`
-                        : `${meta.atual} / ${meta.objetivo}`}
-                    </span>
-                  </div>
-                  <div className="h-3 bg-dark-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        percentual >= 100
-                          ? "bg-emerald-500"
-                          : percentual >= 75
-                          ? "bg-brand-500"
-                          : percentual >= 50
-                          ? "bg-gold-500"
-                          : "bg-red-500"
-                      }`}
-                      style={{ width: `${Math.min(percentual, 100)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-dark-500 mt-1">
-                    {percentual}% da meta{percentual >= 100 && " ✓ Atingida!"}
-                  </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {baseDados.map((item) => (
+              <div key={item.label} className="rounded-xl border border-dark-800 bg-dark-900/50 p-4">
+                <div className="flex items-center justify-between text-dark-500">
+                  <span className="text-xs font-semibold uppercase tracking-wider">{item.label}</span>
+                  <item.icon className="h-4 w-4" />
                 </div>
-              );
-            })}
+                <p className="mt-3 text-2xl font-bold text-white">{item.value.toLocaleString("pt-BR")}</p>
+              </div>
+            ))}
           </div>
         </Card>
       </div>
 
-      {/* Top Clientes */}
       <Card variant="glass">
         <CardHeader
-          title="Top 5 Clientes por Faturamento"
-          subtitle="Principais contas do ano"
+          title="Top clientes por faturamento"
+          subtitle="Ordenado por pedidos/projetos pagos ou faturamentoTotal"
           icon={<Award className="h-5 w-5" />}
         />
-        <div className="overflow-x-auto mt-4">
+        <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-dark-500 border-b border-dark-700/50">
-                <th className="text-left py-2 px-3 font-medium">#</th>
-                <th className="text-left py-2 px-3 font-medium">Cliente</th>
-                <th className="text-left py-2 px-3 font-medium">Projetos</th>
-                <th className="text-left py-2 px-3 font-medium">Faturamento</th>
-                <th className="text-left py-2 px-3 font-medium">% do Total</th>
+              <tr className="border-b border-dark-700/50 text-dark-500">
+                <th className="px-3 py-2 text-left font-medium">#</th>
+                <th className="px-3 py-2 text-left font-medium">Cliente</th>
+                <th className="px-3 py-2 text-left font-medium">Projetos</th>
+                <th className="px-3 py-2 text-left font-medium">Propostas</th>
+                <th className="px-3 py-2 text-left font-medium">Faturamento</th>
+                <th className="px-3 py-2 text-left font-medium">%</th>
               </tr>
             </thead>
             <tbody>
-              {topClientes.map((cliente, i) => (
-                <tr
-                  key={cliente.nome}
-                  className="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors"
-                >
-                  <td className="py-3 px-3">
-                    <span
-                      className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
-                        i === 0
-                          ? "bg-gold-500/20 text-gold-400"
-                          : i === 1
-                          ? "bg-dark-600/50 text-dark-300"
-                          : i === 2
-                          ? "bg-amber-700/20 text-amber-600"
-                          : "bg-dark-800 text-dark-500"
-                      }`}
-                    >
-                      {i + 1}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-white font-medium">{cliente.nome}</td>
-                  <td className="py-3 px-3 text-dark-300">{cliente.projetos}</td>
-                  <td className="py-3 px-3 text-brand-400 font-medium">{cliente.faturamento}</td>
-                  <td className="py-3 px-3">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-dark-800 rounded-full overflow-hidden max-w-20">
-                        <div
-                          className="h-full bg-gradient-to-r from-brand-500 to-purple-500 rounded-full"
-                          style={{ width: `${cliente.percentual}%` }}
-                        />
+              {topClientes.length ? (
+                topClientes.map((cliente, index) => (
+                  <tr key={`${cliente.nome}-${index}`} className="border-b border-dark-800/50 transition-colors hover:bg-dark-800/30">
+                    <td className="px-3 py-3">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-dark-800 text-xs font-bold text-dark-300">
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 font-medium text-white">{cliente.nome}</td>
+                    <td className="px-3 py-3 text-dark-300">{cliente.projetos}</td>
+                    <td className="px-3 py-3 text-dark-300">{cliente.propostas}</td>
+                    <td className="px-3 py-3 font-medium text-brand-400">{money(cliente.faturamento)}</td>
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-20 overflow-hidden rounded-full bg-dark-800">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-brand-500 to-purple-500"
+                            style={{ width: `${Math.min(cliente.percentual, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-dark-400">{cliente.percentual}%</span>
                       </div>
-                      <span className="text-xs text-dark-400">{cliente.percentual}%</span>
-                    </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-3 py-8 text-center text-dark-500" colSpan={6}>
+                    Sem clientes cadastrados no banco.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </Card>
 
-      {/* Insights Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card variant="glass" className="border-emerald-500/20">
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
               <TrendingUp className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-white font-medium">Melhor Mês</p>
-              <p className="text-2xl font-bold text-emerald-400">Dezembro</p>
-              <p className="text-xs text-dark-500 mt-1">R$ 35.000 faturados</p>
+              <p className="font-medium text-white">Melhor mes</p>
+              <p className="text-2xl font-bold text-emerald-400">{bestMonth.valor ? bestMonth.label : "Sem receita"}</p>
+              <p className="mt-1 text-xs text-dark-500">{money(bestMonth.valor)}</p>
             </div>
           </div>
         </Card>
 
         <Card variant="glass" className="border-brand-500/20">
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10">
               <Zap className="h-5 w-5 text-brand-400" />
             </div>
             <div>
-              <p className="text-white font-medium">Serviço Top</p>
-              <p className="text-2xl font-bold text-brand-400">Landing Pages</p>
-              <p className="text-xs text-dark-500 mt-1">45% dos projetos</p>
+              <p className="font-medium text-white">Servico top</p>
+              <p className="text-2xl font-bold text-brand-400">{topService?.name || "Sem dados"}</p>
+              <p className="mt-1 text-xs text-dark-500">{topService ? `${topService.value} registros` : "0 registros"}</p>
             </div>
           </div>
         </Card>
 
         <Card variant="glass" className="border-gold-500/20">
           <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gold-500/10 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold-500/10">
               <Activity className="h-5 w-5 text-gold-400" />
             </div>
             <div>
-              <p className="text-white font-medium">Canal Principal</p>
-              <p className="text-2xl font-bold text-gold-400">Indicações</p>
-              <p className="text-xs text-dark-500 mt-1">42% dos clientes</p>
+              <p className="font-medium text-white">Canal principal</p>
+              <p className="text-2xl font-bold text-gold-400">{topOrigin?.name || "Sem origem"}</p>
+              <p className="mt-1 text-xs text-dark-500">{topOrigin ? `${topOrigin.valor} clientes` : "0 clientes"}</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Comparativo Período */}
       <Card variant="gradient">
         <CardHeader
-          title="Comparativo de Períodos"
-          subtitle="Este ano vs Ano anterior"
+          title="Comparativo de periodos"
+          subtitle={`${year} vs ${year - 1}, usando apenas registros do banco`}
           icon={<FileText className="h-5 w-5" />}
         />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-          {[
-            { label: "Faturamento", atual: "R$ 278.5k", anterior: "R$ 211.0k", variacao: "+32%" },
-            { label: "Projetos", atual: "42", anterior: "24", variacao: "+75%" },
-            { label: "Clientes", atual: "28", anterior: "19", variacao: "+47%" },
-            { label: "Ticket Médio", atual: "R$ 6.630", anterior: "R$ 5.750", variacao: "+15%" },
-          ].map((item) => (
-            <div key={item.label} className="text-center p-4 rounded-xl bg-dark-800/30">
-              <p className="text-xs text-dark-500 mb-2">{item.label}</p>
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {comparativo.map((item) => (
+            <div key={item.label} className="rounded-xl bg-dark-800/30 p-4 text-center">
+              <p className="mb-2 text-xs text-dark-500">{item.label}</p>
               <p className="text-xl font-bold text-white">{item.atual}</p>
-              <p className="text-xs text-dark-500 mt-1">Anterior: {item.anterior}</p>
-              <p className="text-sm font-medium text-emerald-400 mt-1">{item.variacao}</p>
+              <p className="mt-1 text-xs text-dark-500">Anterior: {item.anterior}</p>
+              <p className={`mt-1 text-sm font-medium ${item.positivo ? "text-emerald-400" : "text-red-400"}`}>
+                {item.variacao}
+              </p>
             </div>
           ))}
         </div>

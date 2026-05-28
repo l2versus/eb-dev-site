@@ -9,7 +9,7 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "db:deploy": "bash ./scripts/colify_db_deploy.sh",
-    "lint": "next lint",
+    "lint": "eslint .",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",

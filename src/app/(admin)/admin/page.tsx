@@ -9,8 +9,6 @@ import Link from "next/link";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DonutChart, BarChartCustom, LineChartCustom } from "@/components/charts/charts";
-import { loadProjetos, getProjetoStats, type Projeto } from "@/lib/shared-projetos";
-import { loadConversas, getChatStats, type Conversa } from "@/lib/shared-chat";
 import { toast } from "sonner";
 import {
   DollarSign,
@@ -33,6 +31,49 @@ import {
   User,
 } from "lucide-react";
 
+interface Projeto {
+  id: string;
+  titulo: string;
+  clienteNome: string;
+  status: "briefing" | "design" | "desenvolvimento" | "revisao" | "entregue";
+  prioridade: "baixa" | "media" | "alta" | "urgente";
+  valor: number;
+  progresso: number;
+  prazo: string;
+  tags: string[];
+}
+
+interface Conversa {
+  id: string;
+  clienteNome: string;
+  ultimaMensagem: string;
+  ultimaHora: string;
+  naoLidas: number;
+  status: string;
+}
+
+function getProjetoStats(projetos: Projeto[]) {
+  const ativos = projetos.filter((p) => p.status !== "entregue");
+  const entregues = projetos.filter((p) => p.status === "entregue");
+  const faturamentoTotal = projetos.reduce((sum, p) => sum + Number(p.valor || 0), 0);
+  const faturamentoAtivos = ativos.reduce((sum, p) => sum + Number(p.valor || 0), 0);
+
+  return {
+    ativos,
+    entregues,
+    faturamentoTotal,
+    faturamentoAtivos,
+    ticketMedio: projetos.length ? faturamentoTotal / projetos.length : 0,
+  };
+}
+
+function getChatStats(conversas: Conversa[]) {
+  return {
+    totalConversas: conversas.length,
+    totalNaoLidas: conversas.reduce((sum, conversa) => sum + (conversa.naoLidas || 0), 0),
+  };
+}
+
 // ─── Status config ────────────────────────────────────────────────────────────
 const statusConfig: Record<string, { label: string; css: string }> = {
   briefing: { label: "Briefing", css: "text-purple-400 bg-purple-500/10" },
@@ -52,17 +93,17 @@ export default function AdminDashboardPage() {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const refresh = useCallback(async () => {
-    // localStorage data (projetos + chat still use localStorage)
-    setProjetos(loadProjetos());
-    setConversas(loadConversas());
-
-    // API data (clientes, financeiro, compromissos from Prisma)
+    // API data from PostgreSQL through Prisma
     try {
-      const [clientesRes, financeiroRes, compromissosRes] = await Promise.all([
+      const [projetosRes, chatRes, clientesRes, financeiroRes, compromissosRes] = await Promise.all([
+        fetch("/api/projetos"),
+        fetch("/api/chat"),
         fetch("/api/clientes"),
         fetch("/api/financeiro"),
         fetch("/api/compromissos"),
       ]);
+      if (projetosRes.ok) setProjetos(await projetosRes.json());
+      if (chatRes.ok) setConversas(await chatRes.json());
       if (clientesRes.ok) setClientes(await clientesRes.json());
       if (financeiroRes.ok) setTransacoes(await financeiroRes.json());
       if (compromissosRes.ok) setCompromissos(await compromissosRes.json());

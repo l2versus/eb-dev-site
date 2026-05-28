@@ -8,16 +8,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  loadProjetos,
-  saveProjetos,
-  addProjeto,
-  updateProjeto,
-  deleteProjeto,
-  type Projeto,
-  type ProjetoStatus,
-  type ProjetoPrioridade,
-} from "@/lib/shared-projetos";
 import { toast } from "sonner";
 import {
   FolderKanban,
@@ -33,6 +23,25 @@ import {
   X,
   Eye,
 } from "lucide-react";
+
+type ProjetoStatus = "briefing" | "design" | "desenvolvimento" | "revisao" | "entregue";
+type ProjetoPrioridade = "baixa" | "media" | "alta" | "urgente";
+
+interface Projeto {
+  id: string;
+  titulo: string;
+  descricao: string;
+  clienteNome: string;
+  clienteEmail: string;
+  status: ProjetoStatus;
+  prioridade: ProjetoPrioridade;
+  valor: number;
+  progresso: number;
+  prazo: string;
+  tags: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 const COLUNAS = [
   { key: "briefing" as const, label: "📋 Briefing", color: "from-blue-500/20 to-blue-600/5", border: "border-blue-500/30", badge: "bg-blue-500/20 text-blue-300" },
@@ -106,23 +115,44 @@ export default function ProjetosPage() {
     tags: "",
   });
 
-  useEffect(() => {
-    setProjetos(loadProjetos());
-    setLoaded(true);
+  const fetchProjetos = useCallback(async () => {
+    try {
+      const res = await fetch("/api/projetos");
+      if (!res.ok) throw new Error("Erro ao carregar projetos");
+      const data = await res.json();
+      setProjetos(Array.isArray(data) ? data : []);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao carregar projetos");
+    } finally {
+      setLoaded(true);
+    }
   }, []);
 
+  useEffect(() => {
+    void fetchProjetos();
+  }, [fetchProjetos]);
+
   // Mover projeto para coluna (via drag ou botão)
-  const moverProjeto = (projeto: Projeto, novoStatus: ProjetoStatus) => {
+  const moverProjeto = async (projeto: Projeto, novoStatus: ProjetoStatus) => {
     const progressoMap: Record<ProjetoStatus, number> = {
       briefing: 10, design: 30, desenvolvimento: 60, revisao: 85, entregue: 100,
     };
-    const updated = updateProjeto(projeto.id, {
-      status: novoStatus,
-      progresso: progressoMap[novoStatus],
-    });
-    if (updated) {
-      setProjetos(loadProjetos());
+
+    try {
+      const res = await fetch("/api/projetos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: projeto.id,
+          status: novoStatus,
+          progresso: progressoMap[novoStatus],
+        }),
+      });
+      if (!res.ok) throw new Error("Erro ao mover projeto");
+      await fetchProjetos();
       toast.success(`Movido para ${COLUNAS.find(c => c.key === novoStatus)?.label || novoStatus}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao mover projeto");
     }
   };
 
@@ -157,7 +187,7 @@ export default function ProjetosPage() {
     if (!draggedId) return;
     const projeto = projetos.find(p => p.id === draggedId);
     if (projeto && projeto.status !== colKey) {
-      moverProjeto(projeto, colKey);
+      void moverProjeto(projeto, colKey);
     }
     setDraggedId(null);
   };
@@ -243,7 +273,7 @@ export default function ProjetosPage() {
     if (hasMoved.current && dragOverCol && touchDragId.current) {
       const projeto = projetos.find(p => p.id === touchDragId.current);
       if (projeto && projeto.status !== dragOverCol) {
-        moverProjeto(projeto, dragOverCol);
+        void moverProjeto(projeto, dragOverCol);
       }
     }
 
@@ -262,7 +292,7 @@ export default function ProjetosPage() {
   }, [handleTouchMove, handleTouchEnd]);
 
   // Salvar projeto (criar ou editar)
-  const salvarProjeto = () => {
+  const salvarProjeto = async () => {
     const payload = {
       titulo: form.titulo,
       descricao: form.descricao,
@@ -276,22 +306,45 @@ export default function ProjetosPage() {
     };
 
     if (editando) {
-      updateProjeto(editando.id, payload);
+      const res = await fetch("/api/projetos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editando.id, ...payload }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || "Erro ao atualizar projeto.");
+        return;
+      }
       toast.success("Projeto atualizado!");
     } else {
-      addProjeto(payload);
+      const res = await fetch("/api/projetos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || "Erro ao criar projeto.");
+        return;
+      }
       toast.success("Projeto criado!");
     }
-    setProjetos(loadProjetos());
+    await fetchProjetos();
     fecharModal();
   };
 
   // Excluir
-  const excluirProjeto = (id: string) => {
-    deleteProjeto(id);
-    setProjetos(loadProjetos());
+  const excluirProjeto = async (id: string) => {
+    const res = await fetch(`/api/projetos?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      toast.error(err.error || "Erro ao excluir projeto.");
+      return;
+    }
+    await fetchProjetos();
     setDetalheProjeto(null);
-    toast.success("Projeto excluído!");
+    toast.success("Projeto excluido!");
   };
 
   // Modal
@@ -600,7 +653,7 @@ export default function ProjetosPage() {
                           <button onClick={() => abrirModal(projeto)} className="p-1.5 text-dark-400 hover:text-amber-400 rounded-lg hover:bg-dark-800">
                             <Edit3 className="h-4 w-4" />
                           </button>
-                          <button onClick={() => excluirProjeto(projeto.id)} className="p-1.5 text-dark-400 hover:text-red-400 rounded-lg hover:bg-dark-800">
+                          <button onClick={() => void excluirProjeto(projeto.id)} className="p-1.5 text-dark-400 hover:text-red-400 rounded-lg hover:bg-dark-800">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -674,7 +727,7 @@ export default function ProjetosPage() {
                 <Button onClick={() => { setDetalheProjeto(null); abrirModal(detalheProjeto); }} variant="outline" className="flex-1 gap-1">
                   <Edit3 className="h-4 w-4" /> Editar
                 </Button>
-                <Button onClick={() => excluirProjeto(detalheProjeto.id)} className="gap-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30">
+                <Button onClick={() => void excluirProjeto(detalheProjeto.id)} className="gap-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30">
                   <Trash2 className="h-4 w-4" /> Excluir
                 </Button>
               </div>
@@ -799,7 +852,7 @@ export default function ProjetosPage() {
                 <Button onClick={fecharModal} variant="outline" className="flex-1">
                   Cancelar
                 </Button>
-                <Button onClick={salvarProjeto} disabled={!form.titulo.trim()} className="flex-1">
+                <Button onClick={() => void salvarProjeto()} disabled={!form.titulo.trim()} className="flex-1">
                   {editando ? "Salvar" : "Criar Projeto"}
                 </Button>
               </div>

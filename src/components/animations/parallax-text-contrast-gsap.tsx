@@ -1,15 +1,10 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 🎨 Componente: ParallaxTextContrast — Texto com Parallax + Blur/Contrast
+// ParallaxTextContrast - text parallax and contrast effects
 // Efeito premium onde texto se move e muda de contraste/blur conforme scroll
-// ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 interface ParallaxTextContrastProps {
   text: string;
@@ -72,7 +67,8 @@ export function ParallaxTextContrast({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [blurStart, blurEnd, scale, markers]);
 
@@ -88,7 +84,7 @@ export function ParallaxTextContrast({
   );
 }
 
-// ─── Versão com Múltiplas Linhas ───────────────────────────────────────────
+// Multiple line version
 
 interface ParallaxTextMultilineProps {
   lines: string[];
@@ -140,10 +136,20 @@ export function ParallaxTextMultiline({
         duration: 1,
         ease: "power2.inOut",
       });
+      // store timeline reference for scoped cleanup
+      (lineRefs.current as any)[`_tl_${index}`] = tl;
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // mate apenas as timelines criadas para cada linha
+      lineRefs.current.forEach((_, idx) => {
+        const t = (lineRefs.current as any)[`_tl_${idx}`];
+        if (t) {
+          t.kill();
+          // @ts-ignore
+          t.scrollTrigger?.kill?.();
+        }
+      });
     };
   }, [lines, markers]);
 
@@ -166,7 +172,7 @@ export function ParallaxTextMultiline({
   );
 }
 
-// ─── Contrast Shift Effect ────────────────────────────────────────────────────
+// Contrast shift effect
 
 interface ContrastShiftProps {
   children: React.ReactNode;
@@ -224,7 +230,8 @@ export function ContrastShift({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [contrastStart, contrastEnd, brightnessStart, brightnessEnd, markers]);
 
@@ -237,7 +244,7 @@ export function ContrastShift({
   );
 }
 
-// ─── Blurred Reveal Effect ────────────────────────────────────────────────────
+// Blurred reveal effect
 
 interface BlurredRevealProps {
   text: string;
@@ -292,7 +299,8 @@ export function BlurredReveal({
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
     };
   }, [blurAmount, markers]);
 
@@ -305,7 +313,7 @@ export function BlurredReveal({
   );
 }
 
-// ─── Advanced: Morphing Colors + Parallax ─────────────────────────────────────
+// Advanced morphing colors and parallax
 
 interface MorphingColorParallaxProps {
   text: string;
@@ -366,7 +374,10 @@ export function MorphingColorParallax({
     return () => {
       tl.kill();
       parallaxTl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // @ts-ignore
+      tl.scrollTrigger?.kill?.();
+      // @ts-ignore
+      parallaxTl.scrollTrigger?.kill?.();
     };
   }, [colors, markers]);
 

@@ -70,8 +70,6 @@ interface ConfigPreferencias {
   horaFim: string;
 }
 
-const STORAGE_KEY = "eb-admin-config";
-
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 const defaultPerfil: ConfigPerfil = {
   nome: "Emmanuel Bezerra",
@@ -113,37 +111,41 @@ export default function ConfiguracoesPage() {
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // Carregar configurações do localStorage
+  // Carregar configurações do PostgreSQL
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const data = JSON.parse(saved);
+    const carregar = async () => {
+      try {
+        const res = await fetch("/api/configuracoes");
+        if (!res.ok) throw new Error("Erro ao carregar configuracoes");
+        const data = await res.json();
         if (data.perfil) setPerfil({ ...defaultPerfil, ...data.perfil });
         if (data.notificacoes) setNotificacoes({ ...defaultNotificacoes, ...data.notificacoes });
         if (data.preferencias) setPreferencias({ ...defaultPreferencias, ...data.preferencias });
+      } catch {
+        toast.error("Erro ao carregar configuracoes.");
+      } finally {
+        setLoaded(true);
       }
-    } catch {
-      // usar defaults
-    }
-    setLoaded(true);
+    };
+
+    void carregar();
   }, []);
 
   // Salvar tudo
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     setSaving(true);
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ perfil, notificacoes, preferencias, savedAt: new Date().toISOString() })
-      );
-      setTimeout(() => {
-        setSaving(false);
-        toast.success("Configurações salvas com sucesso!");
-      }, 500);
+      const res = await fetch("/api/configuracoes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ perfil, notificacoes, preferencias }),
+      });
+      if (!res.ok) throw new Error("Erro ao salvar configuracoes");
+      toast.success("Configuracoes salvas no banco!");
     } catch {
+      toast.error("Erro ao salvar configuracoes.");
+    } finally {
       setSaving(false);
-      toast.error("Erro ao salvar configurações.");
     }
   }, [perfil, notificacoes, preferencias]);
 
@@ -499,14 +501,13 @@ export default function ConfiguracoesPage() {
             <div className="p-4 rounded-xl border border-brand-500/20 bg-brand-500/5">
               <div className="flex items-center gap-2 mb-1">
                 <FileText className="h-4 w-4 text-brand-400" />
-                <p className="text-sm font-semibold text-white">Dados Locais</p>
+                <p className="text-sm font-semibold text-white">Banco de Dados</p>
               </div>
               <p className="text-xs text-dark-400">
-                Configurações salvas no localStorage do navegador. Dados de projetos e chat são
-                armazenados em memória (sessão do servidor).
+                Configuracoes, projetos, CRM, chat, financeiro e agenda usam PostgreSQL via Prisma.
               </p>
               <Badge variant="info" size="sm" className="mt-2">
-                Local Storage
+                PostgreSQL
               </Badge>
             </div>
           </div>

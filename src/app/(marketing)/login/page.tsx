@@ -281,14 +281,12 @@ function LoginContent() {
           {/* Register link */}
           <p className="text-center text-sm text-dark-400 mt-6">
             Não tem conta?{" "}
-            <a
-              href="https://wa.me/5585998500344?text=Ol%C3%A1%20Emmanuel!%20Gostaria%20de%20criar%20uma%20conta%20no%20sistema."
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/registro"
               className="text-brand-400 hover:text-brand-300 font-medium transition-colors"
             >
               Cadastre-se grátis
-            </a>
+            </Link>
           </p>
 
           {/* Security note */}

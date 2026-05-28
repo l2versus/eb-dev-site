@@ -24,6 +24,7 @@ interface DonutChartProps {
   centerLabel?: string;
   centerValue?: string;
   height?: number;
+  format?: "currency" | "number";
 }
 
 export function DonutChart({
@@ -31,6 +32,7 @@ export function DonutChart({
   centerLabel,
   centerValue,
   height = 300,
+  format = "currency",
 }: DonutChartProps) {
   return (
     <div className="relative" style={{ height }}>
@@ -64,7 +66,9 @@ export function DonutChart({
               color: "#fff",
             }}
             formatter={(value: number) => [
-              `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+              format === "currency"
+                ? `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                : value.toLocaleString("pt-BR"),
               "",
             ]}
           />
@@ -117,6 +121,7 @@ interface BarChartCustomProps {
   height?: number;
   barColor?: string;
   metaColor?: string;
+  format?: "currency" | "number" | "days";
 }
 
 export function BarChartCustom({
@@ -124,7 +129,20 @@ export function BarChartCustom({
   height = 300,
   barColor = "#e14a72",
   metaColor = "#d99c22",
+  format = "currency",
 }: BarChartCustomProps) {
+  const formatTick = (value: number) => {
+    if (format === "number") return value.toLocaleString("pt-BR");
+    if (format === "days") return `${value}d`;
+    return `R$ ${(value / 1000).toFixed(0)}k`;
+  };
+
+  const formatTooltip = (value: number) => {
+    if (format === "number") return value.toLocaleString("pt-BR");
+    if (format === "days") return `${value.toLocaleString("pt-BR")} dias`;
+    return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  };
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} barGap={4}>
@@ -141,9 +159,7 @@ export function BarChartCustom({
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) =>
-            `R$ ${(value / 1000).toFixed(0)}k`
-          }
+          tickFormatter={formatTick}
         />
         <Tooltip
           contentStyle={{
@@ -154,10 +170,7 @@ export function BarChartCustom({
             fontSize: "13px",
             color: "#fff",
           }}
-          formatter={(value: number) => [
-            `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-            "",
-          ]}
+          formatter={(value: number) => [formatTooltip(value), ""]}
         />
         <Bar
           dataKey="valor"

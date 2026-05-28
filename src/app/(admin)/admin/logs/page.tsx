@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,11 +56,11 @@ interface LogEntry {
   ip?: string;
 }
 
-// ─── Dados mock ───────────────────────────────────────────────────────────────
+// ─── Dados legados de exemplo (nao usados; tela carrega /api/logs) ───────────
 const now = new Date();
 const h = (hoursAgo: number) => new Date(now.getTime() - hoursAgo * 60 * 60 * 1000).toISOString();
 
-const mockLogs: LogEntry[] = [
+const legacyExampleLogs: LogEntry[] = [
   { id: "1", timestamp: h(0.1), categoria: "auth", nivel: "info", acao: "Login", descricao: "Acesso ao painel admin", usuario: "Emmanuel Bezerra", ip: "189.40.xx.xx" },
   { id: "2", timestamp: h(0.5), categoria: "projeto", nivel: "success", acao: "Status atualizado", descricao: "Projeto 'Myka Procópio' movido para Revisão", usuario: "Emmanuel Bezerra", detalhes: "Status anterior: Desenvolvimento → Revisão. Progresso: 85%" },
   { id: "3", timestamp: h(1), categoria: "chat", nivel: "info", acao: "Nova mensagem", descricao: "Resposta enviada para João Silva", usuario: "Emmanuel Bezerra" },
@@ -147,11 +147,29 @@ function tempoRelativo(iso: string): string {
 
 // ═══ Componente Principal ═════════════════════════════════════════════════════
 export default function LogAtividadesPage() {
-  const [logs] = useState<LogEntry[]>(mockLogs);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [busca, setBusca] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState<Categoria | "todos">("todos");
   const [filtroNivel, setFiltroNivel] = useState<Nivel | "todos">("todos");
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
+
+  const carregarLogs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/logs");
+      if (!res.ok) throw new Error("Erro ao carregar logs");
+      const data = await res.json();
+      setLogs(Array.isArray(data) ? data : []);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao carregar logs");
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    void carregarLogs();
+  }, [carregarLogs]);
 
   // ─── Filtro ──────────────────────────────────────────────────────────
   const logsFiltrados = useMemo(() => {
@@ -191,6 +209,14 @@ export default function LogAtividadesPage() {
     });
   };
 
+  if (!loaded) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-sm text-dark-400">
+        Carregando logs do banco...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 sm:space-y-8">
       {/* Header */}
@@ -210,7 +236,15 @@ export default function LogAtividadesPage() {
           }}>
             Exportar
           </Button>
-          <Button variant="outline" size="sm" icon={<RefreshCw className="h-4 w-4" />} onClick={() => toast.success("Logs atualizados!")}>
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<RefreshCw className="h-4 w-4" />}
+            onClick={() => {
+              void carregarLogs();
+              toast.success("Logs atualizados!");
+            }}
+          >
             Atualizar
           </Button>
         </div>

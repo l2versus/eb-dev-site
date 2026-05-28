@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger, isReducedMotion } from "@/lib/gsap";
 
 const FRAME_COUNT = 121;
-const SCROLL_DISTANCE = 10800;
+const SCROLL_DISTANCE = 9200;
+const MOBILE_SCROLL_DISTANCE = 5200;
 
 const STORY_BEATS = [
   {
@@ -40,7 +41,7 @@ const STORY_BEATS = [
     title: "Seu projeto pode ter esse nivel de narrativa.",
     text: "Um site com presenca, leitura facil e movimento com funcao.",
     start: 0.76,
-    end: 0.93,
+    end: 0.99,
   },
 ];
 
@@ -73,7 +74,6 @@ export function VideoStorySection() {
     const images: HTMLImageElement[] = [];
     imagesRef.current = images;
     let loadedFrames = 0;
-    let resizeObserver: ResizeObserver | undefined;
 
     const drawFrame = (frameIndex: number) => {
       const image = images[frameIndex] ?? images[lastFrameRef.current] ?? images[0];
@@ -111,106 +111,158 @@ export function VideoStorySection() {
           setReady(true);
           drawFrame(0);
         }
-        if (loadedFrames === FRAME_COUNT) {
-          ScrollTrigger.refresh();
-        }
       };
       images.push(image);
     }
 
     let mm: any;
     const ctx = gsap.context(() => {
-      // scope by media: keep heavy frame sequence for larger viewports
+      const showStaticFirstBeat = () => {
+        gsap.set(".video-story-beat", { autoAlpha: 0, y: 0, filter: "none" });
+        gsap.set(".story-word", { yPercent: 0, autoAlpha: 1, filter: "none" });
+        gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0, filter: "none" });
+      };
+
+      const createStoryTimeline = ({
+        id,
+        distance,
+        scrub,
+        beatY,
+        wordY,
+        introBlur,
+        exitBlur,
+        exitY,
+        refreshPriority,
+      }: {
+        id: string;
+        distance: number;
+        scrub: number;
+        beatY: number;
+        wordY: number;
+        introBlur: number;
+        exitBlur: number;
+        exitY: number;
+        refreshPriority: number;
+      }) => {
+        const introFilter = introBlur > 0 ? `blur(${introBlur}px)` : "none";
+        const exitFilter = exitBlur > 0 ? `blur(${exitBlur}px)` : "none";
+
+        gsap.set(".video-story-beat", { autoAlpha: 0, y: beatY, filter: introFilter });
+        gsap.set(".story-word", { yPercent: wordY, autoAlpha: 0, filter: introFilter });
+
+        const playhead = { frame: lastFrameRef.current };
+        const timeline = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            id,
+            trigger: section,
+            start: "top top",
+            end: () => `+=${distance}`,
+            pin: true,
+            pinSpacing: true,
+            scrub,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            refreshPriority,
+            onRefresh: (self) => drawFrame(Math.round(self.progress * (FRAME_COUNT - 1))),
+          },
+        });
+
+        timeline.to(
+          playhead,
+          {
+            frame: FRAME_COUNT - 1,
+            duration: 1,
+            ease: "none",
+            onUpdate: () => drawFrame(Math.round(playhead.frame)),
+          },
+          0,
+        );
+
+        STORY_BEATS.forEach((beat, index) => {
+          const beatEl = section.querySelector(`.video-story-beat-${index}`);
+          if (!beatEl) return;
+
+          const words = beatEl.querySelectorAll(".story-word");
+          const inDuration = 0.035;
+          const outDuration = 0.045;
+
+          timeline
+            .fromTo(
+              beatEl,
+              { autoAlpha: 0, y: beatY, filter: introFilter },
+              { autoAlpha: 1, y: 0, filter: "none", duration: inDuration, ease: "power2.out" },
+              beat.start,
+            )
+            .fromTo(
+              words,
+              { yPercent: wordY, autoAlpha: 0, filter: introFilter },
+              {
+                yPercent: 0,
+                autoAlpha: 1,
+                filter: "none",
+                duration: inDuration,
+                stagger: 0.004,
+                ease: "power2.out",
+              },
+              beat.start + 0.006,
+            )
+            .to(
+              beatEl,
+              {
+                autoAlpha: 0,
+                y: exitY,
+                filter: exitFilter,
+                duration: outDuration,
+                ease: "power2.in",
+              },
+              beat.end,
+            );
+        });
+      };
+
+      if (isReducedMotion()) {
+        showStaticFirstBeat();
+        return;
+      }
+
       mm = ScrollTrigger.matchMedia({
         "(min-width: 768px)": () => {
-          if (isReducedMotion()) {
-            gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0 });
-            return;
-          }
-
-          gsap.set(".video-story-beat", { autoAlpha: 0, y: 40, filter: "blur(12px)" });
-          gsap.set(".story-word", { yPercent: 90, autoAlpha: 0, filter: "blur(10px)" });
-
-          const playhead = { frame: 0 };
-          const timeline = gsap.timeline({
-            defaults: { ease: "none" },
-            scrollTrigger: {
-              id: "video-story-frame-sequence",
-              trigger: section,
-              start: "top top",
-              end: () => `+=${SCROLL_DISTANCE}`,
-              pin: true,
-              scrub: 1.8,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-            },
-          });
-
-          timeline.to(
-            playhead,
-            {
-              frame: FRAME_COUNT - 1,
-              duration: 1,
-              ease: "none",
-              onUpdate: () => drawFrame(Math.round(playhead.frame)),
-            },
-            0,
-          );
-
-          STORY_BEATS.forEach((beat, index) => {
-            const beatEl = section.querySelector(`.video-story-beat-${index}`);
-            if (!beatEl) return;
-
-            const words = beatEl.querySelectorAll(".story-word");
-            const inDuration = 0.035;
-            const outDuration = 0.045;
-
-            timeline
-              .fromTo(
-                beatEl,
-                { autoAlpha: 0, y: 44, filter: "blur(12px)" },
-                { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: inDuration, ease: "power2.out" },
-                beat.start,
-              )
-              .fromTo(
-                words,
-                { yPercent: 90, autoAlpha: 0, filter: "blur(10px)" },
-                {
-                  yPercent: 0,
-                  autoAlpha: 1,
-                  filter: "blur(0px)",
-                  duration: inDuration,
-                  stagger: 0.004,
-                  ease: "power2.out",
-                },
-                beat.start + 0.006,
-              )
-              .to(
-                beatEl,
-                {
-                  autoAlpha: 0,
-                  y: -26,
-                  filter: "blur(8px)",
-                  duration: outDuration,
-                  ease: "power2.in",
-                },
-                beat.end,
-              );
+          createStoryTimeline({
+            id: "video-story-frame-sequence-desktop",
+            distance: SCROLL_DISTANCE,
+            scrub: 1.8,
+            beatY: 44,
+            wordY: 90,
+            introBlur: 12,
+            exitBlur: 8,
+            exitY: -26,
+            refreshPriority: 220,
           });
         },
 
-        // mobile / small screens: simple fallback
         "(max-width: 767px)": () => {
-          gsap.set(".video-story-beat-0", { autoAlpha: 1, y: 0 });
+          createStoryTimeline({
+            id: "video-story-frame-sequence-mobile",
+            distance: MOBILE_SCROLL_DISTANCE,
+            scrub: 0.9,
+            beatY: 22,
+            wordY: 45,
+            introBlur: 0,
+            exitBlur: 0,
+            exitY: -18,
+            refreshPriority: 230,
+          });
         },
       });
     }, section);
 
-    resizeObserver = new ResizeObserver(() => drawFrame(lastFrameRef.current));
+    const resizeObserver = new ResizeObserver(() => drawFrame(lastFrameRef.current));
     resizeObserver.observe(canvas);
 
     return () => {
       resizeObserver?.disconnect();
+      mm?.revert?.();
       ctx.revert();
     };
   }, []);

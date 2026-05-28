@@ -1,20 +1,12 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// 💬 Chat Admin — 100% localStorage (sem API)
+// Chat Admin — dados reais via PostgreSQL
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  loadConversas,
-  loadMensagens,
-  enviarMensagem,
-  marcarComoLida,
-  type Conversa,
-  type Mensagem,
-} from "@/lib/shared-chat";
 import { toast } from "sonner";
 import {
   MessageCircle,
@@ -30,6 +22,28 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+interface Conversa {
+  id: string;
+  clienteId: string;
+  clienteNome: string;
+  clienteEmail: string;
+  ultimaMensagem: string;
+  ultimaHora: string;
+  naoLidas: number;
+  status: "ativo" | "arquivado";
+}
+
+interface Mensagem {
+  id: string;
+  conversaId: string;
+  remetente: "admin" | "cliente";
+  remetenteNome: string;
+  conteudo: string;
+  tipo: "texto" | "arquivo" | "imagem" | "link";
+  lida: boolean;
+  createdAt: string;
+}
+
 export default function ChatPage() {
   const [conversas, setConversas] = useState<Conversa[]>([]);
   const [conversaSelecionada, setConversaSelecionada] = useState<Conversa | null>(null);
@@ -41,39 +55,76 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setConversas(loadConversas());
-    setLoaded(true);
+  const carregarConversas = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chat");
+      if (!res.ok) throw new Error("Erro ao carregar conversas");
+      const data = await res.json();
+      setConversas(Array.isArray(data) ? data : []);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao carregar conversas");
+    } finally {
+      setLoaded(true);
+    }
   }, []);
+
+  useEffect(() => {
+    void carregarConversas();
+  }, [carregarConversas]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens]);
 
   // Selecionar conversa
-  const selecionarConversa = (conversa: Conversa) => {
+  const selecionarConversa = async (conversa: Conversa) => {
     setConversaSelecionada(conversa);
     setShowMobile(true);
-    const msgs = loadMensagens(conversa.id);
-    setMensagens(msgs);
 
-    if (conversa.naoLidas > 0) {
-      marcarComoLida(conversa.id);
-      setConversas(loadConversas());
+    try {
+      const res = await fetch(`/api/chat?conversaId=${encodeURIComponent(conversa.id)}`);
+      if (!res.ok) throw new Error("Erro ao carregar mensagens");
+      setMensagens(await res.json());
+
+      if (conversa.naoLidas > 0) {
+        await fetch("/api/chat", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversaId: conversa.id }),
+        });
+        await carregarConversas();
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao abrir conversa");
     }
 
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   // Enviar mensagem
-  const handleEnviar = () => {
+  const handleEnviar = async () => {
     if (!novaMensagem.trim() || !conversaSelecionada) return;
 
-    enviarMensagem(conversaSelecionada.id, novaMensagem.trim(), "admin", "Emmanuel");
-    setNovaMensagem("");
-    setMensagens(loadMensagens(conversaSelecionada.id));
-    setConversas(loadConversas());
-    toast.success("Mensagem enviada!");
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversaId: conversaSelecionada.id,
+          conteudo: novaMensagem.trim(),
+          remetente: "admin",
+          remetenteNome: "Emmanuel",
+        }),
+      });
+      if (!res.ok) throw new Error("Erro ao enviar mensagem");
+      const enviada = await res.json();
+      setMensagens((atuais) => [...atuais, enviada]);
+      setNovaMensagem("");
+      await carregarConversas();
+      toast.success("Mensagem enviada!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao enviar mensagem");
+    }
   };
 
   // Formatar hora
@@ -147,7 +198,7 @@ export default function ChatPage() {
             conversasFiltradas.map((conversa) => (
               <button
                 key={conversa.id}
-                onClick={() => selecionarConversa(conversa)}
+                onClick={() => void selecionarConversa(conversa)}
                 className={`w-full flex items-start gap-3 p-4 text-left hover:bg-dark-800/50 transition-colors border-b border-dark-800/50 ${
                   conversaSelecionada?.id === conversa.id ? "bg-dark-800/80" : ""
                 }`}
@@ -267,7 +318,7 @@ export default function ChatPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  handleEnviar();
+                  void handleEnviar();
                 }}
                 className="flex items-center gap-2"
               >

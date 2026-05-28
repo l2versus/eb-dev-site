@@ -1,8 +1,7 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 📄 API — Propostas CRUD + Envio
-// ══════════════════════════════════════════════════════════════════════════════
+// API - Propostas CRUD + Envio
 
 import { NextRequest, NextResponse } from "next/server";
+import { StatusProposta } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/api-auth";
 
@@ -102,11 +101,12 @@ export async function POST(request: NextRequest) {
       termosContrato,
       observacoes,
       validade,
+      status,
       geradaPorIA,
       briefingIA,
     } = body;
 
-    if (!clienteId || !titulo || !valor || !tipoProjeto) {
+    if (!clienteId || !titulo || valor == null || !tipoProjeto) {
       return NextResponse.json(
         { error: "Dados incompletos" },
         { status: 400 }
@@ -116,6 +116,10 @@ export async function POST(request: NextRequest) {
     const valorNumerico = parseFloat(String(valor));
     const descontoNumerico = desconto ? parseFloat(String(desconto)) : 0;
     const valorFinal = valorNumerico - descontoNumerico;
+    const statusProposta =
+      typeof status === "string" && status in StatusProposta
+        ? (status as StatusProposta)
+        : StatusProposta.RASCUNHO;
 
     const proposta = await prisma.proposta.create({
       data: {
@@ -141,9 +145,14 @@ export async function POST(request: NextRequest) {
         termosContrato,
         observacoes,
         validade: validade ? new Date(validade) : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 dias
-        status: "RASCUNHO",
+        status: statusProposta,
         geradaPorIA: !!geradaPorIA,
         briefingIA,
+        enviadaEm: statusProposta === StatusProposta.ENVIADA ? new Date() : undefined,
+        respondidaEm:
+          statusProposta === StatusProposta.APROVADA || statusProposta === StatusProposta.RECUSADA
+            ? new Date()
+            : undefined,
       },
       include: {
         cliente: true,

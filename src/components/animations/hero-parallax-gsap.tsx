@@ -1,16 +1,12 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 🎬 Componente: HeroParallaxGSAP — Hero com parallax, text reveal, effects
+// HeroParallaxGSAP - parallax hero animations
+// ScrollTrigger based timelines and effects
 // Premium version com ScrollTrigger, timelines, e efeitos avançados
-// ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
 import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import Image from "next/image";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface HeroParallaxGSAPProps {
   title: string;
@@ -51,11 +47,12 @@ export function HeroParallaxGSAP({
     // Master timeline
     const masterTl = gsap.timeline();
 
-    // Background parallax
+    // Background parallax (capture trigger para cleanup local)
+    let bgTrigger: any;
     if (backgroundImage) {
       const bgLayer = hero.querySelector("[data-bg-layer]") as HTMLElement;
       if (bgLayer) {
-        ScrollTrigger.create({
+        bgTrigger = ScrollTrigger.create({
           trigger: hero,
           onUpdate: (self) => {
             gsap.to(bgLayer, {
@@ -145,7 +142,12 @@ export function HeroParallaxGSAP({
     return () => {
       masterTl.kill();
       scrollTl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // mate apenas os triggers/timelines criados por esse componente
+      bgTrigger?.kill?.();
+      // @ts-ignore
+      scrollTl.scrollTrigger?.kill?.();
+      // @ts-ignore
+      masterTl.scrollTrigger?.kill?.();
     };
   }, [title, subtitle, children, titleAnimation, parallaxIntensity]);
 
@@ -223,7 +225,7 @@ export function HeroParallaxGSAP({
   );
 }
 
-// ─── Minimal Hero Parallax ─────────────────────────────────────────────────
+// Minimal hero parallax
 
 interface MinimalHeroParallaxProps {
   title: string;

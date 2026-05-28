@@ -58,6 +58,9 @@ export function HeroSection() {
             return;
           }
 
+          const loaderFractureChars = root.querySelectorAll(".jm-loader-fracture .fracture-char");
+          const heroFractureChars = root.querySelectorAll(".hero-fracture .fracture-char");
+
           gsap.set(root, {
             "--negative-y": "-28%",
             "--negative-band": "18%",
@@ -70,13 +73,15 @@ export function HeroSection() {
           });
           gsap.set(".jm-loader-kicker", { y: 18, opacity: 0 });
           gsap.set(".jm-loader-word", { yPercent: 118, rotate: 2 });
-          gsap.set(".jm-loader-fracture .fracture-char", {
-            x: (index) => ((index % 5) - 2) * 16,
-            y: (index) => (index % 2 === 0 ? 36 : -28),
-            rotate: (index) => ((index % 7) - 3) * 5,
-            opacity: 0,
-            filter: "blur(8px)",
-          });
+          if (loaderFractureChars.length) {
+            gsap.set(loaderFractureChars, {
+              x: (index) => ((index % 5) - 2) * 16,
+              y: (index) => (index % 2 === 0 ? 36 : -28),
+              rotate: (index) => ((index % 7) - 3) * 5,
+              opacity: 0,
+              filter: "blur(8px)",
+            });
+          }
           gsap.set(".jm-loader-panel", { yPercent: 0 });
           gsap.set(".jm-bg-media", {
             clipPath: "inset(0% 0% 0% 0% round 0px)",
@@ -86,13 +91,15 @@ export function HeroSection() {
           gsap.set(".jm-word", { yPercent: 112, rotate: 2 });
           gsap.set(".jm-title-top", { xPercent: -8, opacity: 0 });
           gsap.set(".jm-title-bottom", { xPercent: 8, opacity: 0 });
-          gsap.set(".hero-fracture .fracture-char", {
-            x: (index) => ((index % 5) - 2) * 14,
-            y: (index) => (index % 2 === 0 ? 28 : -22),
-            rotate: (index) => ((index % 7) - 3) * 4,
-            opacity: 0,
-            filter: "blur(8px)",
-          });
+          if (heroFractureChars.length) {
+            gsap.set(heroFractureChars, {
+              x: (index) => ((index % 5) - 2) * 14,
+              y: (index) => (index % 2 === 0 ? 28 : -22),
+              rotate: (index) => ((index % 7) - 3) * 4,
+              opacity: 0,
+              filter: "blur(8px)",
+            });
+          }
           gsap.set(".jm-kicker > *", { y: 18, opacity: 0 });
           gsap.set(".jm-copy > *", { y: 28, opacity: 0 });
           gsap.set(".jm-action", { y: 28, opacity: 0 });
@@ -112,19 +119,6 @@ export function HeroSection() {
           intro
             .to(".jm-loader-kicker", { y: 0, opacity: 1, duration: 0.72 }, 0.22)
             .to(".jm-loader-word", { yPercent: 0, rotate: 0, duration: 1.15, stagger: 0.08 }, 0.28)
-            .to(
-              ".jm-loader-fracture .fracture-char",
-              {
-                x: 0,
-                y: 0,
-                rotate: 0,
-                opacity: 1,
-                filter: "blur(0px)",
-                duration: 0.9,
-                stagger: { each: 0.014, from: "random" },
-              },
-              0.34,
-            )
             .to(".jm-loader-name", { scale: 1.025, duration: 2.2, ease: "sine.inOut" }, 0.65)
             .to(".jm-loader", { clipPath: "inset(0% 0% 100% 0%)", duration: 1.05, ease: "expo.inOut" }, 4.55)
             .to(".jm-loader", { autoAlpha: 0, duration: 0.01 }, 5.58)
@@ -142,19 +136,6 @@ export function HeroSection() {
             .to(".jm-word", { yPercent: 0, rotate: 0, duration: 1.12, stagger: 0.08 }, 4.82)
             .to(".jm-title-top", { xPercent: 0, opacity: 1, duration: 1.18 }, 4.88)
             .to(".jm-title-bottom", { xPercent: 0, opacity: 1, duration: 1.18 }, 4.88)
-            .to(
-              ".hero-fracture .fracture-char",
-              {
-                x: 0,
-                y: 0,
-                rotate: 0,
-                opacity: 1,
-                filter: "blur(0px)",
-                duration: 0.78,
-                stagger: { each: 0.012, from: "random" },
-              },
-              4.94,
-            )
             .to(".jm-kicker > *", { y: 0, opacity: 1, duration: 0.72, stagger: 0.06 }, 5.05)
             .to(
               ".jm-frame",
@@ -174,6 +155,38 @@ export function HeroSection() {
             .to(".jm-action", { y: 0, opacity: 1, duration: 0.72, stagger: 0.07 }, 5.74)
             .to(".jm-stat", { y: 0, opacity: 1, duration: 0.7, stagger: 0.055 }, 5.8)
             .to(".jm-scroll-cue", { opacity: 1, y: 0, duration: 0.6 }, 5.92);
+
+          if (loaderFractureChars.length) {
+            intro.to(
+              loaderFractureChars,
+              {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 0.9,
+                stagger: { each: 0.014, from: "random" },
+              },
+              0.34,
+            );
+          }
+
+          if (heroFractureChars.length) {
+            intro.to(
+              heroFractureChars,
+              {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 0.78,
+                stagger: { each: 0.012, from: "random" },
+              },
+              4.94,
+            );
+          }
 
           gsap.to(".jm-bg-media img", {
             scale: 1.08,
@@ -207,12 +220,15 @@ export function HeroSection() {
 
           const scrollTl = gsap.timeline({
             scrollTrigger: {
+              id: "hero-motion-pin",
               trigger: root,
               start: "top top",
               end: "+=1900",
               pin: true,
               scrub: 0.9,
               anticipatePin: 1,
+              invalidateOnRefresh: true,
+              refreshPriority: 260,
             },
           });
 
@@ -413,4 +429,3 @@ export function HeroSection() {
     </section>
   );
 }
-

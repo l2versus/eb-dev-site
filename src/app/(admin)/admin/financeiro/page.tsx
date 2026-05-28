@@ -132,7 +132,9 @@ export default function FinanceiroPage() {
         const data = await res.json();
         setProjetos(Array.isArray(data) ? data : []);
       }
-    } catch {/* usar mock */} finally {
+    } catch {
+      toast.error("Erro ao carregar projetos do banco.");
+    } finally {
       setLoading(false);
     }
   }, []);

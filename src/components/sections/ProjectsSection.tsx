@@ -196,6 +196,7 @@ export function ProjectsSection() {
             scrub: 0.95,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            refreshPriority: 180,
             onRefresh: (self) => {
               pinTriggerRef.current = self;
               syncProgressUi(self.progress);

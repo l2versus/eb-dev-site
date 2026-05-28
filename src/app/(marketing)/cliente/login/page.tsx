@@ -174,11 +174,10 @@ export default function ClienteLoginPage() {
               Não recebeu seu código?
             </p>
             <Link
-              href="https://wa.me/5585998500344?text=Olá! Preciso do meu código de acesso ao portal."
-              target="_blank"
+              href="/registro"
               className="inline-flex items-center gap-2 text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors"
             >
-              Falar no WhatsApp
+              Criar cadastro agora
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>

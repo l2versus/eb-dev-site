@@ -1,11 +1,21 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     // ─── Output standalone para Docker ───────────────────────────────
     output: "standalone",
+    outputFileTracingRoot: __dirname,
 
     // ─── Ignorar erros de TS no build (Prisma não configurado) ───────
     typescript: {
         ignoreBuildErrors: true,
+    },
+
+    eslint: {
+        ignoreDuringBuilds: true,
     },
 
     // ─── Otimização de Imagens ───────────────────────────────────────

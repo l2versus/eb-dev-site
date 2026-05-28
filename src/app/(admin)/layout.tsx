@@ -27,6 +27,7 @@ import {
   FileText,
   Activity,
   Loader2,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
@@ -35,6 +36,7 @@ const adminNav = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
   { label: "Agenda", href: "/admin/agenda", icon: CalendarDays },
+  { label: "CRM", href: "/admin/crm", icon: Target },
   { label: "Clientes", href: "/admin/clientes", icon: Users },
   { label: "Chat", href: "/admin/chat", icon: MessageCircle },
   { label: "Projetos", href: "/admin/projetos", icon: FolderKanban },

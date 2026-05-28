@@ -254,8 +254,8 @@ export function TrustProcessSections() {
       </section>
 
       <section id="processo" className="process-stage relative border-t border-[#f5f0e6]/10">
-        <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-24 sm:px-8 lg:grid-cols-[0.92fr_1fr] lg:px-12 lg:py-32">
-          <div className="lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)]">
+        <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-24 sm:px-8 lg:grid-cols-[0.86fr_1fr] lg:px-12 lg:py-28">
+          <div className="lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
             <div className="process-heading">
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#9fcaab]">
                 Metodo
@@ -265,7 +265,7 @@ export function TrustProcessSections() {
               </h2>
             </div>
 
-            <div className="relative mt-10 aspect-[4/5] max-h-[58vh] overflow-hidden border border-[#ffc090]/18 bg-[#151411] shadow-[0_28px_100px_rgba(0,0,0,0.42)]">
+            <div className="relative mt-8 aspect-[4/5] max-h-[52vh] overflow-hidden border border-[#ffc090]/18 bg-[#151411] shadow-[0_28px_100px_rgba(0,0,0,0.42)]">
               {processSteps.map((step, index) => (
                 <Image
                   key={step.image}
@@ -293,29 +293,31 @@ export function TrustProcessSections() {
               <span className="process-progress absolute inset-x-0 top-0 block h-full origin-top scale-y-0 bg-[#ffc090]" />
             </div>
 
-            <div className="space-y-6 sm:pl-12">
+            <div className="space-y-5 sm:pl-12 lg:space-y-4">
               {processSteps.map((step, index) => {
                 const Icon = step.icon;
                 return (
                   <article
                     key={step.number}
-                    className={`process-step-${index} min-h-[56vh] border border-[#f5f0e6]/12 bg-[#151411]/72 p-6 sm:p-8`}
+                    className={`process-step-${index} flex min-h-[420px] flex-col justify-between border border-[#f5f0e6]/12 bg-[#151411]/72 p-6 sm:p-8 lg:min-h-[360px] lg:p-7 xl:min-h-[390px]`}
                   >
-                    <div className="flex items-start justify-between gap-6">
-                      <span className="font-display text-7xl leading-none text-[#ffc090]">
-                        {step.number}
-                      </span>
-                      <span className="flex h-12 w-12 items-center justify-center border border-[#f5f0e6]/14 text-[#9fcaab]">
-                        <Icon className="h-5 w-5" />
-                      </span>
+                    <div>
+                      <div className="flex items-start justify-between gap-6">
+                        <span className="font-display text-7xl leading-none text-[#ffc090] lg:text-6xl">
+                          {step.number}
+                        </span>
+                        <span className="flex h-12 w-12 items-center justify-center border border-[#f5f0e6]/14 text-[#9fcaab] lg:h-10 lg:w-10">
+                          <Icon className="h-5 w-5 lg:h-4 lg:w-4" />
+                        </span>
+                      </div>
+                      <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.22em] text-[#9fcaab] lg:mt-8">
+                        {step.eyebrow}
+                      </p>
+                      <h3 className="mt-4 max-w-2xl font-display text-[clamp(3rem,6vw,6.5rem)] leading-[0.86] lg:text-[clamp(2.6rem,4.2vw,4.8rem)]">
+                        {step.title}
+                      </h3>
                     </div>
-                    <p className="mt-12 font-mono text-[10px] uppercase tracking-[0.22em] text-[#9fcaab]">
-                      {step.eyebrow}
-                    </p>
-                    <h3 className="mt-4 max-w-2xl font-display text-[clamp(3rem,6vw,6.5rem)] leading-[0.86]">
-                      {step.title}
-                    </h3>
-                    <p className="mt-7 max-w-xl text-lg leading-8 text-[#cfc0af]">
+                    <p className="mt-7 max-w-xl text-lg leading-8 text-[#cfc0af] lg:mt-5 lg:text-base lg:leading-7">
                       {step.text}
                     </p>
                   </article>

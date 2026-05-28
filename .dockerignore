@@ -4,7 +4,25 @@ node_modules
 .env
 *.env.local
 .git
+.vercel
+.claude
+.playwright-mcp
+.vscode
+.idea
 README.md
 Dockerfile
 docker-compose.yml
 .dockerignore
+
+# Local tool artifacts
+.codex-*.log
+.codex-dev-*.log
+*local-check*.png
+*.tsbuildinfo
+cookies.txt
+
+# Local backup snapshots
+backup-before-*/
+backup-site-*/
+recovery-before-*/
+codex-recovery-screens/

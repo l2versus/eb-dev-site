@@ -12,15 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "sonner";
 import {
-  loadProjects,
-  updateProject,
-  addMessage,
-  addFile,
-  genId,
-  type ProjetoCliente,
-  type ProjetoFase,
-} from "@/lib/shared-project";
-import {
   Users,
   Search,
   Plus,
@@ -45,6 +36,8 @@ import {
   Send,
 } from "lucide-react";
 
+const genId = () => Math.random().toString(36).slice(2, 10);
+
 // ─── Types (compatíveis com Prisma schema) ──────────────────────────────────
 type ClienteStatus = "ATIVO" | "LEAD" | "PROSPECT" | "NEGOCIANDO" | "INATIVO" | "PERDIDO";
 type ClienteTipo = "PF" | "PJ";
@@ -67,6 +60,115 @@ interface Cliente {
   createdAt: string;
   totalProjetos?: number;
   totalPropostas?: number;
+}
+
+type ProjetoFaseStatus = "pending" | "in_progress" | "completed";
+
+interface ProjetoFase {
+  id: number;
+  name: string;
+  status: ProjetoFaseStatus;
+  date: string;
+  description: string;
+}
+
+interface BriefingFile {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  date: string;
+  uploadedBy: "admin" | "cliente";
+  url?: string;
+}
+
+interface BriefingMessage {
+  id: string;
+  from: "Emmanuel" | "Cliente";
+  date: string;
+  message: string;
+}
+
+interface ProjetoCliente {
+  id: string;
+  name: string;
+  clienteNome: string;
+  clienteEmail: string;
+  status: string;
+  package: string;
+  startDate: string;
+  expectedDelivery: string;
+  progress: number;
+  investment: string;
+  paid: string;
+  remaining: string;
+  phases: ProjetoFase[];
+  files: BriefingFile[];
+  messages: BriefingMessage[];
+  nextSteps: string[];
+  accessCode: string;
+}
+
+interface ProjetoApi {
+  id: string;
+  titulo: string;
+  clienteNome: string;
+  clienteEmail: string;
+  status: string;
+  valor: number;
+  progresso: number;
+  prazo: string;
+}
+
+function buildPhases(progress: number): ProjetoFase[] {
+  const steps = [
+    ["Briefing & Discovery", "Levantamento de requisitos"],
+    ["Wireframes & UX", "Estrutura visual"],
+    ["Design Visual", "Layout final"],
+    ["Desenvolvimento", "Codificacao"],
+    ["Testes & QA", "Validacao"],
+    ["Entrega Final", "Deploy"],
+  ];
+  const completedUntil = Math.floor((progress / 100) * steps.length);
+
+  return steps.map(([name, description], index) => ({
+    id: index + 1,
+    name,
+    status:
+      index < completedUntil
+        ? "completed"
+        : index === completedUntil && progress < 100
+        ? "in_progress"
+        : "pending",
+    date: "-",
+    description,
+  }));
+}
+
+function projetoApiToBriefing(projeto: ProjetoApi, cliente: Cliente): ProjetoCliente {
+  return {
+    id: projeto.id,
+    name: projeto.titulo,
+    clienteNome: projeto.clienteNome || cliente.nome,
+    clienteEmail: projeto.clienteEmail || cliente.email,
+    status: projeto.status,
+    package: "Standard",
+    startDate: new Date().toISOString().split("T")[0],
+    expectedDelivery: projeto.prazo ? new Date(projeto.prazo).toISOString().split("T")[0] : "",
+    progress: projeto.progresso || 0,
+    investment: formatarMoeda(projeto.valor || 0),
+    paid: "R$ 0,00",
+    remaining: formatarMoeda(projeto.valor || 0),
+    phases: buildPhases(projeto.progresso || 0),
+    files: [],
+    messages: [],
+    nextSteps: ["Definir proxima entrega"],
+    accessCode: cliente.nome.split(" ")[0].toLowerCase(),
+  };
+}
+
+function formatarMoeda(valor: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
 }
 
 function getClienteStats(clientes: Cliente[]) {
@@ -272,52 +374,52 @@ export default function ClientesPage() {
   const formatarValor = (valor: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
 
-  /* ═══ Briefing (shared-project.ts) ═══════════════════════════════════════ */
-  const abrirBriefing = (cliente: Cliente) => {
+  /* ═══ Briefing conectado ao PostgreSQL via /api/projetos ════════════════ */
+  const abrirBriefing = async (cliente: Cliente) => {
     setBriefingCliente(cliente);
-    const projetos = loadProjects();
-    const projeto = projetos.find(
-      (p) =>
-        p.clienteNome.toLowerCase() === cliente.nome.toLowerCase() ||
-        p.clienteEmail?.toLowerCase() === cliente.email.toLowerCase()
-    );
-    if (projeto) {
-      setBriefingProjeto({ ...projeto });
-    } else {
-      const novoProjeto: ProjetoCliente = {
-        id: `PRJ-${Date.now()}`,
-        name: `Projeto — ${cliente.nome}`,
-        clienteNome: cliente.nome,
-        clienteEmail: cliente.email,
-        status: "in_progress",
-        package: "Standard",
-        startDate: new Date().toISOString().split("T")[0],
-        expectedDelivery: "",
-        progress: 0,
-        investment: "A definir",
-        paid: "R$ 0",
-        remaining: "A definir",
-        phases: [
-          { id: 1, name: "Briefing & Discovery", status: "pending", date: "-", description: "Levantamento de requisitos" },
-          { id: 2, name: "Wireframes & UX", status: "pending", date: "-", description: "Estrutura visual" },
-          { id: 3, name: "Design Visual", status: "pending", date: "-", description: "Layout final" },
-          { id: 4, name: "Desenvolvimento", status: "pending", date: "-", description: "Codificação" },
-          { id: 5, name: "Testes & QA", status: "pending", date: "-", description: "Validação" },
-          { id: 6, name: "Entrega Final", status: "pending", date: "-", description: "Deploy" },
-        ],
-        files: [],
-        messages: [],
-        nextSteps: ["Definir escopo do projeto"],
-        accessCode: cliente.nome.split(" ")[0].toLowerCase(),
-      };
-      updateProject(novoProjeto);
-      setBriefingProjeto(novoProjeto);
+
+    try {
+      const res = await fetch("/api/projetos");
+      if (!res.ok) throw new Error("Erro ao carregar projetos");
+      const projetos = (await res.json()) as ProjetoApi[];
+      let projeto = projetos.find(
+        (p) =>
+          p.clienteNome.toLowerCase() === cliente.nome.toLowerCase() ||
+          p.clienteEmail?.toLowerCase() === cliente.email.toLowerCase(),
+      );
+
+      if (!projeto) {
+        const createRes = await fetch("/api/projetos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            titulo: `Projeto - ${cliente.nome}`,
+            descricao: cliente.notas || "Briefing criado pelo CRM.",
+            clienteNome: cliente.nome,
+            clienteEmail: cliente.email,
+            status: "briefing",
+            prioridade: "media",
+            valor: 0,
+            progresso: 0,
+            tags: ["CRM"],
+          }),
+        });
+        if (!createRes.ok) throw new Error("Erro ao criar projeto do cliente");
+        projeto = await createRes.json();
+      }
+
+      if (!projeto) throw new Error("Projeto nao encontrado");
+      setBriefingProjeto(projetoApiToBriefing(projeto, cliente));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao abrir briefing");
+      setBriefingProjeto(null);
     }
+
     setBriefingTab("fases");
     setShowBriefing(true);
   };
 
-  const atualizarFase = (faseId: number, novoStatus: ProjetoFase["status"]) => {
+  const atualizarFase = async (faseId: number, novoStatus: ProjetoFaseStatus) => {
     if (!briefingProjeto) return;
     const updated = { ...briefingProjeto };
     updated.phases = updated.phases.map((f) =>
@@ -325,12 +427,33 @@ export default function ClientesPage() {
     );
     const completed = updated.phases.filter((f) => f.status === "completed").length;
     updated.progress = Math.round((completed / updated.phases.length) * 100);
-    updateProject(updated);
     setBriefingProjeto({ ...updated });
-    toast.success("Fase atualizada!");
+
+    const status =
+      updated.progress >= 100
+        ? "entregue"
+        : updated.progress >= 80
+        ? "revisao"
+        : updated.progress >= 45
+        ? "desenvolvimento"
+        : updated.progress >= 20
+        ? "design"
+        : "briefing";
+
+    try {
+      const res = await fetch("/api/projetos", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: updated.id, progresso: updated.progress, status }),
+      });
+      if (!res.ok) throw new Error("Erro ao atualizar fase");
+      toast.success("Fase atualizada no banco!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao atualizar fase");
+    }
   };
 
-  const enviarMensagemBriefing = () => {
+  const enviarMensagemBriefing = async () => {
     if (!briefingProjeto || !novaMensagem.trim()) return;
     const msg = {
       id: genId(),
@@ -343,12 +466,27 @@ export default function ClientesPage() {
       }),
       message: novaMensagem.trim(),
     };
-    addMessage(briefingProjeto.id, msg);
-    setBriefingProjeto((prev) =>
-      prev ? { ...prev, messages: [msg, ...prev.messages] } : prev
-    );
-    setNovaMensagem("");
-    toast.success("Mensagem enviada!");
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clienteId: briefingCliente?.id,
+          conteudo: novaMensagem.trim(),
+          remetente: "admin",
+          remetenteNome: "Emmanuel",
+        }),
+      });
+      if (!res.ok) throw new Error("Erro ao enviar mensagem");
+      setBriefingProjeto((prev) =>
+        prev ? { ...prev, messages: [msg, ...prev.messages] } : prev
+      );
+      setNovaMensagem("");
+      toast.success("Mensagem salva no chat!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao enviar mensagem");
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -368,11 +506,10 @@ export default function ClientesPage() {
         uploadedBy: "admin" as const,
         url: reader.result as string,
       };
-      addFile(briefingProjeto.id, novoArquivo);
       setBriefingProjeto((prev) =>
         prev ? { ...prev, files: [...prev.files, novoArquivo] } : prev
       );
-      toast.success("Arquivo enviado!");
+      toast.info("Arquivo anexado nesta sessao. Storage permanente sera ligado ao proximo passo.");
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -585,7 +722,7 @@ export default function ClientesPage() {
                   {/* Ações */}
                   <div className="flex items-center gap-0.5 shrink-0">
                     <button
-                      onClick={() => abrirBriefing(cliente)}
+                      onClick={() => void abrirBriefing(cliente)}
                       className="p-2 rounded-lg hover:bg-blue-500/10 text-blue-400 transition-colors"
                       title="Ver Briefing"
                     >
@@ -921,7 +1058,7 @@ export default function ClientesPage() {
                     <select
                       value={fase.status}
                       onChange={(e) =>
-                        atualizarFase(fase.id, e.target.value as ProjetoFase["status"])
+                        void atualizarFase(fase.id, e.target.value as ProjetoFaseStatus)
                       }
                       className="bg-dark-700 border border-dark-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-500"
                     >
@@ -992,12 +1129,14 @@ export default function ClientesPage() {
                   <input
                     value={novaMensagem}
                     onChange={(e) => setNovaMensagem(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && enviarMensagemBriefing()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void enviarMensagemBriefing();
+                    }}
                     placeholder="Escreva uma mensagem..."
                     className="flex-1 bg-dark-800 border border-dark-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                   />
                   <button
-                    onClick={enviarMensagemBriefing}
+                    onClick={() => void enviarMensagemBriefing()}
                     disabled={!novaMensagem.trim()}
                     className="p-2 rounded-xl bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40 transition-colors"
                   >
